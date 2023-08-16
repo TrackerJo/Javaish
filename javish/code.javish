@@ -15,6 +15,10 @@ function getAmounts(String eventName){
 
     let int total equal call getTotal(numTickets, seatingType, valOfVoucher).
     call displayTotal(numTickets, valOfVoucher, total, eventName).
+
+    function test(){
+        return "hi".
+    }
 }
 
 function getTotal(int numTickets, String seatingType, int valOfVoucher){
