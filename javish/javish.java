@@ -6,7 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
-import javish.Elements.ElementTypes;
+
 import javish.Statements.StmtType;
 import javish.Variables.VarType;
 
@@ -49,7 +49,7 @@ public class javish {
                     DeclarationStmt declaration = (DeclarationStmt) statement;
                     String name = declaration.getName();
                     VarType varType = declaration.getVarType();
-                    String value = declaration.getValue();
+                    String value = declaration.getValue().toString();
 
                     
                   
@@ -90,12 +90,12 @@ public class javish {
                 
                 case RETURN:
                     ReturnStmt returnStmt = (ReturnStmt) statement;
-                    System.out.println("Return: " + returnStmt.getValue());
+                    System.out.println("Return: " + returnStmt.getValue().toString());
                     
                     break;
                 case MUTATION:
                     MutationStmt mutationStmt = (MutationStmt) statement;
-                    System.out.println("Mutation: " + mutationStmt.getVarName() + " " + mutationStmt.getMutationType() + " " + mutationStmt.getValue());
+                    System.out.println("Mutation: " + mutationStmt.getVarName() + " " + mutationStmt.getMutationType() + " " + mutationStmt.getValue().toString());
                     
                     break;
                 case FUNCTION:
@@ -114,7 +114,7 @@ public class javish {
                     break;
                 case ASSIGNMENT:
                     AssignmentStmt assignmentStmt = (AssignmentStmt) statement;
-                    System.out.println("Assignment: " + assignmentStmt.getName() + " " + assignmentStmt.getValue());
+                    System.out.println("Assignment: " + assignmentStmt.getName() + " " + assignmentStmt.getValue().toString());
                     
                     break;
                 default:
@@ -123,10 +123,18 @@ public class javish {
         }
     }
 
-    private static String getParamString(String[] params){
+    private static String getParamString(Expression[] params){
         String paramString = "";
-        for (String param : params) {
-            paramString += param + ", ";
+        for (Expression param : params) {
+            
+            if(param == null){continue;}
+            if(param.getElements() == null){continue;}
+            String exprString = param.toString();
+            
+            paramString += exprString + ", ";
+        }
+        if(paramString.length() < 2){
+            return "";
         }
         return paramString.substring(0, paramString.length() - 2);
     }

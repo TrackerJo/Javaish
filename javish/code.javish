@@ -1,6 +1,6 @@
 function main(){
     call eventName().
-    call showMessageDialog("Thenk you for using our ticket service!").
+    call showMessageDialog("Thank you for using our ticket service!").
 }
 
 function eventName(){
@@ -9,7 +9,7 @@ function eventName(){
 }
 
 function getAmounts(String eventName){
-    let int numTickets equal call showInputDialog("How many tickets do you want to the " + eventName " + "?").
+    let int numTickets equal call showInputDialog("How many tickets do you want to the " + eventName + "?").
     let String seatingType equal call showInputDialog("What type of seating do you want for the " + eventName + "? (premium/general)").
     let int valOfVoucher equal call showInputDialog("How much do you want on a food/merchandise voucher (whole number) to the "+ eventName +"?").
 

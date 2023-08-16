@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-import javish.Elements.MutationType;
 import javish.Variables.VarType;
 
 public class Statements {
     enum StmtType {
         FUNCTION, IF, WHILE, FOR, RETURN, CALL, ASSIGNMENT, DECLARATION, VARIABLE, MUTATION, END, ELSE, CLASS, ELSEIF
+    }
+
+    enum MutationType {
+        ADD, SUBTRACT, MULTIPLY, DIVIDE
     }
 
     StmtType type;
@@ -80,10 +83,10 @@ class FunctionStmt extends Statements {
 }
 
 class IfStmt extends Statements {
-    String condition;
+    Expression condition;
     
     
-    public IfStmt(int line,String condition) {
+    public IfStmt(int line,Expression condition) {
         this.line = line;
         this.condition = condition;
         
@@ -91,7 +94,7 @@ class IfStmt extends Statements {
         this.isBlock = true;
     }
 
-    public String getCondition() {
+    public Expression getCondition() {
         return condition;
     }
     public int getLine() {
@@ -102,9 +105,9 @@ class IfStmt extends Statements {
 }
 
 class WhileStmt extends Statements {
-    String condition;
+    Expression condition;
 
-    public WhileStmt(int line,String condition) {
+    public WhileStmt(int line,Expression condition) {
         this.line = line;
         this.condition = condition;
 
@@ -115,14 +118,14 @@ class WhileStmt extends Statements {
         return line;
     }
 
-    public String getCondition() {
+    public Expression getCondition() {
         return condition;
     }
 }
 
 class ForStmt extends Statements {
-    String condition;
-    public ForStmt(int line,String condition) {
+    Expression condition;
+    public ForStmt(int line,Expression condition) {
         this.line = line;
         this.condition = condition;
         this.type = StmtType.FOR;
@@ -132,20 +135,20 @@ class ForStmt extends Statements {
         return line;
     }
 
-    public String getCondition() {
+    public Expression getCondition() {
         return condition;
     }
 }
 
 class ReturnStmt extends Statements {
-    String value;
-    public ReturnStmt(int line,String value) {
+    Expression value;
+    public ReturnStmt(int line,Expression value) {
         this.line = line;
         this.value = value;
         this.type = StmtType.RETURN;
     }
 
-    public String getValue() {
+    public Expression getValue() {
         return value;
     }
      public int getLine() {
@@ -155,8 +158,8 @@ class ReturnStmt extends Statements {
 
 class CallStmt extends Statements {
     String name;
-    String[] params;
-    public CallStmt(int line,String name, String[] params) {
+    Expression[] params;
+    public CallStmt(int line,String name, Expression[] params) {
         this.line = line;
         this.name = name;
         this.params = params;
@@ -167,7 +170,7 @@ class CallStmt extends Statements {
         return name;
     }
 
-    public String[] getParams() {
+    public Expression[] getParams() {
         return params;
     }
 
@@ -178,8 +181,8 @@ class CallStmt extends Statements {
 
 class AssignmentStmt extends Statements {
     String name;
-    String value;
-    public AssignmentStmt(int line,String name, String value) {
+    Expression value;
+    public AssignmentStmt(int line,String name, Expression value) {
         this.line = line;
         this.name = name;
         this.value = value;
@@ -190,7 +193,7 @@ class AssignmentStmt extends Statements {
         return name;
     }
 
-    public String getValue() {
+    public Expression getValue() {
         return value;
     }
 
@@ -202,8 +205,8 @@ class AssignmentStmt extends Statements {
 class DeclarationStmt extends Statements {
     String name;
     VarType varType;
-    String value;
-    public DeclarationStmt(int line,String name, VarType varType, String value) {
+    Expression value;
+    public DeclarationStmt(int line,String name, VarType varType, Expression value) {
         this.line = line;
         this.name = name;
         this.varType = varType;
@@ -218,7 +221,7 @@ class DeclarationStmt extends Statements {
         return varType;
     }
 
-    public String getValue() {
+    public Expression getValue() {
         return value;
     }
 
@@ -238,9 +241,9 @@ class VariableStmt extends Statements {
 
 class MutationStmt extends Statements {
     String varName;
-    String value;
+    Expression value;
     MutationType mutationType;
-    public MutationStmt(int line,String varName, String value, MutationType mutationType) {
+    public MutationStmt(int line,String varName, Expression value, MutationType mutationType) {
         this.line = line;
         this.varName = varName;
         this.value = value;
@@ -252,7 +255,7 @@ class MutationStmt extends Statements {
         return varName;
     }
 
-    public String getValue() {
+    public Expression getValue() {
         return value;
     }
 
@@ -289,14 +292,14 @@ class ElseStmt extends Statements {
 }
 
 class ElseIfStmt extends Statements {
-    String condition;
-    public ElseIfStmt(int line,String condition) {
+    Expression condition;
+    public ElseIfStmt(int line,Expression condition) {
         this.line = line;
         this.condition = condition;
         this.type = StmtType.ELSEIF;
     }
 
-    public String getCondition() {
+    public Expression getCondition() {
         return condition;
     }
 
