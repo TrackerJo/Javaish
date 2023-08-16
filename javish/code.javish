@@ -22,7 +22,7 @@ function getTotal(int numTickets, String seatingType, int valOfVoucher){
     let int PREMIUM equal 60.
     let int GENERAL equal 25.
 
-    if seatingType equals "premium" {
+    if seatingType equals ("premium" + " dog") {
         total equals numTickets * PREMIUM.
     }else if seatingType equals "general" {
         total equals numTickets * GENERAL.

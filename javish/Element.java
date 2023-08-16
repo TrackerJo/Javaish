@@ -7,15 +7,30 @@ import javish.Variables.VarType;
 
 public class Element {
     enum ElementType {
-        PLUS, MINUS, DIVIDE, MULTIPLY, FLOAT, INTEGER, VARIABLE, FUNCTION, EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_EQUAL, GREATER_THAN_EQUAL, STRING, BOOL, AND, OR, NOT
+        PLUS, MINUS, DIVIDE, MULTIPLY, FLOAT, INTEGER, VARIABLE, FUNCTION, EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_EQUAL, GREATER_THAN_EQUAL, STRING, BOOL, AND, OR, NOT, EXPRESSION
     }
 
     ElementType type;
 
     public ElementType getType(){
+        
         return type;
     }
     
+    public String typeString(){
+        if(type == ElementType.EXPRESSION){
+            ExpressionElmt expression = (ExpressionElmt) this;
+            Element[] elements = expression.expression.getElements();
+            String str = "EXPRESSION(";
+            for (Element element : elements) {
+                str += element.typeString() + " ";
+            }
+            str = str.substring(0, str.length() - 1);
+            str += ")";
+            return str;
+        }
+        return type.toString();
+    }
 }
 
 class AndElmt extends Element {
@@ -258,6 +273,18 @@ class NotElmt extends Element {
     }
 }
 
+class ExpressionElmt extends Element {
+    public Expression expression;
+
+    public ExpressionElmt(Expression expression) {
+        type = ElementType.EXPRESSION;
+        this.expression = expression;
+    }
+
+    public String toString(){
+        return  "EXPRESSION(" + expression.toString() + ")";
+    }
+}
 
 
 

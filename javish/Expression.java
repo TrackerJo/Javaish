@@ -34,6 +34,7 @@ public class Expression {
     }
 
     private Element[] parseExpression(String expression) {
+        System.out.println("PARSING EXPRESSION: "+expression);
         //TODO: Parse Expression
         int i = 0;
         boolean readingString = false;
@@ -41,14 +42,36 @@ public class Expression {
         boolean readingFunction = false;
         boolean readingFunctionName = false;
         boolean readingFunctionArgs = false;
+        boolean readingExpression = false;
         List<Element> elements = new ArrayList<Element>();
         String currentElement = "";
         String currentFunctionName = "";
         String currentFunctionArgs = "";
+        int currentExpressionDepth = 0;
         List<Element[]> functionArgs = new ArrayList<Element[]>();
         while(i<expression.length()){
             char c = expression.charAt(i);
-            if(c=='"' && !readingFunction){
+            if(c=='(' && !readingFunction && !readingString){
+                if(readingExpression){
+                    currentExpressionDepth++;
+                    currentElement += c;
+                } else {
+                    readingExpression = true;
+                    
+                    currentExpressionDepth++;
+                }
+            } else if(c==')' && !readingFunction && !readingString && readingExpression){
+                if(readingExpression){
+                    currentExpressionDepth--;
+                    if(currentExpressionDepth==0){
+                        readingExpression = false;
+                        elements.add(new ExpressionElmt(new Expression(parseExpression(currentElement), ExpressionReturnType.NUMBER, line)));
+                        currentElement = "";
+                    } else {
+                        currentElement += c;
+                    }
+                }
+            } else if(c=='"' && !readingFunction && !readingExpression){
                 if(readingString){
                     readingString = false;
                     
@@ -70,9 +93,10 @@ public class Expression {
                 }
             }
             else if(c==' '){
-                if(readingString){
+                if(readingString || readingExpression){
                     currentElement += c;
-                } else if(currentElement.equals("call") && !readingFunction){
+                } 
+                else if(currentElement.equals("call") && !readingFunction){
                     System.out.println("READING FUNCTION");
                     readingFunction = true;
                     currentElement = "";
@@ -248,7 +272,7 @@ public class Expression {
     public String toString() {
         String str = "";
         for (Element elmt : elements) {
-            str += elmt.getType() + " ";
+            str += elmt.typeString() + " ";
         }
         return str;
     }
