@@ -549,10 +549,12 @@ public class Parser {
 
         while (i < line.length()) {
             char c = line.charAt(i);
-            if (c == ' ' && !readingId) {
+            if (c == ' ') {
                 if (readingId && rString.equals("return")) {
                     readingId = false;
                     rString = "";
+                } else{
+                    rString += c;
                 }
             } else if(c == '.'){
                 returnVal = rString;
