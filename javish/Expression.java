@@ -272,7 +272,7 @@ public class Expression {
     public String toString() {
         String str = "";
         for (Element elmt : elements) {
-            str += elmt.typeString() + " ";
+            str += elmt.toString() + " ";
         }
         return str;
     }

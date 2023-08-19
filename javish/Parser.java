@@ -25,7 +25,6 @@ public class Parser {
         boolean readingIndents = true;
         while(i < line.length()){
             char c = line.charAt(i);
-            
             if(c != ' ' && readingIndents){
                 readingIndents = false;
                 rString += c;
@@ -316,7 +315,7 @@ public class Parser {
                     readingName = false;
                     
                     rString = "";
-                } else if(!readingName && !readingValue && rString.equals("equals")){
+                } else if(!readingName && !readingValue && rString.equals("=")){
                     readingValue = true;
                     rString = "";
                 } else {
@@ -633,7 +632,7 @@ public class Parser {
                     varName = rString;
                     rString = "";
                 } 
-                else if(rString.equals("equal")){
+                else if(rString.equals("=")){
                     readingValue = true;
                     rString = "";
 
