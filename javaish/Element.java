@@ -1,13 +1,13 @@
-package javish;
+package javaish;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import javish.Variables.VarType;
+import javaish.Variables.VarType;
 
 public class Element {
     enum ElementType {
-        PLUS, MINUS, DIVIDE, MULTIPLY, FLOAT, INTEGER, VARIABLE, FUNCTION, EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_EQUAL, GREATER_THAN_EQUAL, STRING, BOOL, AND, OR, NOT, EXPRESSION
+        PLUS, MINUS, DIVIDE, MULTIPLY, FLOAT, INTEGER, VARIABLE, FUNCTION, EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_EQUAL, GREATER_THAN_EQUAL, STRING, BOOL, AND, OR, NOT, EXPRESSION, CAST
     }
 
     ElementType type;
@@ -286,7 +286,21 @@ class ExpressionElmt extends Element {
     }
 }
 
+class CastElmt extends Element {
+    public VarType castType;
+    public Element element;
 
+    public CastElmt(VarType type, Element element) {
+       
+        this.type = ElementType.CAST;
+        this.castType = type;
+        this.element = element;
+    }
+
+    public String toString(){
+        return  "CAST(" + type.toString() + ", " + element.toString() + ")";
+    }
+}
 
 
 

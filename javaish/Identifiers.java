@@ -1,4 +1,4 @@
-package javish;
+package javaish;
 
 public class Identifiers {
    String[] identifiers = {"let", "add", "subtract", "multiply", "divide", "print", "if", "while", "for", "function", "return"};

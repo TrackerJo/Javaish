@@ -1,11 +1,11 @@
-package javish;
+package javaish;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import javish.Expression.ExpressionReturnType;
-import javish.Statements.MutationType;
-import javish.Variables.VarType;
+import javaish.Expression.ExpressionReturnType;
+import javaish.Statements.MutationType;
+import javaish.Variables.VarType;
 
 public class Parser {
     String source;

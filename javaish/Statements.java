@@ -1,10 +1,9 @@
-package javish;
+package javaish;
 
 import java.util.ArrayList;
 import java.util.List;
 
-
-import javish.Variables.VarType;
+import javaish.Variables.VarType;
 
 public class Statements {
     enum StmtType {

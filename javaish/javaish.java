@@ -1,4 +1,4 @@
-package javish;
+package javaish;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -6,15 +6,15 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
+import javaish.Statements.StmtType;
+import javaish.Variables.VarType;
 
-import javish.Statements.StmtType;
-import javish.Variables.VarType;
-
-public class javish {
-
-    
+public class javaish {
+   
      public static void main(String[] args) throws IOException {
-        String path = "javish/code.javish";
+        String path = "javaish/code.javish";
+        
+        
         runFile(path);
     }
 

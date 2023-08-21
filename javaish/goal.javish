@@ -28,7 +28,7 @@ function getTotal(int numTickets, String seatingType, int valOfVoucher){
 
     if seatingType equals ("premium" + " dog") {
         total equals numTickets * PREMIUM.
-    }else if seatingType equals "general" {
+    } else if seatingType equals "general" {
         total equals numTickets * GENERAL.
     } else {
         call showMessageDialog("Seating type entered is not available").

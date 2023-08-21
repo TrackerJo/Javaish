@@ -1,6 +1,6 @@
-package javish;
+package javaish;
 
-import javish.Variables.VarType;
+import javaish.Variables.VarType;
 
 public class Argument {
     VarType type;

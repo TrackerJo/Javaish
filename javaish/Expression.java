@@ -1,7 +1,9 @@
-package javish;
+package javaish;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javaish.Variables.VarType;
 
 public class Expression {
     enum ExpressionReturnType {
@@ -43,6 +45,9 @@ public class Expression {
         boolean readingFunctionName = false;
         boolean readingFunctionArgs = false;
         boolean readingExpression = false;
+        boolean readingCast = false;
+        VarType castType = null;
+        ExpressionReturnType castReturnType = ExpressionReturnType.NUMBER;
         List<Element> elements = new ArrayList<Element>();
         String currentElement = "";
         String currentFunctionName = "";
@@ -55,12 +60,30 @@ public class Expression {
                 if(readingExpression){
                     currentExpressionDepth++;
                     currentElement += c;
-                } else {
+                } else if(currentElement.equals("toString")) {
+                    readingCast = true;
+                    castType = VarType.STRING;
+                    castReturnType = ExpressionReturnType.STRING;
+                } else if(currentElement.equals("toFloat")){
+                    readingCast = true;
+                    castType = VarType.FLOAT;
+                    castReturnType = ExpressionReturnType.FLOAT;
+                } else if(currentElement.equals("toInt")){
+                    readingCast = true;
+                    castType = VarType.INT;
+                    castReturnType = ExpressionReturnType.INT;
+                } else if(currentElement.equals("toBool")){
+                    readingCast = true;
+                    castType = VarType.BOOL;
+                    castReturnType = ExpressionReturnType.BOOL;
+                
+                }else {
+
                     readingExpression = true;
                     
                     currentExpressionDepth++;
                 }
-            } else if(c==')' && !readingFunction && !readingString && readingExpression){
+            } else if(c==')' && !readingFunction && !readingString ){
                 if(readingExpression){
                     currentExpressionDepth--;
                     if(currentExpressionDepth==0){
@@ -70,8 +93,14 @@ public class Expression {
                     } else {
                         currentElement += c;
                     }
+                } else if(readingCast){
+                    readingCast = false;
+                    elements.add(new CastElmt(castType, new ExpressionElmt(new Expression(parseExpression(currentElement), castReturnType, line))));
+                    currentElement = "";
+                } else {
+                    currentElement += c;
                 }
-            } else if(c=='"' && !readingFunction && !readingExpression){
+            } else if(c=='"' && !readingFunction && !readingExpression && !readingCast){
                 if(readingString){
                     readingString = false;
                     
@@ -93,7 +122,7 @@ public class Expression {
                 }
             }
             else if(c==' '){
-                if(readingString || readingExpression){
+                if(readingString || readingExpression || readingCast){
                     currentElement += c;
                 } 
                 else if(currentElement.equals("call") && !readingFunction){
@@ -143,7 +172,8 @@ public class Expression {
                 readingFunctionArgs = true;
                 currentFunctionName = currentElement;
                 currentElement = "";
-            } else if(readingFunction && readingFunctionArgs && c == ',' && !readingString){
+            } 
+            else if(readingFunction && readingFunctionArgs && c == ',' && !readingString){
                 System.out.println("PARSING FUNCTION ARG: "+currentElement);
                 functionArgs.add(parseExpression(currentElement));
                 currentElement = "";
