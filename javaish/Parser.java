@@ -206,7 +206,17 @@ public class Parser {
                     FunctionStmt functionStmt = new FunctionStmt(lineNumber, functionName, arguments);
                     parents.add(functionStmt);
                     break;
-                case "call":
+                   
+                default:
+                    if(variableNames.contains(words[0]) && nextWord(line, words[0].length() + 1).equals("equals")){
+                        String assignment = parseAssignment(line, words[0]);
+                        
+                        String varValueA = assignment;
+                        Expression expressionA = new Expression(varValueA, ExpressionReturnType.STRING, lineNumber);
+                        AssignmentStmt assignmentStmt = new AssignmentStmt(lineNumber, words[0], expressionA);
+                        parents.get(parents.size() - 1).addStatement(assignmentStmt);
+                        
+                    } else if(possibleFunctionName(words[0])){
                     String[] functionCall = parseFunctionCall(line);
                     String functionCallName = functionCall[0];
                     String[] functionCallArgs = functionCall[1].split(",");
@@ -223,17 +233,8 @@ public class Parser {
                     }
                     CallStmt functionCallStmt = new CallStmt(lineNumber, functionCallName, functionArgExpressions);
                     parents.get(parents.size() - 1).addStatement(functionCallStmt);
-                    break;
-                default:
-                    if(variableNames.contains(words[0]) && nextWord(line, words[0].length() + 1).equals("equals")){
-                        String assignment = parseAssignment(line, words[0]);
-                        
-                        String varValueA = assignment;
-                        Expression expressionA = new Expression(varValueA, ExpressionReturnType.STRING, lineNumber);
-                        AssignmentStmt assignmentStmt = new AssignmentStmt(lineNumber, words[0], expressionA);
-                        parents.get(parents.size() - 1).addStatement(assignmentStmt);
-                        
-                    } else {
+                    }
+                    else {
                         System.out.println("Error: Unknown statement at line " + lineNumber + ":" + line);
                       
                         System.exit(0);
@@ -248,6 +249,19 @@ public class Parser {
         
 
         return parents.get(0);
+    }
+
+    private boolean possibleFunctionName(String name){
+       //Check if contains parenthesis
+         if(name.contains("(")){
+            String[] splitName = name.split("\\(");
+            String functionName = splitName[0];
+            if(variableNames.contains(functionName) || functionName.contains(" ")){
+                return false;
+            }
+            return true;
+         } 
+            return false;
     }
 
      private String parseElseIf(String line, String id) {
@@ -343,8 +357,8 @@ public class Parser {
 
     private String[] parseFunctionCall(String line){
        int i = 0;
-        boolean readingId = true;
-        boolean readingName = false;
+        
+        boolean readingName = true;
         boolean readingArgs = false;
         boolean readingArgName = false;
         boolean readingString = false;
@@ -361,11 +375,7 @@ public class Parser {
                 rString += c;
             } else
             if(c == ' ' && !readingString){
-                if(rString.equals("call") && readingId){
-                    readingId = false;
-                    readingName = true;
-                    rString = "";
-                } else if(readingName){
+                if(readingName){
                     functionName = rString;
                     readingName = false;
                     readingArgs = true;
@@ -655,11 +665,13 @@ public class Parser {
                     varName = rString;
                     rString = "";
                 } 
-                else if(rString.equals("=")){
+                else if(rString.equals("=") || rString.equals("equal")){
                     readingValue = true;
                     rString = "";
 
-                } 
+                } else {
+                    rString += c;
+                }
             } else if(c == '"'){
                 if(!readingString){
                     readingString = true;

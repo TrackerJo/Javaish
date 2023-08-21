@@ -81,7 +81,13 @@ public class Expression {
                     castReturnType = ExpressionReturnType.BOOL;
                      currentElement = "";
                 
-                }else {
+                } else if(possibleFunctionName(currentElement)){
+                    readingFunction = true;
+                    currentFunctionName = currentElement;
+                    currentElement = "";
+                    readingFunctionArgs = true;
+                }
+                else {
 
                     readingExpression = true;
                     
@@ -211,6 +217,18 @@ public class Expression {
         
 
        
+    }
+
+    private boolean possibleFunctionName(String name){
+       //Check if contains parenthesis
+         
+            String[] splitName = name.split("\\(");
+            String functionName = splitName[0];
+            if(functionName.contains(" ")){
+                return false;
+            }
+         
+            return true;
     }
 
     private Element parseElement(String element) {
