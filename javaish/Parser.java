@@ -307,6 +307,11 @@ public class Parser {
 
         while(i < line.length()){
             char c = line.charAt(i);
+            boolean hasNext = i < line.length() - 1;
+            char nextChar = ' ';
+            if(hasNext){
+                nextChar = line.charAt(i + 1);
+            } 
             if(c == '"'){
                 readingString = !readingString;
             } else
@@ -321,7 +326,7 @@ public class Parser {
                 } else {
                     rString += c;
                 }
-            } else if(c == '.' && !readingString && readingValue){
+            } else if(c == '.' && !readingString && readingValue && !hasNext){
                 varValue = rString;
                 rString = "";
                 readingValue = false;
@@ -495,8 +500,14 @@ public class Parser {
 
         while(i < line.length()){
             char c = line.charAt(i);
+            boolean hasNext = i < line.length() - 1;
+            char nextChar = ' ';
+            if(hasNext){
+                nextChar = line.charAt(i + 1);
+            } 
             if(c =='"'){
                 readingString = !readingString;
+                rString += c;
             } else if(c == ' ' && !readingString){
                 if(rString.equals(type) && readingType){
                     readingType = false;
@@ -509,8 +520,10 @@ public class Parser {
                     rString = "";
                 } else if(varName.equals("") && readingVar && rString.equals("to")){
                     rString = "";
+                } else {
+                    rString += c;
                 }
-            } else if(c == '.'){
+            } else if(c == '.' && !readingString && !hasNext){
                 varName = rString;
                 rString = "";
             } else {
@@ -548,6 +561,11 @@ public class Parser {
 
         while (i < line.length()) {
             char c = line.charAt(i);
+            boolean hasNext = i < line.length() - 1;
+            char nextChar = ' ';
+            if(hasNext){
+                nextChar = line.charAt(i + 1);
+            } 
             if (c == ' ') {
                 if (readingId && rString.equals("return")) {
                     readingId = false;
@@ -555,7 +573,7 @@ public class Parser {
                 } else{
                     rString += c;
                 }
-            } else if(c == '.'){
+            } else if(c == '.' && !hasNext){
                 returnVal = rString;
                 rString = "";
             } else {
@@ -614,7 +632,12 @@ public class Parser {
         String rString = "";
         while (i < line.length()) {
             char c = line.charAt(i);
-            
+            boolean hasNext = i < line.length() - 1;
+            char nextChar = ' ';
+            if(hasNext){
+                nextChar = line.charAt(i + 1);
+            } 
+
             
              if(c == ' ' && !readingValue){
                 if(readingId && rString.equals("let")){
@@ -636,7 +659,7 @@ public class Parser {
                     readingValue = true;
                     rString = "";
 
-                }
+                } 
             } else if(c == '"'){
                 if(!readingString){
                     readingString = true;
@@ -645,7 +668,7 @@ public class Parser {
                     readingString = false;
                     rString += c;
                 }
-            } else if(c == '.' && !readingString){
+            } else if(c == '.' && !readingString && !hasNext){
                 varValue = rString;
             }else {
                 rString += c;

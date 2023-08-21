@@ -28,7 +28,11 @@ public class Element {
             str = str.substring(0, str.length() - 1);
             str += ")";
             return str;
+        } else if(type == ElementType.CAST){
+            CastElmt cast = (CastElmt) this;
+            return "CAST(" + cast.castType.toString() + ", " + cast.element.typeString() + ")";
         }
+         
         return type.toString();
     }
 }
@@ -298,7 +302,7 @@ class CastElmt extends Element {
     }
 
     public String toString(){
-        return  "CAST(" + type.toString() + ", " + element.toString() + ")";
+        return  "CAST(" + castType.toString() + ", " + element.toString() + ")";
     }
 }
 

@@ -12,7 +12,7 @@ import javaish.Variables.VarType;
 public class javaish {
    
      public static void main(String[] args) throws IOException {
-        String path = "javaish/code.javish";
+        String path = "javaish/code.javaish";
         
         
         runFile(path);

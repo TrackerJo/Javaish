@@ -64,18 +64,22 @@ public class Expression {
                     readingCast = true;
                     castType = VarType.STRING;
                     castReturnType = ExpressionReturnType.STRING;
+                    currentElement = "";
                 } else if(currentElement.equals("toFloat")){
                     readingCast = true;
                     castType = VarType.FLOAT;
                     castReturnType = ExpressionReturnType.FLOAT;
+                     currentElement = "";
                 } else if(currentElement.equals("toInt")){
                     readingCast = true;
                     castType = VarType.INT;
+                     currentElement = "";
                     castReturnType = ExpressionReturnType.INT;
                 } else if(currentElement.equals("toBool")){
                     readingCast = true;
                     castType = VarType.BOOL;
                     castReturnType = ExpressionReturnType.BOOL;
+                     currentElement = "";
                 
                 }else {
 
@@ -302,7 +306,10 @@ public class Expression {
     public String toString() {
         String str = "";
         for (Element elmt : elements) {
-            str += elmt.toString() + " ";
+            str += elmt.typeString() + " ";
+        }
+        if(str.length()>0){
+            str = str.substring(0, str.length()-1);
         }
         return str;
     }
