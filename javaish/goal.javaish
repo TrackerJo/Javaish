@@ -9,9 +9,9 @@ function eventName(){
 }
 
 function getAmounts(String eventName){
-    let int numTickets equal showInputDialog("How many tickets do you want to the " + eventName + "?").
+    let int numTickets equal toInt(showInputDialog("How many tickets do you want to the " + eventName + "?")).
     let String seatingType equal showInputDialog("What type of seating do you want for the " + eventName + "? (premium/general)").
-    let int valOfVoucher equal showInputDialog("How much do you want on a food/merchandise voucher (whole number) to the "+ eventName +"?").
+    let int valOfVoucher equal toInt(showInputDialog("How much do you want on a food/merchandise voucher (whole number) to the "+ eventName +"?")).
 
     let int total equal getTotal(numTickets, seatingType, valOfVoucher).
     displayTotal(numTickets, valOfVoucher, total, eventName).

@@ -53,40 +53,49 @@ public class Expression {
         String currentFunctionName = "";
         String currentFunctionArgs = "";
         int currentExpressionDepth = 0;
+        int currentCastDepth = 0;
         List<Element[]> functionArgs = new ArrayList<Element[]>();
         while(i<expression.length()){
             char c = expression.charAt(i);
             if(c=='(' && !readingFunction && !readingString){
-                if(readingExpression){
+                if(readingExpression && !readingCast){
                     currentExpressionDepth++;
                     currentElement += c;
-                } else if(currentElement.equals("toString")) {
+                } else if(currentElement.equals("toString") && !readingCast) {
+                    currentCastDepth++;
                     readingCast = true;
                     castType = VarType.STRING;
                     castReturnType = ExpressionReturnType.STRING;
                     currentElement = "";
-                } else if(currentElement.equals("toFloat")){
+                } else if(currentElement.equals("toFloat") && !readingCast){
+                     currentCastDepth++;
                     readingCast = true;
                     castType = VarType.FLOAT;
                     castReturnType = ExpressionReturnType.FLOAT;
                      currentElement = "";
-                } else if(currentElement.equals("toInt")){
+                } else if(currentElement.equals("toInt") && !readingCast){
+                     currentCastDepth++;
                     readingCast = true;
                     castType = VarType.INT;
                      currentElement = "";
                     castReturnType = ExpressionReturnType.INT;
-                } else if(currentElement.equals("toBool")){
+                } else if(currentElement.equals("toBool") && !readingCast){
+                     currentCastDepth++;
                     readingCast = true;
                     castType = VarType.BOOL;
                     castReturnType = ExpressionReturnType.BOOL;
                      currentElement = "";
                 
-                } else if(possibleFunctionName(currentElement)){
+                } else if(possibleFunctionName(currentElement) && !readingCast){
                     readingFunction = true;
                     currentFunctionName = currentElement;
                     currentElement = "";
                     readingFunctionArgs = true;
+                } else if(readingCast){
+                    currentCastDepth++;
+                    currentElement += c;
                 }
+                 
                 else {
 
                     readingExpression = true;
@@ -104,9 +113,16 @@ public class Expression {
                         currentElement += c;
                     }
                 } else if(readingCast){
-                    readingCast = false;
-                    elements.add(new CastElmt(castType, new ExpressionElmt(new Expression(parseExpression(currentElement), castReturnType, line))));
-                    currentElement = "";
+                    currentCastDepth--;
+                    if(currentCastDepth==0){
+                        readingCast = false;
+                        elements.add(new CastElmt(castType, new ExpressionElmt(new Expression(parseExpression(currentElement), castReturnType, line))));
+                        currentElement = "";
+                    } else {
+                        currentElement += c;
+                    }
+                    
+                    
                 } else {
                     currentElement += c;
                 }
@@ -324,7 +340,7 @@ public class Expression {
     public String toString() {
         String str = "";
         for (Element elmt : elements) {
-            str += elmt.typeString() + " ";
+            str += elmt.toString() + " ";
         }
         if(str.length()>0){
             str = str.substring(0, str.length()-1);
