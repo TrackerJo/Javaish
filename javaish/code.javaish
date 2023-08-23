@@ -1,1 +1,2 @@
-let String count = "Hello " + "World.
+let String count = "Hello " + "World".
+let int x = 5.

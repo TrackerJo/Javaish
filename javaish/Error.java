@@ -25,4 +25,9 @@ public class Error {
         System.err.println("Error: Unclosed string at line " + lineNumber);
         System.exit(0);
     }
+
+    public static void VariableAlreadyExists(String name) {
+        System.err.println("Error: Variable " + name + " already exists!");
+        System.exit(0);
+    }
 }

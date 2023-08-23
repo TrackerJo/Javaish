@@ -32,28 +32,27 @@ class Variables{
         }
     }
 
-    public void addVariable(String name, String type, String value){
-        JavaishType t = getType(type);
+    public void addVariable(String name, JavaishType type, JavaishVal value){
+        
         if(allVariables.containsKey(name)){
-            System.out.println("Variable " + name + " already exists");
-            System.exit(0);
+            Error.VariableAlreadyExists(name);
         }
         else{
-            allVariables.put(name, t);
-            switch (t) {
+            allVariables.put(name, type);
+            switch (type) {
                 case INT:
-                    intVariables.add(new intVar(Integer.parseInt(value), name));
+                    intVariables.add(new intVar((JavaishInt)value, name));
                     
                     break;
                 case FLOAT:
-                    floatVariables.add(new floatVar(Float.parseFloat(value), name));
+                    floatVariables.add(new floatVar((JavaishFloat)value, name));
                     break;
                 case BOOLEAN:
-                    boolVariables.add(new boolVar(Boolean.parseBoolean(value), name));
+                    boolVariables.add(new boolVar((JavaishBoolean)value, name));
                     break;
 
                 case STRING:
-                    stringVariables.add(new stringVar(value, name));
+                    stringVariables.add(new stringVar((JavaishString)value, name));
                     break;
             
                 default:
@@ -66,34 +65,34 @@ class Variables{
        return allVariables.containsKey(name);
    }
 
-   public String getVariableValue(String name){
+   public JavaishVal getVariableValue(String name){
          JavaishType t = allVariables.get(name);
          switch (t) {
               case INT:
                 for(intVar i : intVariables){
                      if(i.name.equals(name)){
-                          return Integer.toString(i.value);
+                          return i.getValue();
                      }
                 }
                 break;
                 case FLOAT:
                  for(floatVar i : floatVariables){
                       if(i.name.equals(name)){
-                            return Float.toString(i.value);
+                            return i.getValue();
                       }
                  }
                  break;
                 case BOOLEAN:
                  for(boolVar i : boolVariables){
                       if(i.name.equals(name)){
-                            return Boolean.toString(i.value);
+                            return i.getValue();
                       }
                  }
                  break;
                 case STRING:
                  for(stringVar i : stringVariables){
                       if(i.name.equals(name)){
-                            return i.value;
+                            return i.getValue();
                       }
                  }
                  break;
@@ -106,38 +105,51 @@ class Variables{
 }
 
 class intVar {
-    int value;
+    JavaishInt value;
     String name;
-    intVar(int value, String name){
+    intVar(JavaishInt value, String name){
         this.value = value;
         this.name = name;
+    }
+    public JavaishInt getValue() {
+        return value;
     }
 }
 
 class floatVar {
-    float value;
+    JavaishFloat value;
     String name;
-    floatVar(float value, String name){
+    floatVar(JavaishFloat value, String name){
         this.value = value;
         this.name = name;
+    }
+
+    public JavaishFloat getValue() {
+        return value;
     }
 }
 
 class boolVar {
-    boolean value;
+    JavaishBoolean value;
     String name;
-    boolVar(boolean value, String name){
+    boolVar(JavaishBoolean value, String name){
         this.value = value;
         this.name = name;
+    }
+    public JavaishBoolean getValue() {
+        return value;
     }
 }
 
 class stringVar {
-    String value;
+    JavaishString value;
     String name;
-    stringVar(String value, String name){
+    stringVar(JavaishString value, String name){
         this.value = value;
         this.name = name;
+    }
+    public JavaishString getValue() {
+        return value;
     }
 }
 

@@ -302,6 +302,7 @@ public class Interpreter {
             Error.TypeMismatch(type.toString(), value.typeString(), lineNumber);
             return;
         }
+        variables.addVariable(declaration.getName(), type, value);
         System.out.println("Declaration: Type:" + declaration.getVarType()+ " Name: "+ declaration.getName() + " Value:" + value.getValue());
     }
 

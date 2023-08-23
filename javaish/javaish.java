@@ -30,6 +30,7 @@ public class javaish {
         printStmts(statements.getBody(),0);
         Interpreter interpreter = new Interpreter(variables);
         interpreter.interpretBlock(statements.getBody());
+        printVars(variables);
         // Organizer organizer = new Organizer(statements);
         // List<Elements> elements = organizer.organize();
         //System.out.println(elements);
@@ -38,6 +39,25 @@ public class javaish {
         
     }
 
+    private static void printVars(Variables variables) {
+        System.out.println("Variables:");
+        System.out.println("Integers:");
+        for (intVar intVar : variables.intVariables) {
+            System.out.println(intVar.name + ": " + intVar.value.getValue());
+        }
+        System.out.println("Floats:");
+        for (floatVar floatVar : variables.floatVariables) {
+            System.out.println(floatVar.name + ": " + floatVar.value.getValue());
+        }
+        System.out.println("Booleans:");
+        for (boolVar boolVar : variables.boolVariables) {
+            System.out.println(boolVar.name + ": " + boolVar.value.getValue());
+        }
+        System.out.println("Strings:");
+        for (stringVar stringVar : variables.stringVariables) {
+            System.out.println(stringVar.name + ": " + stringVar.value.getValue());
+        }
+    }
     
     private static void printStmts(List<Statements> statements, int indent) {
         for (Statements statement : statements) {
