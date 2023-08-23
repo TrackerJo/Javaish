@@ -1,10 +1,1 @@
-let float count = 5.0 + (5 + 2).
-
-test().
-for when (count > 5) increment 1 {
-    add 1 + 1 to count.
-}
-
-for each dog in dogs {
-    add dog to dogs.
-}
+let String count = "Hello " + "World.

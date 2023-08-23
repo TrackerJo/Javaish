@@ -3,6 +3,7 @@ package javaish;
 import java.util.ArrayList;
 import java.util.List;
 
+import javaish.JavaishVal.JavaishType;
 import javaish.Variables.VarType;
 
 public class Statements {
@@ -234,9 +235,9 @@ class AssignmentStmt extends Statements {
 
 class DeclarationStmt extends Statements {
     String name;
-    VarType varType;
+    JavaishType varType;
     Expression value;
-    public DeclarationStmt(int line,String name, VarType varType, Expression value) {
+    public DeclarationStmt(int line,String name, JavaishType varType, Expression value) {
         this.line = line;
         this.name = name;
         this.varType = varType;
@@ -247,7 +248,7 @@ class DeclarationStmt extends Statements {
         return name;
     }
 
-    public VarType getVarType() {
+    public JavaishType getVarType() {
         return varType;
     }
 

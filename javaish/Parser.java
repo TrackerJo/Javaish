@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javaish.Expression.ExpressionReturnType;
+import javaish.JavaishVal.JavaishType;
 import javaish.Statements.MutationType;
 import javaish.Variables.VarType;
 
@@ -57,7 +58,7 @@ public class Parser {
                    
                     String[] declaration = parseDeclaration(line);
                     String varName = declaration[0];
-                    VarType varType = getType(declaration[1]);
+                    JavaishType varType = getType(declaration[1]);
                     String varValue = declaration[2];
                     ExpressionReturnType expressionType = ExpressionReturnType.STRING;
                     switch (varType) {
@@ -74,7 +75,7 @@ public class Parser {
                             expressionType = ExpressionReturnType.FLOAT;
                             break;
                         
-                        case BOOL:
+                        case BOOLEAN:
                             expressionType = ExpressionReturnType.BOOL;
                             break;
                     
@@ -217,7 +218,7 @@ public class Parser {
                             throw new RuntimeException("Invalid argument declaration. Full Arg" + functionDeclaration[1] + " Line: " + lineNumber); 
                         }
                         String argName = arg[1];
-                        VarType argType = getType(arg[0]);
+                        JavaishType argType = getType(arg[0]);
                         arguments[i] = new Argument(argType, argName);
                     }
                     
@@ -253,9 +254,8 @@ public class Parser {
                     parents.get(parents.size() - 1).addStatement(functionCallStmt);
                     }
                     else {
-                        System.out.println("Error: Unknown statement at line " + lineNumber + ":" + line);
-                      
-                        System.exit(0);
+                        
+                      Error.UnexpectedStmt(line, lineNumber);
                     }
                     
                 
@@ -273,6 +273,7 @@ public class Parser {
        //Check if contains parenthesis
          if(name.contains("(")){
             String[] splitName = name.split("\\(");
+            System.out.println("SplitName: " + splitName[0]);
             String functionName = splitName[0];
             if(variableNames.contains(functionName) || functionName.contains(" ") || functionName.length() == 0){
                 return false;
@@ -837,22 +838,25 @@ public class Parser {
         }
 
         variableNames.add(varName);
+        if(readingString){
+            Error.UnclosedString(lineNumber);
+        }
 
         
         return new String[]{varName, varType, varValue};
 
     }
 
-    private VarType getType(String type) {
+    private JavaishType getType(String type) {
         switch (type) {
             case "String":
-                return VarType.STRING;
+                return JavaishType.STRING;
             case "int":
-                return VarType.INT;
+                return JavaishType.INT;
             case "float":
-                return VarType.FLOAT;
+                return JavaishType.FLOAT;
             case "bool":
-                return VarType.BOOL;
+                return JavaishType.BOOLEAN;
             default:
                 return null;
         }

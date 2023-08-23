@@ -6,12 +6,14 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
+import javaish.JavaishVal.JavaishType;
 import javaish.Statements.StmtType;
 import javaish.Variables.VarType;
 
 public class javaish {
    
      public static void main(String[] args) throws IOException {
+       
         String path = "javaish/code.javaish";
         
         
@@ -26,6 +28,8 @@ public class javaish {
         Statements statements = parser.parse();
         System.out.println(statements.getBody());
         printStmts(statements.getBody(),0);
+        Interpreter interpreter = new Interpreter(variables);
+        interpreter.interpretBlock(statements.getBody());
         // Organizer organizer = new Organizer(statements);
         // List<Elements> elements = organizer.organize();
         //System.out.println(elements);
@@ -48,7 +52,7 @@ public class javaish {
                 case DECLARATION:
                     DeclarationStmt declaration = (DeclarationStmt) statement;
                     String name = declaration.getName();
-                    VarType varType = declaration.getVarType();
+                    JavaishType varType = declaration.getVarType();
                     String value = declaration.getValue().toString();
 
                     

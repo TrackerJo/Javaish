@@ -3,6 +3,7 @@ package javaish;
 import java.util.ArrayList;
 import java.util.List;
 
+import javaish.JavaishVal.JavaishType;
 import javaish.Variables.VarType;
 
 public class Expression {
@@ -28,14 +29,14 @@ public class Expression {
         this.line = line;
         //Parse Expression
         
-        this.elements = parseExpression(expression);
+        this.elements = parseExpression(expression, 1);
     }
 
     public int getLine() {
         return line;
     }
 
-    private Element[] parseExpression(String expression) {
+    private Element[] parseExpression(String expression, int column) {
         System.out.println("PARSING EXPRESSION: "+expression);
         //TODO: Parse Expression
         int i = 0;
@@ -46,7 +47,7 @@ public class Expression {
         boolean readingFunctionArgs = false;
         boolean readingExpression = false;
         boolean readingCast = false;
-        VarType castType = null;
+        JavaishType castType = null;
         ExpressionReturnType castReturnType = ExpressionReturnType.NUMBER;
         List<Element> elements = new ArrayList<Element>();
         String currentElement = "";
@@ -64,25 +65,25 @@ public class Expression {
                 } else if(currentElement.equals("toString") && !readingCast) {
                     currentCastDepth++;
                     readingCast = true;
-                    castType = VarType.STRING;
+                    castType = JavaishType.STRING;
                     castReturnType = ExpressionReturnType.STRING;
                     currentElement = "";
                 } else if(currentElement.equals("toFloat") && !readingCast){
                      currentCastDepth++;
                     readingCast = true;
-                    castType = VarType.FLOAT;
+                    castType = JavaishType.FLOAT;
                     castReturnType = ExpressionReturnType.FLOAT;
                      currentElement = "";
                 } else if(currentElement.equals("toInt") && !readingCast){
                      currentCastDepth++;
                     readingCast = true;
-                    castType = VarType.INT;
+                    castType = JavaishType.INT;
                      currentElement = "";
                     castReturnType = ExpressionReturnType.INT;
                 } else if(currentElement.equals("toBool") && !readingCast){
                      currentCastDepth++;
                     readingCast = true;
-                    castType = VarType.BOOL;
+                    castType = JavaishType.BOOLEAN;
                     castReturnType = ExpressionReturnType.BOOL;
                      currentElement = "";
                 
@@ -108,7 +109,7 @@ public class Expression {
                     currentExpressionDepth--;
                     if(currentExpressionDepth==0){
                         readingExpression = false;
-                        elements.add(new ExpressionElmt(new Expression(parseExpression(currentElement), ExpressionReturnType.NUMBER, line)));
+                        elements.add(new ExpressionElmt(new Expression(parseExpression(currentElement, column + i), ExpressionReturnType.NUMBER, line)));
                         currentElement = "";
                     } else {
                         currentElement += c;
@@ -117,7 +118,7 @@ public class Expression {
                     currentCastDepth--;
                     if(currentCastDepth==0){
                         readingCast = false;
-                        elements.add(new CastElmt(castType, new ExpressionElmt(new Expression(parseExpression(currentElement), castReturnType, line))));
+                        elements.add(new CastElmt(castType, new ExpressionElmt(new Expression(parseExpression(currentElement, column + i), castReturnType, line))));
                         currentElement = "";
                     } else {
                         currentElement += c;
@@ -188,7 +189,7 @@ public class Expression {
                 else{
                     if(currentElement.length()>0 && !currentElement.equals("not") && !readingFunction){
                         System.out.println("PARSING ELEMENT: "+currentElement);
-                        elements.add(parseElement(currentElement));
+                        elements.add(parseElement(currentElement, column + i));
                         currentElement = "";
                         lastReadString = false;
                     }
@@ -202,11 +203,11 @@ public class Expression {
             } 
             else if(readingFunction && readingFunctionArgs && c == ',' && !readingString){
                 System.out.println("PARSING FUNCTION ARG: "+currentElement);
-                functionArgs.add(parseExpression(currentElement));
+                functionArgs.add(parseExpression(currentElement, column + i));
                 currentElement = "";
             } else if(readingFunction && readingFunctionArgs && c == ')' && !readingString){
                 System.out.println("PARSING FUNCTION ARG: "+currentElement);
-                functionArgs.add(parseExpression(currentElement));
+                functionArgs.add(parseExpression(currentElement, column + i));
                 currentElement = "";
                 readingFunctionArgs = false;
                 readingFunction = false;
@@ -225,7 +226,7 @@ public class Expression {
 
         if(currentElement.length()>0 && !lastReadString){
             
-            elements.add(parseElement(currentElement));
+            elements.add(parseElement(currentElement, column + i));
             
         }
 
@@ -248,7 +249,7 @@ public class Expression {
             return true;
     }
 
-    private Element parseElement(String element) {
+    private Element parseElement(String element, int column) {
         if(isInteger(element)){
             return new IntElmt(Integer.parseInt(element));
         }else if(isFloat(element)){
@@ -282,7 +283,8 @@ public class Expression {
         } else if(isVariable(element)){
             return new VariableElmt(element);
         }
-       throw new IllegalArgumentException("Invalid Element: "+element + ". Line: " + getLine());//TODO: make proper exception
+        Error.UnexpectedElmt(element, getLine(), column);
+        return null;
     }
  
 

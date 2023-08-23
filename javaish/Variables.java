@@ -2,26 +2,29 @@ package javaish;
 
 import java.util.ArrayList;
 import java.util.Map;
+
+import javaish.JavaishVal.JavaishType;
+
 import java.util.HashMap;
 
 class Variables{
     enum VarType {INT, FLOAT, BOOL, STRING}
-    Map<String, VarType> allVariables = new HashMap<String, VarType>();
+    Map<String, JavaishType> allVariables = new HashMap<String, JavaishType>();
     ArrayList<intVar> intVariables = new ArrayList<intVar>();
     ArrayList<floatVar> floatVariables = new ArrayList<floatVar>();
     ArrayList<boolVar> boolVariables = new ArrayList<boolVar>();
     ArrayList<stringVar> stringVariables = new ArrayList<stringVar>();
 
-    private VarType getType(String type){
+    private JavaishType getType(String type){
         switch (type) {
-            case "Int":
-                return VarType.INT;
-            case "Float":
-                return VarType.FLOAT;
-            case "Bool":
-                return VarType.BOOL;
+            case "int":
+                return JavaishType.INT;
+            case "float":
+                return JavaishType.FLOAT;
+            case "bool":
+                return JavaishType.BOOLEAN;
             case "String":
-                return VarType.STRING;
+                return JavaishType.STRING;
             default:
                 System.out.println("Invalid type");
                 System.exit(0);
@@ -30,7 +33,7 @@ class Variables{
     }
 
     public void addVariable(String name, String type, String value){
-        VarType t = getType(type);
+        JavaishType t = getType(type);
         if(allVariables.containsKey(name)){
             System.out.println("Variable " + name + " already exists");
             System.exit(0);
@@ -45,7 +48,7 @@ class Variables{
                 case FLOAT:
                     floatVariables.add(new floatVar(Float.parseFloat(value), name));
                     break;
-                case BOOL:
+                case BOOLEAN:
                     boolVariables.add(new boolVar(Boolean.parseBoolean(value), name));
                     break;
 
@@ -64,7 +67,7 @@ class Variables{
    }
 
    public String getVariableValue(String name){
-         VarType t = allVariables.get(name);
+         JavaishType t = allVariables.get(name);
          switch (t) {
               case INT:
                 for(intVar i : intVariables){
@@ -80,7 +83,7 @@ class Variables{
                       }
                  }
                  break;
-                case BOOL:
+                case BOOLEAN:
                  for(boolVar i : boolVariables){
                       if(i.name.equals(name)){
                             return Boolean.toString(i.value);

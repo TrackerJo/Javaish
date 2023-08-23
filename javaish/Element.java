@@ -3,6 +3,7 @@ package javaish;
 import java.util.ArrayList;
 import java.util.List;
 
+import javaish.JavaishVal.JavaishType;
 import javaish.Variables.VarType;
 
 public class Element {
@@ -116,6 +117,10 @@ class FloatElmt extends Element {
         return Float.toString(value);
     }
 
+    public float getValue(){
+        return value;
+    }
+
 }
 
 class IntElmt extends Element {
@@ -128,6 +133,10 @@ class IntElmt extends Element {
 
     public String toString(){
         return Integer.toString(value);
+    }
+
+    public int getValue(){
+        return value;
     }
 
 }
@@ -252,6 +261,10 @@ class StringElmt extends Element {
     public String toString(){
         return value;
     }
+
+    public String getValue(){
+        return value;
+    }
 }
 
 class BoolElmt extends Element {
@@ -264,6 +277,10 @@ class BoolElmt extends Element {
 
     public String toString(){
         return Boolean.toString(value);
+    }
+
+    public boolean getValue(){
+        return value;
     }
 }
 
@@ -291,10 +308,10 @@ class ExpressionElmt extends Element {
 }
 
 class CastElmt extends Element {
-    public VarType castType;
+    public JavaishType castType;
     public Element element;
 
-    public CastElmt(VarType type, Element element) {
+    public CastElmt(JavaishType type, Element element) {
        
         this.type = ElementType.CAST;
         this.castType = type;
