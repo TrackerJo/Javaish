@@ -7,7 +7,7 @@ import javaish.Variables.VarType;
 
 public class Statements {
     enum StmtType {
-        FUNCTION, IF, WHILE, FOR, RETURN, CALL, ASSIGNMENT, DECLARATION, VARIABLE, MUTATION, END, ELSE, CLASS, ELSEIF
+        FUNCTION, IF, WHILE, FOREACH, RETURN, CALL, ASSIGNMENT, DECLARATION, VARIABLE, MUTATION, END, ELSE, CLASS, ELSEIF, FORWHEN
     }
 
     enum MutationType {
@@ -122,20 +122,51 @@ class WhileStmt extends Statements {
     }
 }
 
-class ForStmt extends Statements {
+class ForWhenStmt extends Statements {
     Expression condition;
-    public ForStmt(int line,Expression condition) {
+    Expression increment;
+    public ForWhenStmt(int line,Expression condition, Expression increment) {
         this.line = line;
         this.condition = condition;
-        this.type = StmtType.FOR;
+        this.increment = increment;
+        this.type = StmtType.FORWHEN;
         this.isBlock = true;
-    }
-     public int getLine() {
-        return line;
     }
 
     public Expression getCondition() {
         return condition;
+    }
+
+    public Expression getIncrement() {
+        return increment;
+    }
+
+     public int getLine() {
+        return line;
+    }
+}
+
+class ForEachStmt extends Statements {
+    String tempVar;
+    String listVar;
+    public ForEachStmt(int line,String tempVar, String listVar) {
+        this.line = line;
+        this.tempVar = tempVar;
+        this.listVar = listVar;
+        this.type = StmtType.FOREACH;
+        this.isBlock = true;
+    }
+
+    public String getTempVar() {
+        return tempVar;
+    }
+
+    public String getListVar() {
+        return listVar;
+    }
+
+    public int getLine() {
+        return line;
     }
 }
 

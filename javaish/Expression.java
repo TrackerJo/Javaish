@@ -87,6 +87,7 @@ public class Expression {
                      currentElement = "";
                 
                 } else if(possibleFunctionName(currentElement) && !readingCast){
+                    System.out.println("READING FUNCTION NAME: " + currentElement);
                     readingFunction = true;
                     currentFunctionName = currentElement;
                     currentElement = "";
@@ -237,10 +238,10 @@ public class Expression {
 
     private boolean possibleFunctionName(String name){
        //Check if contains parenthesis
-         
+
             String[] splitName = name.split("\\(");
             String functionName = splitName[0];
-            if(functionName.contains(" ")){
+            if(functionName.contains(" ") || functionName.length()==0){
                 return false;
             }
          

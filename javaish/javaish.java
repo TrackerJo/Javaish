@@ -12,7 +12,7 @@ import javaish.Variables.VarType;
 public class javaish {
    
      public static void main(String[] args) throws IOException {
-        String path = "javaish/goal.javaish";
+        String path = "javaish/code.javaish";
         
         
         runFile(path);
@@ -117,6 +117,20 @@ public class javaish {
                     System.out.println("Assignment: " + assignmentStmt.getName() + " " + assignmentStmt.getValue().toString());
                     
                     break;
+                case FOREACH:
+                    ForEachStmt foreachStmt = (ForEachStmt) statement;
+                    System.out.println("Foreach: " + foreachStmt.getTempVar() + " in " + foreachStmt.getListVar());
+                    if(foreachStmt.getBody() != null){
+                        printStmts(foreachStmt.getBody(), indent + 1);
+                    }
+                    
+                    break;
+                case FORWHEN:
+                    ForWhenStmt forwhenStmt = (ForWhenStmt) statement;
+                    System.out.println("ForWhen: " + forwhenStmt.getCondition() + " Increment: " + forwhenStmt.getIncrement());
+                    if(forwhenStmt.getBody() != null){
+                        printStmts(forwhenStmt.getBody(), indent + 1);
+                    }
                 default:
                     break;
             }

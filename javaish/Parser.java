@@ -134,10 +134,28 @@ public class Parser {
                     }
                     break;
                 case "for":
-                    String forCondition = parseLoop(line, "for");
-                    Expression forBoolExpression = new Expression(forCondition, ExpressionReturnType.BOOL, lineNumber);
-                    ForStmt forStmt = new ForStmt(lineNumber, forBoolExpression);
-                    parents.add(forStmt);   
+                    //Get second word
+                    if(words[1].equals("when")){
+                        String[] forLoop = parseForWhen(line);
+                        String forCondition = forLoop[0];
+                        String forIncrement = forLoop[1];
+                        Expression forConditionExpression = new Expression(forCondition, ExpressionReturnType.STRING, lineNumber);
+                        Expression forIncrementExpression = new Expression(forIncrement, ExpressionReturnType.NUMBER, lineNumber);
+                        ForWhenStmt forStmt = new ForWhenStmt(lineNumber, forConditionExpression, forIncrementExpression);
+                        parents.add(forStmt); 
+                    } else if(words[1].equals("each")){
+                        String[] forLoop = parseForEach(line);
+                        String forVarName = forLoop[0];
+                        String forListName = forLoop[1];
+                        
+                        ForEachStmt forStmt = new ForEachStmt(lineNumber, forVarName, forListName);
+                        parents.add(forStmt);
+                            
+                    } else {
+                        System.out.println("Error: Invalid for loop declaration at line " + lineNumber + ":" + line);
+                        System.exit(0);
+                    }
+                      
                     break;
                 case "while":
                     String whileCondition = parseLoop(line, "while");
@@ -256,7 +274,7 @@ public class Parser {
          if(name.contains("(")){
             String[] splitName = name.split("\\(");
             String functionName = splitName[0];
-            if(variableNames.contains(functionName) || functionName.contains(" ")){
+            if(variableNames.contains(functionName) || functionName.contains(" ") || functionName.length() == 0){
                 return false;
             }
             return true;
@@ -264,7 +282,136 @@ public class Parser {
             return false;
     }
 
-     private String parseElseIf(String line, String id) {
+    private String[] parseForEach(String line){
+        int i = 0;
+        boolean readingId = true;
+        boolean readingEach = false;
+        boolean readingVar = false;
+        boolean readingList = false;
+        boolean readingString = false;
+
+        String rString = "";
+        String varName = "";
+        String listName = "";
+
+        while(i < line.length()){
+            char c = line.charAt(i);
+            if(c == '"'){
+                readingString = !readingString;
+                rString += c;
+            } else
+            if(c == ' ' && !readingString){
+                if(readingId && rString.equals("for")){
+                   
+                    readingId = false;
+                    readingEach = true;
+                    rString = "";
+                } else if(readingEach && rString.equals("each")){
+                    readingEach = false;
+                    readingVar = true;
+                    rString = "";
+                }else if(readingVar){
+                    readingVar = false;
+                    varName = rString;
+                    rString = "";
+                } else if(rString.equals("in") && !readingList){
+                    readingList = true;
+                    rString = "";
+                } else if(readingList){
+                    readingList = false;
+                    listName = rString;
+                    rString = "";
+                } else {
+                    rString += c;
+                }
+            } else if(c == '{' && !readingString && listName.equals("")){
+                listName = rString;
+                rString = "";
+            } else {
+                rString += c;
+            }
+            i++;
+        }
+
+        return new String[]{varName, listName};
+
+    }
+
+    private String[] parseForWhen(String line){
+        int i = 0;
+        boolean readingId = true;
+        boolean readingWhen = false;
+        boolean readingCondition = false;
+        boolean readingIncrement = false;
+        boolean readingString = false;
+        boolean readingExpression = false;
+        int parenCount = 0;
+        String rString = "";
+        String condition = "";
+        String increment = "";
+        while(i < line.length()){
+            char c = line.charAt(i);
+            if(c == '"'){
+                readingString = !readingString;
+                rString += c;
+            } else if(!readingString && c == '('){
+                parenCount++;
+                readingExpression = true;
+                rString += c;
+            } else if(!readingString && c == ')'){
+                parenCount--;
+                if(parenCount == 0){
+                    readingExpression = false;
+                    rString += c;
+                } else {
+                    rString += c;
+                }
+            } else if(readingExpression){
+                rString += c;
+            }
+            else if(c == ' ' && !readingString && !readingExpression){
+                if(readingId && rString.equals("for")){
+                    readingId = false;
+                    readingWhen = true;
+                    rString = "";
+                } else if(readingWhen && rString.equals("when")){
+                    readingWhen = false;
+                    readingCondition = true;
+                    rString = "";
+                } else if( readingCondition && nextWord(line, i+1).equals("increment")){
+                    readingCondition = false;
+                    condition = rString;
+                    
+                    rString = "";
+                } else if(rString.equals("increment")){
+                    readingIncrement = true;
+                    rString = "";
+                }
+                else if(readingIncrement){
+                    readingIncrement = false;
+                    increment = rString;
+                    
+                    rString = "";
+                } else {
+                    rString += c;
+                }
+            } else if(c == '{' && !readingString && increment.equals("") && !readingExpression){
+                increment = rString;
+                rString = "";
+            } else if(c == ' ' && readingExpression){
+                rString += c;
+            } 
+            else {
+                rString += c;
+            }
+            i++;
+        }
+
+        return new String[]{condition, increment};
+
+    }
+
+    private String parseElseIf(String line, String id) {
         int i = 0;
         boolean readingBracket = true;
         boolean readingElse = false;
