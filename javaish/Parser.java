@@ -227,7 +227,7 @@ public class Parser {
                     break;
                    
                 default:
-                    if(variableNames.contains(words[0]) && nextWord(line, words[0].length() + 1).equals("equals")){
+                    if(variableNames.contains(words[0]) && (nextWord(line, words[0].length() + 1).equals("equals") || nextWord(line, words[0].length() + 1).equals("="))){
                         String assignment = parseAssignment(line, words[0]);
                         
                         String varValueA = assignment;
@@ -482,7 +482,7 @@ public class Parser {
                     readingName = false;
                     
                     rString = "";
-                } else if(!readingName && !readingValue && rString.equals("=")){
+                } else if(!readingName && !readingValue && (rString.equals("=") || rString.equals("equals"))){
                     readingValue = true;
                     rString = "";
                 } else {

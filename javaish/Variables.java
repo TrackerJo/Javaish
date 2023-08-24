@@ -65,6 +65,62 @@ class Variables{
        return allVariables.containsKey(name);
    }
 
+   public void setVariableValue(String name, JavaishVal value, int lineNumber){
+        JavaishType t = allVariables.get(name);
+        switch (t) {
+             case INT:
+               for(intVar i : intVariables){
+                    if(i.name.equals(name)){
+                         if(value.getType() == JavaishType.INT){
+                                i.value = (JavaishInt)value;
+                             }
+                             else{
+                                Error.TypeMismatch("Int", value.typeString(), lineNumber);
+                         }
+                    }
+               }
+               break;
+               case FLOAT:
+                for(floatVar i : floatVariables){
+                     if(i.name.equals(name)){
+                            if(value.getType() == JavaishType.FLOAT){
+                                    i.value = (JavaishFloat)value;
+                                 }
+                                 else{
+                                    Error.TypeMismatch("Float", value.typeString(), lineNumber);
+                             }
+                     }
+                }
+                break;
+               case BOOLEAN:
+                for(boolVar i : boolVariables){
+                     if(i.name.equals(name)){
+                            if(value.getType() == JavaishType.BOOLEAN){
+                                    i.value = (JavaishBoolean)value;
+                                 }
+                                 else{
+                                    Error.TypeMismatch("Boolean", value.typeString(), lineNumber);
+                             }
+                     }
+                }
+                break;
+               case STRING:
+                for(stringVar i : stringVariables){
+                     if(i.name.equals(name)){
+                            if(value.getType() == JavaishType.STRING){
+                                    i.value = (JavaishString)value;
+                                 }
+                                 else{
+                                    Error.TypeMismatch("String", value.typeString(), lineNumber);
+                             }
+                     }
+                }
+                break;
+             default:
+               break;
+        }
+   }
+
    public JavaishVal getVariableValue(String name){
          JavaishType t = allVariables.get(name);
          switch (t) {

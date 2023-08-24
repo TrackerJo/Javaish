@@ -339,7 +339,9 @@ public class Interpreter {
     }
 
     private void evalAssignment(AssignmentStmt assignment){
-   
+        String name = assignment.getName();
+        JavaishVal value = evalExpression(assignment.getValue());
+        variables.setVariableValue(name, value, lineNumber);
        
 
     }

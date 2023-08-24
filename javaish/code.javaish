@@ -1,3 +1,4 @@
 let String count = "Hello " + "World".
 let int x = 5.
 let int y = x + 10 + toInt(5.6).
+x = 10.
