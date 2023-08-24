@@ -6,6 +6,7 @@ import java.util.Map;
 import javaish.JavaishVal.JavaishType;
 
 import java.util.HashMap;
+import java.util.List;
 
 class Variables{
     enum VarType {INT, FLOAT, BOOL, STRING}
@@ -14,6 +15,7 @@ class Variables{
     ArrayList<floatVar> floatVariables = new ArrayList<floatVar>();
     ArrayList<boolVar> boolVariables = new ArrayList<boolVar>();
     ArrayList<stringVar> stringVariables = new ArrayList<stringVar>();
+    Map<String, functionVar> functions = new HashMap<String, functionVar>();
 
     private JavaishType getType(String type){
         switch (type) {
@@ -63,6 +65,15 @@ class Variables{
 
    public boolean isVariable(String name){
        return allVariables.containsKey(name);
+   }
+
+   public void addFunction(String name, List<Statements> body, Argument[] args){
+        if(functions.containsKey(name)){
+            Error.FunctionAlreadyExists(name);
+        }
+        else{
+            functions.put(name, new functionVar(name, body, args));
+        }
    }
 
    public void setVariableValue(String name, JavaishVal value, int lineNumber){
@@ -213,6 +224,25 @@ class stringVar {
     }
     public JavaishString getValue() {
         return value;
+    }
+}
+
+class functionVar {
+    String name;
+    List<Statements> body;
+    Argument[] args;
+    functionVar(String name, List<Statements> body, Argument[] args){
+        this.name = name;
+        this.body = body;
+        this.args = args;
+    }
+    public Argument[] getArgs() {
+        return args;
+    }
+    public List<Statements> getBody() {
+        return body;
+    }public String getName() {
+        return name;
     }
 }
 

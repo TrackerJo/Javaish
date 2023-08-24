@@ -60,4 +60,9 @@ public class Error {
         System.err.println("Error: Can't perform mutation on " + type + " at line " + lineNumber);
         System.exit(0);
     }
+
+    public static void FunctionAlreadyExists(String name) {
+        System.err.println("Error: Function " + name + " already exists!");
+        System.exit(0);
+    }
 }

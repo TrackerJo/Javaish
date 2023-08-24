@@ -57,6 +57,11 @@ public class javaish {
         for (stringVar stringVar : variables.stringVariables) {
             System.out.println(stringVar.name + ": " + stringVar.value.getValue());
         }
+        System.out.println("Functions:");
+        for (functionVar functionVar : variables.functions.values()) {
+            System.out.println(functionVar.name + "(" + getArgsString(functionVar.args) + ")");
+            
+        }
     }
     
     private static void printStmts(List<Statements> statements, int indent) {

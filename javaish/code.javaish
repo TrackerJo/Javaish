@@ -6,3 +6,9 @@ multiply x by 1.
 add 1 to y.
 subtract 10 from x.
 divide x by 2.
+
+function test(int val){
+    x = val.
+}
+
+test(5).

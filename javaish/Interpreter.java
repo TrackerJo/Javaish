@@ -365,6 +365,12 @@ public class Interpreter {
     }
 
     private void evalFunction(FunctionStmt function){
+        String name = function.getName();
+        Argument[] args = function.getArgs();
+        List<Statements> body = function.getBody();
+        variables.addFunction(name, body, args);
+
+
 
     }
 
