@@ -3,6 +3,7 @@ package javaish;
 import java.util.List;
 
 import javaish.JavaishVal.JavaishType;
+import javaish.Statements.MutationType;
 
 public class Interpreter {
    int lineNumber = 0;
@@ -234,7 +235,7 @@ public class Interpreter {
     private JavaishVal performOperation(Operator operation, JavaishVal total, JavaishVal val2){
         JavaishVal result = null;
         if(operation == null){
-            System.out.println(val2.getValue());
+            System.out.println(val2.getValue() + " SINGLE VAL");
             return val2;
         }
         switch (operation) {
@@ -350,6 +351,12 @@ public class Interpreter {
         JavaishType type = declaration.getVarType();
         JavaishVal value = evalExpression(declaration.getValue());
         if(type != value.getType()){
+            if(type == JavaishType.FLOAT && value.getType() == JavaishType.INT){
+                 variables.addVariable(declaration.getName(), type, new JavaishFloat(((JavaishInt) value).getValue()));
+                System.out.println("Declaration: Type:" + declaration.getVarType()+ " Name: "+ declaration.getName() + " Value:" + value.getValue());
+                return;
+            }
+            System.out.println("Type Mismatch");
             Error.TypeMismatch(type.toString(), value.typeString(), lineNumber);
             return;
         }
@@ -394,7 +401,40 @@ public class Interpreter {
     }
 
     private void evalMutation(MutationStmt mutationStmt){
+        MutationType type = mutationStmt.getMutationType();
+        String name = mutationStmt.getVarName();
+        JavaishVal value = evalExpression(mutationStmt.getValue());
 
+        JavaishVal variable = variables.getVariableValue(name);
+        if(variable == null){
+            Error.VariableNotDeclared(name, lineNumber);
+            return;
+        }
+        if(variable.getType() == JavaishType.STRING){
+            if(type != MutationType.ADD){
+                Error.CantPerformMutation(variable.typeString(), lineNumber);
+                return;
+            }
+        }
+
+        JavaishVal newVal = performOperation(mutationTypeToOperator(type), variable, value);
+        variables.setVariableValue(name, newVal, lineNumber);
+
+    }
+
+    private Operator mutationTypeToOperator(MutationType type){
+        switch (type) {
+            case ADD:
+                return Operator.PLUS;
+            case SUBTRACT:
+                return Operator.MINUS;
+            case MULTIPLY:
+                return Operator.MULTIPLY;
+            case DIVIDE:
+                return Operator.DIVIDE;
+            default:
+                return null;
+        }
     }
 
 

@@ -35,4 +35,29 @@ public class Error {
         System.err.println("Error: Unable to parse " + type + " to " + goal + " at line " + lineNumber);
         System.exit(0);
     }
+
+    public static void VariableNotDeclared(String name, int lineNumber) {
+        System.err.println("Error: Variable " + name + " not declared at line " + lineNumber);
+        System.exit(0);
+    }
+
+    public static void FunctionNotDeclared(String name, int lineNumber) {
+        System.err.println("Error: Function " + name + " not declared at line " + lineNumber);
+        System.exit(0);
+    }
+
+    public static void InvalidFunctionCall(String name, int lineNumber) {
+        System.err.println("Error: Invalid function call at line " + lineNumber + ": " + name);
+        System.exit(0);
+    }
+
+    public static void InvalidFunctionCall(String name, int lineNumber, String expected, String got) {
+        System.err.println("Error: Invalid function call at line " + lineNumber + ": " + name + ": Expected " + expected + ", got " + got);
+        System.exit(0);
+    }
+
+    public static void CantPerformMutation(String type, int lineNumber) {
+        System.err.println("Error: Can't perform mutation on " + type + " at line " + lineNumber);
+        System.exit(0);
+    }
 }

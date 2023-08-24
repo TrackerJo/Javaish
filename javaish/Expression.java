@@ -343,7 +343,7 @@ public class Expression {
     public String toString() {
         String str = "";
         for (Element elmt : elements) {
-            str += elmt.typeString() + " ";
+            str += elmt.toString() + " ";
         }
         if(str.length()>0){
             str = str.substring(0, str.length()-1);

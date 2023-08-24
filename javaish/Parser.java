@@ -171,7 +171,7 @@ public class Parser {
                     parents.get(parents.size() - 1).addStatement(returnStmt);
                     break;
                 case "add":
-                    String[] addMutation = parseMutation(line, "add");
+                    String[] addMutation = parseMutationAS(line, "add");
                     String addVarName = addMutation[0];
                     String addChange = addMutation[1];
                     Expression addExpression = new Expression(addChange, ExpressionReturnType.NUMBER, lineNumber);
@@ -179,7 +179,7 @@ public class Parser {
                     parents.get(parents.size() - 1).addStatement(addStmt);
                     break;
                 case "subtract":
-                    String[] subtractMutation = parseMutation(line, "subtract");
+                    String[] subtractMutation = parseMutationAS(line, "subtract");
                     String subtractVarName = subtractMutation[0];
                     String subtractChange = subtractMutation[1];
                     Expression subtractExpression = new Expression(subtractChange, ExpressionReturnType.NUMBER, lineNumber);
@@ -187,17 +187,17 @@ public class Parser {
                     parents.get(parents.size() - 1).addStatement(subtractStmt);
                     break;
                 case "multiply":
-                    String[] multiplyMutation = parseMutation(line, "multiply");
-                    String multiplyVarName = multiplyMutation[0];
-                    String multiplyChange = multiplyMutation[1];
+                    String[] multiplyMutation = parseMutationMD(line, "multiply");
+                    String multiplyVarName = multiplyMutation[1];
+                    String multiplyChange = multiplyMutation[0];
                     Expression multiplyExpression = new Expression(multiplyChange, ExpressionReturnType.NUMBER, lineNumber);
                     MutationStmt multiplyStmt = new MutationStmt(lineNumber, multiplyVarName, multiplyExpression,MutationType.MULTIPLY);
                     parents.get(parents.size() - 1).addStatement(multiplyStmt);
                     break;
                 case "divide":
-                    String[] divideMutation = parseMutation(line, "divide");
-                    String divideVarName = divideMutation[0];
-                    String divideChange = divideMutation[1];
+                    String[] divideMutation = parseMutationMD(line, "divide");
+                    String divideVarName = divideMutation[1];
+                    String divideChange = divideMutation[0];
                     Expression divideExpression = new Expression(divideChange, ExpressionReturnType.NUMBER, lineNumber);
                     MutationStmt divideStmt = new MutationStmt(lineNumber, divideVarName, divideExpression,MutationType.DIVIDE);
                     parents.get(parents.size() - 1).addStatement(divideStmt);
@@ -645,17 +645,20 @@ public class Parser {
 
     }
 
-    private String[] parseMutation(String line, String type){
+    private String[] parseMutationAS(String line, String type){
         int i = 0;
         boolean readingType = true;
         boolean readingChange = false;
         boolean readingVar = false;
         boolean readingString = false;
 
+        String id = "to";
+        if(type.equals("subtract")){
+            id = "from";
+        }
         String rString = "";
         String varName = "";
         String change = "";
-
         while(i < line.length()){
             char c = line.charAt(i);
             boolean hasNext = i < line.length() - 1;
@@ -671,12 +674,12 @@ public class Parser {
                     readingType = false;
                     readingChange = true;
                     rString = "";
-                } else if(readingChange && nextWord(line, i+1).equals("to")){
+                } else if(readingChange && nextWord(line, i+1).equals(id)){
                     readingChange = false;
                     change = rString;
                     readingVar = true;
                     rString = "";
-                } else if(varName.equals("") && readingVar && rString.equals("to")){
+                } else if(varName.equals("") && readingVar && rString.equals(id)){
                     rString = "";
                 } else {
                     rString += c;
@@ -695,6 +698,57 @@ public class Parser {
 
 
     }
+
+    private String[] parseMutationMD(String line, String type){
+        int i = 0;
+        boolean readingType = true;
+        boolean readingChange = false;
+        boolean readingVar = false;
+        boolean readingString = false;
+
+        String rString = "";
+        String varName = "";
+        String change = "";
+        while(i < line.length()){
+            char c = line.charAt(i);
+            boolean hasNext = i < line.length() - 1;
+            char nextChar = ' ';
+            if(hasNext){
+                nextChar = line.charAt(i + 1);
+            } 
+            if(c =='"'){
+                readingString = !readingString;
+                rString += c;
+            } else if(c == ' ' && !readingString){
+                if(rString.equals(type) && readingType){
+                    readingType = false;
+                    readingVar = true;
+                    rString = "";
+                } else if(readingVar && nextWord(line, i+1).equals("by")){
+                    readingVar = false;
+                    change = rString;
+                    readingChange = true;
+                    rString = "";
+                } else if(varName.equals("") && readingChange && rString.equals("by")){
+                    rString = "";
+                } else {
+                    rString += c;
+                }
+            } else if(c == '.' && !readingString && !hasNext){
+                varName = rString;
+                rString = "";
+            } else {
+                rString += c;
+            }
+            i++;
+        }
+
+        String[] returnArray = {varName, change};
+        return returnArray;
+
+
+    }
+
 
     private String nextWord(String line, int i){
         String rString = "";

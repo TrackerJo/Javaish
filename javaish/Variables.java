@@ -76,6 +76,7 @@ class Variables{
                              }
                              else{
                                 Error.TypeMismatch("Int", value.typeString(), lineNumber);
+                             
                          }
                     }
                }
@@ -87,7 +88,13 @@ class Variables{
                                     i.value = (JavaishFloat)value;
                                  }
                                  else{
-                                    Error.TypeMismatch("Float", value.typeString(), lineNumber);
+                                    if(value.getType() == JavaishType.INT){
+                                        i.value = new JavaishFloat(((JavaishInt)value).getValue());
+                                    }
+                                    else {
+                                        Error.TypeMismatch("Float", value.typeString(), lineNumber);
+                                    }
+                                   
                              }
                      }
                 }
