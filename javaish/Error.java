@@ -30,4 +30,9 @@ public class Error {
         System.err.println("Error: Variable " + name + " already exists!");
         System.exit(0);
     }
+
+    public static void UnableToParse(String type, int lineNumber, String goal) {
+        System.err.println("Error: Unable to parse " + type + " to " + goal + " at line " + lineNumber);
+        System.exit(0);
+    }
 }

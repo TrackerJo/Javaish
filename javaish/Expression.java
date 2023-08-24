@@ -118,7 +118,7 @@ public class Expression {
                     currentCastDepth--;
                     if(currentCastDepth==0){
                         readingCast = false;
-                        elements.add(new CastElmt(castType, new ExpressionElmt(new Expression(parseExpression(currentElement, column + i), castReturnType, line))));
+                        elements.add(new CastElmt(castType, new Expression(parseExpression(currentElement, column + i), castReturnType, line)));
                         currentElement = "";
                     } else {
                         currentElement += c;
@@ -343,7 +343,7 @@ public class Expression {
     public String toString() {
         String str = "";
         for (Element elmt : elements) {
-            str += elmt.toString() + " ";
+            str += elmt.typeString() + " ";
         }
         if(str.length()>0){
             str = str.substring(0, str.length()-1);

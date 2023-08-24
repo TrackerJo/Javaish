@@ -31,7 +31,7 @@ public class Element {
             return str;
         } else if(type == ElementType.CAST){
             CastElmt cast = (CastElmt) this;
-            return "CAST(" + cast.castType.toString() + ", " + cast.element.typeString() + ")";
+            return "CAST(" + cast.castType.toString() + ", " + cast.element.toString() + ")";
         }
          
         return type.toString();
@@ -151,6 +151,10 @@ class VariableElmt extends Element {
     }
 
     public String toString(){
+        return name;
+    }
+
+    public String getName(){
         return name;
     }
 
@@ -309,9 +313,9 @@ class ExpressionElmt extends Element {
 
 class CastElmt extends Element {
     public JavaishType castType;
-    public Element element;
+    public Expression element;
 
-    public CastElmt(JavaishType type, Element element) {
+    public CastElmt(JavaishType type, Expression element) {
        
         this.type = ElementType.CAST;
         this.castType = type;

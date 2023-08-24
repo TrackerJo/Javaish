@@ -99,6 +99,53 @@ public class Interpreter {
                     break;
                 case CAST:
                     CastElmt cast = (CastElmt) elmt;
+                    JavaishVal val = evalExpression(cast.element);
+                    switch (cast.castType) {
+                        case FLOAT:
+                            if(!(val instanceof JavaishFloat)){
+                                try {
+                                    if(val instanceof JavaishInt){
+                                        val = new JavaishFloat(((JavaishInt) val).getValue());
+                                    } else if(val instanceof JavaishString){
+                                        val = new JavaishFloat(Float.parseFloat(((JavaishString) val).getValue()));
+                                    } 
+                                } catch (Exception e) {
+                                    // TODO: handle exception
+                                    Error.UnableToParse("Float", lineNumber, val.typeString());
+                                }
+                            }
+                            break;
+                        case INT:
+                            if(!(val instanceof JavaishInt)){
+                                try {
+                                    if(val instanceof JavaishFloat){
+                                       val = new JavaishInt(Math.round(((JavaishFloat) val).getValue()));
+                                    } else if(val instanceof JavaishString){
+                                        val =  new JavaishInt(Integer.parseInt(((JavaishString) val).getValue()));
+                                    } 
+                                } catch (Exception e) {
+                                    Error.UnableToParse("Int", lineNumber, val.typeString());
+                                }
+                            }
+                            break;
+                        case STRING:
+                            if(!(val instanceof JavaishString)){
+                                try {
+                                    if(val instanceof JavaishFloat){
+                                        val = new JavaishString(Float.toString(((JavaishFloat) val).getValue()));
+                                    } else if(val instanceof JavaishInt){
+                                        val = new JavaishString(Integer.toString(((JavaishInt) val).getValue()));
+                                    } 
+                                } catch (Exception e) {
+                                    Error.UnableToParse("String", lineNumber, val.typeString());
+                                }
+                            }
+                            break;
+                        default:
+                            break;
+                        
+                    }
+                    total = performOperation(operation, total, val);
                     break;
                 case DIVIDE:
                     DivideElmt divide = (DivideElmt) elmt;
@@ -172,6 +219,8 @@ public class Interpreter {
                     break;
                 case VARIABLE:
                     VariableElmt variable = (VariableElmt) elmt;
+                    JavaishVal valV = variables.getVariableValue(variable.getName());
+                    total = performOperation(operation, total, valV);
                     break;
             
                 default:
