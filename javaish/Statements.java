@@ -346,5 +346,3 @@ class ElseIfStmt extends Statements {
         return line;
     }
 }
-
-

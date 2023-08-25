@@ -9,6 +9,7 @@ import javaish.Statements.MutationType;
 public class Interpreter {
    int lineNumber = 0;
    boolean hasReturned = false;
+   
     Variables globalVariables;
     enum Operator {
         PLUS, MINUS, DIVIDE, MULTIPLY, EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_EQUAL, GREATER_THAN_EQUAL
@@ -18,8 +19,9 @@ public class Interpreter {
         this.globalVariables = variables;
     }
 
-    public void interpretBlock(List<Statements> statements,  Argument[] args,  Expression[] params, String name, boolean isGlobal){
+    public void interpretFunction(List<Statements> statements,  Argument[] args,  Expression[] params, String name, boolean isGlobal){
         Variables localVariables = new Variables();
+        Result pastResult = new Result(false);
         
         if(args != null && params != null) { 
             if(args.length != params.length){
@@ -40,15 +42,19 @@ public class Interpreter {
             }
         }
 
+        interpretBody(statements, localVariables, isGlobal, pastResult);
+
+        
+        
+    }
+
+    private void interpretBody(List<Statements> statements,Variables localVariables, boolean isGlobal, Result pastResult){
         for (Statements statement : statements) {
             if(hasReturned){
                 return;
             }
             interpretStmt(statement, localVariables, isGlobal);
         }
-
-        
-        
     }
 
     private void interpretStmt(Statements stmt, Variables localVariables, boolean isGlobal){
@@ -446,7 +452,7 @@ public class Interpreter {
             Error.FunctionNotDeclared(name, lineNumber);
             return;
         }
-        interpretBlock(body, args, params, name, false);
+        interpretFunction(body, args, params, name, false);
 
     }
 
@@ -529,4 +535,20 @@ public class Interpreter {
 
 
 
+}
+
+class Result {
+    boolean pastResult;
+
+    public Result(boolean pastResult) {
+        this.pastResult = pastResult;
+    }
+    
+    public boolean getResult(){
+        return pastResult;
+    }
+
+    public void setResult(boolean pastResult){
+        this.pastResult = pastResult;
+    }
 }
