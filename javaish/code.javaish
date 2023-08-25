@@ -9,14 +9,15 @@ divide x by 2.
 
 function test(int val){
     x = val.
-    test2(5.0).
+    let int x = 100.
+    return.
+    y = x.
+   
 }
 
 function test2(float val){
     y = val.
     
-    function int(){
-        test(1).
-    }
+   
 }
-test(100).
+test(10).

@@ -173,18 +173,26 @@ class ForEachStmt extends Statements {
 
 class ReturnStmt extends Statements {
     Expression value;
-    public ReturnStmt(int line,Expression value) {
+    boolean hasReturn; 
+    public ReturnStmt(int line,Expression value, boolean hasReturn) {
         this.line = line;
         this.value = value;
         this.type = StmtType.RETURN;
+        this.hasReturn = hasReturn;
     }
 
     public Expression getValue() {
         return value;
     }
-     public int getLine() {
+
+    public int getLine() {
         return line;
     }
+
+    public boolean hasReturn() {
+        return hasReturn;
+    }
+
 }
 
 class CallStmt extends Statements {

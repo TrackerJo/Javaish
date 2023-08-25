@@ -166,9 +166,14 @@ public class Parser {
                     break;
                 case "return":
                     String returnVal = parseReturn(line);
+                    boolean hasReturn = returnVal != "";
                     Expression returnExpression = new Expression(returnVal, ExpressionReturnType.STRING, lineNumber);
-                    ReturnStmt returnStmt = new ReturnStmt(lineNumber, returnExpression);
+                    ReturnStmt returnStmt = new ReturnStmt(lineNumber, returnExpression, hasReturn);
                     parents.get(parents.size() - 1).addStatement(returnStmt);
+                    break;
+                case "return.":
+                    ReturnStmt returnStmt2 = new ReturnStmt(lineNumber, new Expression("", ExpressionReturnType.STRING, lineNumber), false);
+                    parents.get(parents.size() - 1).addStatement(returnStmt2);
                     break;
                 case "add":
                     String[] addMutation = parseMutationAS(line, "add");

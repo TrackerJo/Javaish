@@ -8,6 +8,7 @@ import javaish.Statements.MutationType;
 
 public class Interpreter {
    int lineNumber = 0;
+   boolean hasReturned = false;
     Variables globalVariables;
     enum Operator {
         PLUS, MINUS, DIVIDE, MULTIPLY, EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_EQUAL, GREATER_THAN_EQUAL
@@ -40,6 +41,9 @@ public class Interpreter {
         }
 
         for (Statements statement : statements) {
+            if(hasReturned){
+                return;
+            }
             interpretStmt(statement, localVariables, isGlobal);
         }
 
@@ -471,7 +475,13 @@ public class Interpreter {
     }
 
     private void evalReturn(ReturnStmt returnStmt){
-
+        boolean hasReturn = returnStmt.hasReturn();
+        
+        if(!hasReturn){
+            
+            hasReturned = true;
+            return;
+        } 
     }
 
     private void evalMutation(MutationStmt mutationStmt, Variables localVariables){
