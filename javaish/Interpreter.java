@@ -1,5 +1,6 @@
 package javaish;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javaish.JavaishVal.JavaishType;
@@ -16,9 +17,33 @@ public class Interpreter {
         this.variables = variables;
     }
 
-    public void interpretBlock(List<Statements> statements){
+    public void interpretBlock(List<Statements> statements,  Argument[] args,  Expression[] params, String name){
+        List<String> tempVars = new ArrayList<String>();
+        if(args != null && params != null) { 
+            if(args.length != params.length){
+                Error.ArgumentLengthMismatch(name,lineNumber,args.length, params.length);
+                return;
+            }
+            
+            for (int i = 0; i < params.length; i++) {
+                Expression param = params[i];
+                JavaishVal val = evalExpression(param);
+                Argument arg = args[i];
+                if(arg.getType() != val.getType()){
+                    Error.ArgumentTypeMismatch(name, lineNumber, arg.getType().toString(), val.typeString());
+                    return;
+                }
+                variables.addVariable(arg.getName(), arg.getType(), val);
+                tempVars.add(arg.getName());
+            }
+        }
+
         for (Statements statement : statements) {
             interpretStmt(statement);
+        }
+
+        for (String string : tempVars) {
+            variables.removeVariable(string);
         }
         
     }
@@ -375,6 +400,25 @@ public class Interpreter {
     }
 
     private void evalCall(CallStmt call){
+        String name = call.getName();
+        Expression[] params = call.getParams();
+        if(params == null){
+            params = new Expression[0];
+        }
+        if(params[0] == null){
+            params = new Expression[0];
+        }
+        if(variables.functionExists(name) == false){
+            Error.FunctionNotDeclared(name, lineNumber);
+            return;
+        }
+        Argument[] args = variables.getFunctionArgs(name);
+        List<Statements> body = variables.getFunctionBody(name);
+        if(args == null){
+            Error.FunctionNotDeclared(name, lineNumber);
+            return;
+        }
+        interpretBlock(body, args, params, name);
 
     }
 

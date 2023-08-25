@@ -29,7 +29,7 @@ public class javaish {
         System.out.println(statements.getBody());
         printStmts(statements.getBody(),0);
         Interpreter interpreter = new Interpreter(variables);
-        interpreter.interpretBlock(statements.getBody());
+        interpreter.interpretBlock(statements.getBody(), null, null, "");
         printVars(variables);
         // Organizer organizer = new Organizer(statements);
         // List<Elements> elements = organizer.organize();

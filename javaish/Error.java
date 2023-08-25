@@ -65,4 +65,14 @@ public class Error {
         System.err.println("Error: Function " + name + " already exists!");
         System.exit(0);
     }
+
+    public static void ArgumentLengthMismatch(String name, int lineNumber, int expected, int got) {
+        System.err.println("Error: Argument length mismatch at line " + lineNumber + ": " + name + ": Expected " + expected + ", got " + got);
+        System.exit(0);
+    }
+
+    public static void ArgumentTypeMismatch(String name, int lineNumber, String expected, String got) {
+        System.err.println("Error: Argument type mismatch at line " + lineNumber + ": " + name + ": Expected " + expected + ", got " + got);
+        System.exit(0);
+    }
 }

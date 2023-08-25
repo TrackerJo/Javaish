@@ -9,6 +9,10 @@ divide x by 2.
 
 function test(int val){
     x = val.
+    test2(5.0).
 }
 
-test(5).
+function test2(float val){
+    y = val.
+}
+test(100).

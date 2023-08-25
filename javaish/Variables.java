@@ -6,6 +6,7 @@ import java.util.Map;
 import javaish.JavaishVal.JavaishType;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 class Variables{
@@ -63,6 +64,51 @@ class Variables{
         }
     }
 
+    public boolean functionExists(String name){
+        return functions.containsKey(name);
+    }
+
+   public void removeVariable(String name){
+    JavaishType t = allVariables.get(name);
+    switch (t) {
+        case INT:
+            Iterator<intVar> intIterator = intVariables.iterator();
+            while (intIterator.hasNext()) {
+                intVar i = intIterator.next();
+                if (i.name.equals(name)) {
+                    intIterator.remove();
+                }
+            }
+            break;
+        case FLOAT:
+            Iterator<floatVar> floatIterator = floatVariables.iterator();
+            while (floatIterator.hasNext()) {
+                floatVar i = floatIterator.next();
+                if (i.name.equals(name)) {
+                    floatIterator.remove();
+                }
+            }
+            break;
+        case BOOLEAN:
+            Iterator<boolVar> boolIterator = boolVariables.iterator();
+            while (boolIterator.hasNext()) {
+                boolVar i = boolIterator.next();
+                if (i.name.equals(name)) {
+                    boolIterator.remove();
+                }
+            }
+            break;
+        case STRING:
+            Iterator<stringVar> stringIterator = stringVariables.iterator();
+            while (stringIterator.hasNext()) {
+                stringVar i = stringIterator.next();
+                if (i.name.equals(name)) {
+                    stringIterator.remove();
+                }
+            }
+            break;
+    }
+}
    public boolean isVariable(String name){
        return allVariables.containsKey(name);
    }
@@ -75,6 +121,14 @@ class Variables{
             functions.put(name, new functionVar(name, body, args));
         }
    }
+
+   public Argument[] getFunctionArgs(String name){
+       return functions.get(name).getArgs();
+   }
+
+    public List<Statements> getFunctionBody(String name){
+         return functions.get(name).getBody();
+    }
 
    public void setVariableValue(String name, JavaishVal value, int lineNumber){
         JavaishType t = allVariables.get(name);
@@ -140,6 +194,7 @@ class Variables{
    }
 
    public JavaishVal getVariableValue(String name){
+         System.out.println(name);
          JavaishType t = allVariables.get(name);
          switch (t) {
               case INT:
