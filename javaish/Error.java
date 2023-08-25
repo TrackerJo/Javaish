@@ -75,4 +75,9 @@ public class Error {
         System.err.println("Error: Argument type mismatch at line " + lineNumber + ": " + name + ": Expected " + expected + ", got " + got);
         System.exit(0);
     }
+
+    public static void FunctionNotGlobal(String name, int lineNumber) {
+        System.err.println("Error: Function " + name + " not global at line " + lineNumber);
+        System.exit(0);
+    }
 }

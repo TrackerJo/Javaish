@@ -8,17 +8,18 @@ import javaish.Statements.MutationType;
 
 public class Interpreter {
    int lineNumber = 0;
-    Variables variables;
+    Variables globalVariables;
     enum Operator {
         PLUS, MINUS, DIVIDE, MULTIPLY, EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_EQUAL, GREATER_THAN_EQUAL
     }
     public Interpreter( Variables variables){
         
-        this.variables = variables;
+        this.globalVariables = variables;
     }
 
-    public void interpretBlock(List<Statements> statements,  Argument[] args,  Expression[] params, String name){
-        List<String> tempVars = new ArrayList<String>();
+    public void interpretBlock(List<Statements> statements,  Argument[] args,  Expression[] params, String name, boolean isGlobal){
+        Variables localVariables = new Variables();
+        
         if(args != null && params != null) { 
             if(args.length != params.length){
                 Error.ArgumentLengthMismatch(name,lineNumber,args.length, params.length);
@@ -27,34 +28,32 @@ public class Interpreter {
             
             for (int i = 0; i < params.length; i++) {
                 Expression param = params[i];
-                JavaishVal val = evalExpression(param);
+                JavaishVal val = evalExpression(param, localVariables);
                 Argument arg = args[i];
                 if(arg.getType() != val.getType()){
                     Error.ArgumentTypeMismatch(name, lineNumber, arg.getType().toString(), val.typeString());
                     return;
                 }
-                variables.addVariable(arg.getName(), arg.getType(), val);
-                tempVars.add(arg.getName());
+                localVariables.addVariable(arg.getName(), arg.getType(), val);
+                
             }
         }
 
         for (Statements statement : statements) {
-            interpretStmt(statement);
+            interpretStmt(statement, localVariables, isGlobal);
         }
 
-        for (String string : tempVars) {
-            variables.removeVariable(string);
-        }
+        
         
     }
 
-    private void interpretStmt(Statements stmt){
+    private void interpretStmt(Statements stmt, Variables localVariables, boolean isGlobal){
         System.out.println("Interpreting Stmt Type: " + stmt.getType());
         lineNumber = stmt.getLine();
         switch (stmt.getType()) {
             case ASSIGNMENT:
                 AssignmentStmt assignment = (AssignmentStmt) stmt;
-                evalAssignment(assignment);
+                evalAssignment(assignment, localVariables);
 
                 
                 break;
@@ -64,7 +63,7 @@ public class Interpreter {
                 break;
             case DECLARATION:
                 DeclarationStmt declaration = (DeclarationStmt) stmt;
-                evalDeclaration(declaration);
+                evalDeclaration(declaration, localVariables, isGlobal);
                 break;
             case ELSE:
                 ElseStmt elseStmt = (ElseStmt) stmt;
@@ -76,7 +75,7 @@ public class Interpreter {
                 break;
             case MUTATION:
                 MutationStmt mutationStmt = (MutationStmt) stmt;
-                evalMutation(mutationStmt);
+                evalMutation(mutationStmt, localVariables);
                 break;
             case RETURN:
                 ReturnStmt returnStmt = (ReturnStmt) stmt;
@@ -84,7 +83,7 @@ public class Interpreter {
                 break;
             case FUNCTION:
                 FunctionStmt function = (FunctionStmt) stmt;
-                evalFunction(function);
+                evalFunction(function, localVariables, isGlobal);
                 break;
             case IF:
                 IfStmt ifStmt = (IfStmt) stmt;
@@ -110,7 +109,7 @@ public class Interpreter {
 
     }
 
-    private JavaishVal evalExpression(Expression expression){
+    private JavaishVal evalExpression(Expression expression, Variables localVariables){
         JavaishVal total = null;
         Operator operation = null;
         
@@ -125,7 +124,7 @@ public class Interpreter {
                     break;
                 case CAST:
                     CastElmt cast = (CastElmt) elmt;
-                    JavaishVal val = evalExpression(cast.element);
+                    JavaishVal val = evalExpression(cast.element, localVariables);
                     switch (cast.castType) {
                         case FLOAT:
                             if(!(val instanceof JavaishFloat)){
@@ -182,7 +181,7 @@ public class Interpreter {
                     break;
                 case EXPRESSION:
                     ExpressionElmt expressionElmt = (ExpressionElmt) elmt;
-                    JavaishVal newVal = evalExpression(expressionElmt.expression);
+                    JavaishVal newVal = evalExpression(expressionElmt.expression, localVariables);
                     total = performOperation(operation, total, newVal);
                     break;
                 case FLOAT:
@@ -245,7 +244,15 @@ public class Interpreter {
                     break;
                 case VARIABLE:
                     VariableElmt variable = (VariableElmt) elmt;
-                    JavaishVal valV = variables.getVariableValue(variable.getName());
+                    JavaishVal valV = null;
+                    if(localVariables.isVariable(variable.getName())){
+                        valV = localVariables.getVariableValue(variable.getName());
+                    } else if(globalVariables.isVariable(variable.getName())){
+                        valV = globalVariables.getVariableValue(variable.getName());
+                    } else {
+                        Error.VariableNotDeclared(variable.getName(), lineNumber);
+                        return null;
+                    }
                     total = performOperation(operation, total, valV);
                     break;
             
@@ -364,20 +371,28 @@ public class Interpreter {
         return result;
     }
 
-    private void evalAssignment(AssignmentStmt assignment){
+    private void evalAssignment(AssignmentStmt assignment, Variables localVariables){
         String name = assignment.getName();
-        JavaishVal value = evalExpression(assignment.getValue());
-        variables.setVariableValue(name, value, lineNumber);
+        JavaishVal value = evalExpression(assignment.getValue(), localVariables);
+        if(localVariables.isVariable(name)){
+            localVariables.setVariableValue(name, value, lineNumber);
+            return;
+        }
+        globalVariables.setVariableValue(name, value, lineNumber);
        
 
     }
 
-    private void evalDeclaration(DeclarationStmt declaration){
+    private void evalDeclaration(DeclarationStmt declaration,Variables localVariables ,boolean isGlobal){
         JavaishType type = declaration.getVarType();
-        JavaishVal value = evalExpression(declaration.getValue());
+        JavaishVal value = evalExpression(declaration.getValue(), localVariables);
         if(type != value.getType()){
             if(type == JavaishType.FLOAT && value.getType() == JavaishType.INT){
-                 variables.addVariable(declaration.getName(), type, new JavaishFloat(((JavaishInt) value).getValue()));
+                if(isGlobal){
+                 globalVariables.addVariable(declaration.getName(), type, new JavaishFloat(((JavaishInt) value).getValue()));
+                } else {
+                    localVariables.addVariable(declaration.getName(), type, new JavaishFloat(((JavaishInt) value).getValue()));
+                }
                 System.out.println("Declaration: Type:" + declaration.getVarType()+ " Name: "+ declaration.getName() + " Value:" + value.getValue());
                 return;
             }
@@ -385,15 +400,24 @@ public class Interpreter {
             Error.TypeMismatch(type.toString(), value.typeString(), lineNumber);
             return;
         }
-        variables.addVariable(declaration.getName(), type, value);
+        if(isGlobal){
+            globalVariables.addVariable(declaration.getName(), type, value);
+        } else {
+            localVariables.addVariable(declaration.getName(), type, value);
+        }
         System.out.println("Declaration: Type:" + declaration.getVarType()+ " Name: "+ declaration.getName() + " Value:" + value.getValue());
     }
 
-    private void evalFunction(FunctionStmt function){
+    private void evalFunction(FunctionStmt function, Variables localVariables, boolean isGlobal){
         String name = function.getName();
         Argument[] args = function.getArgs();
         List<Statements> body = function.getBody();
-        variables.addFunction(name, body, args);
+        if(!isGlobal){
+            Error.FunctionNotGlobal(name, lineNumber);
+            return;
+        }
+        
+        globalVariables.addFunction(name, body, args);
 
 
 
@@ -408,17 +432,17 @@ public class Interpreter {
         if(params[0] == null){
             params = new Expression[0];
         }
-        if(variables.functionExists(name) == false){
+        if(globalVariables.functionExists(name) == false){
             Error.FunctionNotDeclared(name, lineNumber);
             return;
         }
-        Argument[] args = variables.getFunctionArgs(name);
-        List<Statements> body = variables.getFunctionBody(name);
+        Argument[] args = globalVariables.getFunctionArgs(name);
+        List<Statements> body = globalVariables.getFunctionBody(name);
         if(args == null){
             Error.FunctionNotDeclared(name, lineNumber);
             return;
         }
-        interpretBlock(body, args, params, name);
+        interpretBlock(body, args, params, name, false);
 
     }
 
@@ -450,12 +474,12 @@ public class Interpreter {
 
     }
 
-    private void evalMutation(MutationStmt mutationStmt){
+    private void evalMutation(MutationStmt mutationStmt, Variables localVariables){
         MutationType type = mutationStmt.getMutationType();
         String name = mutationStmt.getVarName();
-        JavaishVal value = evalExpression(mutationStmt.getValue());
+        JavaishVal value = evalExpression(mutationStmt.getValue(), localVariables);
 
-        JavaishVal variable = variables.getVariableValue(name);
+        JavaishVal variable = globalVariables.getVariableValue(name);
         if(variable == null){
             Error.VariableNotDeclared(name, lineNumber);
             return;
@@ -468,7 +492,11 @@ public class Interpreter {
         }
 
         JavaishVal newVal = performOperation(mutationTypeToOperator(type), variable, value);
-        variables.setVariableValue(name, newVal, lineNumber);
+        if(localVariables.isVariable(name)){
+            localVariables.setVariableValue(name, newVal, lineNumber);
+            return;
+        }
+        globalVariables.setVariableValue(name, newVal, lineNumber);
 
     }
 

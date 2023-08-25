@@ -14,5 +14,9 @@ function test(int val){
 
 function test2(float val){
     y = val.
+    
+    function int(){
+        test(1).
+    }
 }
 test(100).
