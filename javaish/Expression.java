@@ -62,31 +62,6 @@ public class Expression {
                 if(readingExpression && !readingCast){
                     currentExpressionDepth++;
                     currentElement += c;
-                } else if(currentElement.equals("toString") && !readingCast) {
-                    currentCastDepth++;
-                    readingCast = true;
-                    castType = JavaishType.STRING;
-                    castReturnType = ExpressionReturnType.STRING;
-                    currentElement = "";
-                } else if(currentElement.equals("toFloat") && !readingCast){
-                     currentCastDepth++;
-                    readingCast = true;
-                    castType = JavaishType.FLOAT;
-                    castReturnType = ExpressionReturnType.FLOAT;
-                     currentElement = "";
-                } else if(currentElement.equals("toInt") && !readingCast){
-                     currentCastDepth++;
-                    readingCast = true;
-                    castType = JavaishType.INT;
-                     currentElement = "";
-                    castReturnType = ExpressionReturnType.INT;
-                } else if(currentElement.equals("toBool") && !readingCast){
-                     currentCastDepth++;
-                    readingCast = true;
-                    castType = JavaishType.BOOLEAN;
-                    castReturnType = ExpressionReturnType.BOOL;
-                     currentElement = "";
-                
                 } else if(possibleFunctionName(currentElement) && !readingCast){
                     System.out.println("READING FUNCTION NAME: " + currentElement);
                     readingFunction = true;
@@ -211,7 +186,33 @@ public class Expression {
                 currentElement = "";
                 readingFunctionArgs = false;
                 readingFunction = false;
-                elements.add(new FunctionElmt(currentFunctionName, functionArgs));
+                if(currentFunctionName.equals("toString") ) {
+                 if(functionArgs.size()!=1){
+                        Error.ArgumentLengthMismatch(currentFunctionName, 1, functionArgs.size(), getLine());
+                    }
+                    elements.add(new CastElmt(JavaishType.STRING, new Expression(functionArgs.get(0), ExpressionReturnType.NUMBER, line)));
+               
+                } else if(currentFunctionName.equals("toFloat")){
+                     if(functionArgs.size()!=1){
+                        Error.ArgumentLengthMismatch(currentFunctionName, 1, functionArgs.size(), getLine());
+                    }
+                    elements.add(new CastElmt(JavaishType.FLOAT, new Expression(functionArgs.get(0), ExpressionReturnType.NUMBER, line)));
+               
+                } else if(currentFunctionName.equals("toInt")){
+                    if(functionArgs.size()!=1){
+                        Error.ArgumentLengthMismatch(currentFunctionName, 1, functionArgs.size(), getLine());
+                    }
+                    elements.add(new CastElmt(JavaishType.INT, new Expression(functionArgs.get(0), ExpressionReturnType.NUMBER, line)));
+                } else if(currentFunctionName.equals("toBool")){
+                     if(functionArgs.size()!=1){
+                        Error.ArgumentLengthMismatch(currentFunctionName, 1, functionArgs.size(), getLine());
+                    }
+                    elements.add(new CastElmt(JavaishType.BOOLEAN, new Expression(functionArgs.get(0), ExpressionReturnType.NUMBER, line)));
+                
+                } else {
+                    elements.add(new FunctionElmt(currentFunctionName, functionArgs));
+                }
+                
                 currentFunctionName = "";
                 currentFunctionArgs = "";
 

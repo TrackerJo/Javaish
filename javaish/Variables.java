@@ -18,6 +18,19 @@ class Variables{
     ArrayList<stringVar> stringVariables = new ArrayList<stringVar>();
     Map<String, functionVar> functions = new HashMap<String, functionVar>();
 
+    public Variables(Variables variables){
+        this.allVariables = variables.allVariables;
+        this.intVariables = variables.intVariables;
+        this.floatVariables = variables.floatVariables;
+        this.boolVariables = variables.boolVariables;
+        this.stringVariables = variables.stringVariables;
+        this.functions = variables.functions;
+    }
+
+    public Variables(){
+        
+    }
+
     private JavaishType getType(String type){
         switch (type) {
             case "int":

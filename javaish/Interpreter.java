@@ -21,7 +21,7 @@ public class Interpreter {
 
     public void interpretFunction(List<Statements> statements,  Argument[] args,  Expression[] params, String name, boolean isGlobal){
         Variables localVariables = new Variables();
-        Result pastResult = new Result(false);
+        
         
         if(args != null && params != null) { 
             if(args.length != params.length){
@@ -42,22 +42,26 @@ public class Interpreter {
             }
         }
 
-        interpretBody(statements, localVariables, isGlobal, pastResult);
+        interpretBody(statements, localVariables, isGlobal);
 
         
         
     }
 
-    private void interpretBody(List<Statements> statements,Variables localVariables, boolean isGlobal, Result pastResult){
+    private void interpretBody(List<Statements> statements,Variables funcVariables, boolean isGlobal){
+        Result pastResult = new Result(false);  
+        Variables localVariables = new Variables(funcVariables);
+        
+
         for (Statements statement : statements) {
             if(hasReturned){
                 return;
             }
-            interpretStmt(statement, localVariables, isGlobal);
+            interpretStmt(statement, localVariables, isGlobal, pastResult);
         }
     }
 
-    private void interpretStmt(Statements stmt, Variables localVariables, boolean isGlobal){
+    private void interpretStmt(Statements stmt, Variables localVariables, boolean isGlobal, Result pastResult){
         System.out.println("Interpreting Stmt Type: " + stmt.getType());
         lineNumber = stmt.getLine();
         switch (stmt.getType()) {
@@ -77,11 +81,11 @@ public class Interpreter {
                 break;
             case ELSE:
                 ElseStmt elseStmt = (ElseStmt) stmt;
-                evalElse(elseStmt);
+                evalElse(elseStmt, localVariables, pastResult);
                 break;
             case ELSEIF:
                 ElseIfStmt elseifStmt = (ElseIfStmt) stmt;
-                evalElseIf(elseifStmt);
+                evalElseIf(elseifStmt, localVariables, pastResult);
                 break;
             case MUTATION:
                 MutationStmt mutationStmt = (MutationStmt) stmt;
@@ -97,7 +101,7 @@ public class Interpreter {
                 break;
             case IF:
                 IfStmt ifStmt = (IfStmt) stmt;
-                evalIf(ifStmt);
+                evalIf(ifStmt, localVariables);
                 break;
             case WHILE:
                 WhileStmt whileStmt = (WhileStmt) stmt;
@@ -122,15 +126,33 @@ public class Interpreter {
     private JavaishVal evalExpression(Expression expression, Variables localVariables){
         JavaishVal total = null;
         Operator operation = null;
+        Operator comparison = null;
+        JavaishVal compVal = null;
+        boolean isComp = false;
         
         
         for(Element elmt : expression.getElements()){
             switch (elmt.getType()) {
                 case AND:
                     AndElmt and = (AndElmt) elmt;
+                    JavaishBoolean result = performComparision(comparison, total, compVal);
+                    if(result == null){
+                        return null;
+                    }
+                    if(result.getValue() == false){
+                        return new JavaishBoolean(false);
+                    }
+                    total = null;
+                    operation = null;
+                    comparison = null;
+                    compVal = null;
+                    isComp = false;
                     break;
                 case BOOL:
                     BoolElmt bool = (BoolElmt) elmt;
+                    JavaishBoolean valB = new JavaishBoolean(bool.getValue());
+                    
+
                     break;
                 case CAST:
                     CastElmt cast = (CastElmt) elmt;
@@ -180,7 +202,11 @@ public class Interpreter {
                             break;
                         
                     }
-                    total = performOperation(operation, total, val);
+                    if(isComp){
+                        compVal = performOperation(operation, compVal, val);
+                    } else {
+                        total = performOperation(operation, total, val);
+                    }
                     break;
                 case DIVIDE:
                     DivideElmt divide = (DivideElmt) elmt;
@@ -188,6 +214,8 @@ public class Interpreter {
                     break;
                 case EQUAL:
                     EqualElmt equal = (EqualElmt) elmt;
+                    comparison = Operator.EQUAL;
+                    isComp = true;
                     break;
                 case EXPRESSION:
                     ExpressionElmt expressionElmt = (ExpressionElmt) elmt;
@@ -197,29 +225,41 @@ public class Interpreter {
                 case FLOAT:
                     FloatElmt floatElmt = (FloatElmt) elmt;
                     JavaishFloat valF = new JavaishFloat(floatElmt.getValue());
-                    total = performOperation(operation, total, valF);
+                    if(isComp){
+                        compVal = performOperation(operation, compVal, valF);
+                    } else {
+                        total = performOperation(operation, total, valF);
+                    }
                     
                     break;
                 case GREATER_THAN:
                     GreaterThanElmt greaterThan = (GreaterThanElmt) elmt;
-                    operation = Operator.GREATER_THAN;
+                    comparison = Operator.GREATER_THAN;
+                    isComp = true;
                     break;
                 case GREATER_THAN_EQUAL:
                     GreaterThanEqualElmt greaterThanEqual = (GreaterThanEqualElmt) elmt;
-                    operation = Operator.GREATER_THAN_EQUAL;
+                    comparison = Operator.GREATER_THAN_EQUAL;
+                    isComp = true;
                     break;
                 case INTEGER:
                     IntElmt integer = (IntElmt) elmt;
                     JavaishInt valI = new JavaishInt(integer.getValue());
-                    total = performOperation(operation, total, valI);
+                    if(isComp){
+                        compVal = performOperation(operation, compVal, valI);
+                    } else {
+                        total = performOperation(operation, total, valI);
+                    }
                     break;
                 case LESS_THAN:
                     LessThanElmt lessThan = (LessThanElmt) elmt;
-                    operation = Operator.LESS_THAN;
+                    comparison = Operator.LESS_THAN;
+                    isComp = true;
                     break;
                 case LESS_THAN_EQUAL:
                     LessThanEqualElmt lessThanEqual = (LessThanEqualElmt) elmt;
-                    operation = Operator.LESS_THAN_EQUAL;
+                    comparison = Operator.LESS_THAN_EQUAL;
+                    isComp = true;
                     break;
                 case MINUS:
                     MinusElmt minus = (MinusElmt) elmt;
@@ -234,11 +274,22 @@ public class Interpreter {
                     break;
                 case NOT_EQUAL:
                     NotEqualElmt notEqual = (NotEqualElmt) elmt;
-                    operation = Operator.NOT_EQUAL;
+                    comparison = Operator.NOT_EQUAL;
+                    isComp = true;
                     break;
                 case OR:
                     OrElmt or = (OrElmt) elmt;
-
+                    JavaishBoolean resultO = performComparision(comparison, total, compVal);
+                    if(resultO == null){
+                        return null;
+                    }
+                    if(resultO.getValue() == true){
+                        return new JavaishBoolean(true);
+                    }
+                    total = null;
+                    operation = null;
+                    compVal = null;
+                    isComp = false;
                     break;
                 case PLUS:
                     PlusElmt plus = (PlusElmt) elmt;
@@ -248,8 +299,14 @@ public class Interpreter {
                     StringElmt string = (StringElmt) elmt;
                     
                     JavaishString valS = new JavaishString(string.getValue());
+                    if(isComp){
+                        
+                        compVal = performOperation(operation, compVal, valS);
+                    } else {
+                        total = performOperation(operation, total, valS);
+                    }
 
-                    total = performOperation(operation, total, valS);
+                    
                     
                     break;
                 case VARIABLE:
@@ -263,15 +320,275 @@ public class Interpreter {
                         Error.VariableNotDeclared(variable.getName(), lineNumber);
                         return null;
                     }
-                    total = performOperation(operation, total, valV);
+                    if(isComp){
+                        compVal = performOperation(operation, compVal, valV);
+                    } else {
+                        total = performOperation(operation, total, valV);
+                    }
                     break;
             
                 default:
                     break;
             }
         }
+        if(isComp){
+            return performComparision(comparison, total, compVal);
+        }
 
         return total;
+    }
+
+    private JavaishBoolean performComparision(Operator comparison, JavaishVal left, JavaishVal right){
+        JavaishBoolean result = null;
+        switch (comparison) {
+            case EQUAL:
+                if(left.getType() == JavaishType.STRING && right.getType() == JavaishType.STRING){
+                    if(((JavaishString) left).getValue().equals(((JavaishString) right).getValue())){
+                        result = new JavaishBoolean(true);
+                    } else {
+                        result = new JavaishBoolean(false);
+                    }
+                } else if(left.getType() == JavaishType.STRING || right.getType() == JavaishType.STRING){
+                    Error.TypeMismatch("String", "Number or Bool", lineNumber);
+                    return null;
+                }
+                else if(left.getType() == JavaishType.BOOLEAN && right.getType() == JavaishType.BOOLEAN){
+                    if(((JavaishBoolean) left).getValue() == ((JavaishBoolean) right).getValue()){
+                        result = new JavaishBoolean(true);
+                    } else {
+                        result = new JavaishBoolean(false);
+                    }
+                } else if(left.getType() == JavaishType.BOOLEAN || right.getType() == JavaishType.BOOLEAN){
+                    Error.TypeMismatch("Boolean", "Number or String", lineNumber);
+                    return null;
+                }
+                else if(left.getType() == JavaishType.INT && right.getType() == JavaishType.INT){
+                    if(((JavaishInt) left).getValue() == ((JavaishInt) right).getValue()){
+                        result = new JavaishBoolean(true);
+                    } else {
+                        result = new JavaishBoolean(false);
+                    }
+                } else if(left.getType() == JavaishType.INT && right.getType() == JavaishType.FLOAT){
+                    if((float)(((JavaishInt) left).getValue()) == ((JavaishFloat) right).getValue()){
+                        result = new JavaishBoolean(true);
+                    } else {
+                        result = new JavaishBoolean(false);
+                    }
+                } else if(left.getType() == JavaishType.FLOAT && right.getType() == JavaishType.INT){
+                    if(((JavaishFloat) left).getValue() == (float)(((JavaishInt) right).getValue())){
+                        result = new JavaishBoolean(true);
+                    } else {
+                        result = new JavaishBoolean(false);
+                    }
+                } else {
+                    if(((JavaishFloat) left).getValue() == ((JavaishFloat) right).getValue()){
+                        result = new JavaishBoolean(true);
+                    } else {
+                        result = new JavaishBoolean(false);
+                    }
+                }
+                
+                break;
+            case NOT_EQUAL:
+                if(left.getType() == JavaishType.STRING && right.getType() == JavaishType.STRING){
+                    if(!(((JavaishString) left).getValue().equals(((JavaishString) right).getValue()))){
+                        result = new JavaishBoolean(true);
+                    } else {
+                        result = new JavaishBoolean(false);
+                    }
+                } else if(left.getType() == JavaishType.STRING || right.getType() == JavaishType.STRING){
+                    Error.TypeMismatch("String", "Number or Bool", lineNumber);
+                    return null;
+                }
+                else if(left.getType() == JavaishType.BOOLEAN && right.getType() == JavaishType.BOOLEAN){
+                    if(((JavaishBoolean) left).getValue() != ((JavaishBoolean) right).getValue()){
+                        result = new JavaishBoolean(true);
+                    } else {
+                        result = new JavaishBoolean(false);
+                    }
+                } else if(left.getType() == JavaishType.BOOLEAN || right.getType() == JavaishType.BOOLEAN){
+                    Error.TypeMismatch("Boolean", "Number or String", lineNumber);
+                    return null;
+                }
+                else if(left.getType() == JavaishType.INT && right.getType() == JavaishType.INT){
+                    if(((JavaishInt) left).getValue() != ((JavaishInt) right).getValue()){
+                        result = new JavaishBoolean(true);
+                    } else {
+                        result = new JavaishBoolean(false);
+                    }
+                } else if(left.getType() == JavaishType.INT && right.getType() == JavaishType.FLOAT){
+                    if((float)(((JavaishInt) left).getValue()) != ((JavaishFloat) right).getValue()){
+                        result = new JavaishBoolean(true);
+                    } else {
+                        result = new JavaishBoolean(false);
+                    }
+                } else if(left.getType() == JavaishType.FLOAT && right.getType() == JavaishType.INT){
+                    if(((JavaishFloat) left).getValue() != (float)(((JavaishInt) right).getValue())){
+                        result = new JavaishBoolean(true);
+                    } else {
+                        result = new JavaishBoolean(false);
+                    }
+                } else {
+                    if(((JavaishFloat) left).getValue() != ((JavaishFloat) right).getValue()){
+                        result = new JavaishBoolean(true);
+                    } else {
+                        result = new JavaishBoolean(false);
+                    }
+                }
+                
+                break;
+            case LESS_THAN:
+                if(left.getType() == JavaishType.STRING || right.getType() == JavaishType.STRING){
+                    Error.TypeMismatch("Number", "String", lineNumber);
+                    return null;
+                } 
+                if(left.getType() == JavaishType.BOOLEAN || right.getType() == JavaishType.BOOLEAN){
+                    Error.TypeMismatch("Number", "Boolean", lineNumber);
+                    return null;
+                }
+                //Make both numbers float
+                if(left.getType() == JavaishType.INT && right.getType() == JavaishType.INT){
+                    if(((JavaishInt) left).getValue() < ((JavaishInt) right).getValue()){
+                        result = new JavaishBoolean(true);
+                    } else {
+                        result = new JavaishBoolean(false);
+                    }
+                } else if(left.getType() == JavaishType.INT && right.getType() == JavaishType.FLOAT){
+                    if(((JavaishInt) left).getValue() < ((JavaishFloat) right).getValue()){
+                        result = new JavaishBoolean(true);
+                    } else {
+                        result = new JavaishBoolean(false);
+                    }
+                } else if(left.getType() == JavaishType.FLOAT && right.getType() == JavaishType.INT){
+                    if(((JavaishFloat) left).getValue() < ((JavaishInt) right).getValue()){
+                        result = new JavaishBoolean(true);
+                    } else {
+                        result = new JavaishBoolean(false);
+                    }
+                } else {
+                    if(((JavaishFloat) left).getValue() < ((JavaishFloat) right).getValue()){
+                        result = new JavaishBoolean(true);
+                    } else {
+                        result = new JavaishBoolean(false);
+                    }
+                }
+                break;
+            case GREATER_THAN:
+                if(left.getType() == JavaishType.STRING || right.getType() == JavaishType.STRING){
+                    Error.TypeMismatch("Number", "String", lineNumber);
+                    return null;
+                }
+                if(left.getType() == JavaishType.BOOLEAN || right.getType() == JavaishType.BOOLEAN){
+                    Error.TypeMismatch("Number", "Boolean", lineNumber);
+                    return null;
+                }
+                //Make both numbers float
+                if(left.getType() == JavaishType.INT && right.getType() == JavaishType.INT){
+                    if(((JavaishInt) left).getValue() > ((JavaishInt) right).getValue()){
+                        result = new JavaishBoolean(true);
+                    } else {
+                        result = new JavaishBoolean(false);
+                    }
+                } else if(left.getType() == JavaishType.INT && right.getType() == JavaishType.FLOAT){
+                    if(((JavaishInt) left).getValue() > ((JavaishFloat) right).getValue()){
+                        result = new JavaishBoolean(true);
+                    } else {
+                        result = new JavaishBoolean(false);
+                    }
+                } else if(left.getType() == JavaishType.FLOAT && right.getType() == JavaishType.INT){
+                    if(((JavaishFloat) left).getValue() > ((JavaishInt) right).getValue()){
+                        result = new JavaishBoolean(true);
+                    } else {
+                        result = new JavaishBoolean(false);
+                    }
+                } else {
+                    if(((JavaishFloat) left).getValue() > ((JavaishFloat) right).getValue()){
+                        result = new JavaishBoolean(true);
+                    } else {
+                        result = new JavaishBoolean(false);
+                    }
+                }
+                break;
+
+            case LESS_THAN_EQUAL:
+                if(left.getType() == JavaishType.STRING || right.getType() == JavaishType.STRING){
+                    Error.TypeMismatch("Number", "String", lineNumber);
+                    return null;
+                }
+                if(left.getType() == JavaishType.BOOLEAN || right.getType() == JavaishType.BOOLEAN){
+                    Error.TypeMismatch("Number", "Boolean", lineNumber);
+                    return null;
+                }
+                //Make both numbers float
+                if(left.getType() == JavaishType.INT && right.getType() == JavaishType.INT){
+                    if(((JavaishInt) left).getValue() <= ((JavaishInt) right).getValue()){
+                        result = new JavaishBoolean(true);
+                    } else {
+                        result = new JavaishBoolean(false);
+                    }
+                } else if(left.getType() == JavaishType.INT && right.getType() == JavaishType.FLOAT){
+                    if(((JavaishInt) left).getValue() <= ((JavaishFloat) right).getValue()){
+                        result = new JavaishBoolean(true);
+                    } else {
+                        result = new JavaishBoolean(false);
+                    }
+                } else if(left.getType() == JavaishType.FLOAT && right.getType() == JavaishType.INT){
+                    if(((JavaishFloat) left).getValue() <= ((JavaishInt) right).getValue()){
+                        result = new JavaishBoolean(true);
+                    } else {
+                        result = new JavaishBoolean(false);
+                    }
+                } else {
+                    if(((JavaishFloat) left).getValue() <= ((JavaishFloat) right).getValue()){
+                        result = new JavaishBoolean(true);
+                    } else {
+                        result = new JavaishBoolean(false);
+                    }
+                }
+                break;
+            case GREATER_THAN_EQUAL:
+                if(left.getType() == JavaishType.STRING || right.getType() == JavaishType.STRING){
+                    Error.TypeMismatch("Number", "String", lineNumber);
+                    return null;
+                }
+                if(left.getType() == JavaishType.BOOLEAN || right.getType() == JavaishType.BOOLEAN){
+                    Error.TypeMismatch("Number", "Boolean", lineNumber);
+                    return null;
+                }
+                //Make both numbers float
+                if(left.getType() == JavaishType.INT && right.getType() == JavaishType.INT){
+                    if(((JavaishInt) left).getValue() >= ((JavaishInt) right).getValue()){
+                        result = new JavaishBoolean(true);
+                    } else {
+                        result = new JavaishBoolean(false);
+                    }
+                } else if(left.getType() == JavaishType.INT && right.getType() == JavaishType.FLOAT){
+                    if(((JavaishInt) left).getValue() >= ((JavaishFloat) right).getValue()){
+                        result = new JavaishBoolean(true);
+                    } else {
+                        result = new JavaishBoolean(false);
+                    }
+                } else if(left.getType() == JavaishType.FLOAT && right.getType() == JavaishType.INT){
+                    if(((JavaishFloat) left).getValue() >= ((JavaishInt) right).getValue()){
+                        result = new JavaishBoolean(true);
+                    } else {
+                        result = new JavaishBoolean(false);
+                    }
+                } else {
+                    if(((JavaishFloat) left).getValue() >= ((JavaishFloat) right).getValue()){
+                        result = new JavaishBoolean(true);
+                    } else {
+                        result = new JavaishBoolean(false);
+                    }
+                }
+                break;
+
+        
+            default:
+                break;
+        }
+
+        return result;
     }
 
     private JavaishVal performOperation(Operator operation, JavaishVal total, JavaishVal val2){
@@ -456,15 +773,36 @@ public class Interpreter {
 
     }
 
-    private void evalIf(IfStmt ifStmt){
+    private void evalIf(IfStmt ifStmt, Variables localVariables){
+        Expression condition = ifStmt.getCondition();
+        List<Statements> body = ifStmt.getBody();
+        JavaishBoolean result = (JavaishBoolean) evalExpression(condition, localVariables);
+        if(result.getValue() == true){
+            interpretBody(body, localVariables, false);
+        }
 
     }
 
-    private void evalElse(ElseStmt elseStmt){
+    private void evalElse(ElseStmt elseStmt, Variables localVariables, Result pastResult){
+        List<Statements> body = elseStmt.getBody();
+        if(pastResult.getResult() == true){
+            return;
+        }
+        interpretBody(body, localVariables, false);
 
     }
 
-    private void evalElseIf(ElseIfStmt elseifStmt){
+    private void evalElseIf(ElseIfStmt elseifStmt, Variables localVariables, Result pastResult){
+        Expression condition = elseifStmt.getCondition();
+        List<Statements> body = elseifStmt.getBody();
+        JavaishBoolean result = (JavaishBoolean) evalExpression(condition, localVariables);
+        if(pastResult.getResult() == true){
+            return;
+        }
+        if(result.getValue() == true){
+            pastResult.setResult(true);
+            interpretBody(body, localVariables, false);
+        }
 
     }
 
