@@ -1,5 +1,6 @@
 package javaish;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,6 +8,8 @@ import javax.swing.JOptionPane;
 
 import javaish.JavaishVal.JavaishType;
 import javaish.Statements.MutationType;
+
+
 
 public class Interpreter {
    int lineNumber = 0;
@@ -868,7 +871,8 @@ public class Interpreter {
             return;
         }
         if(result.getValue() == true){
-            pastResult.setResult(true);
+           
+
             interpretBody(body, localVariables, false);
         }
 

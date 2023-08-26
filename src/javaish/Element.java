@@ -1,14 +1,15 @@
 package javaish;
 
+
+
 import java.util.ArrayList;
 import java.util.List;
 
-import javaish.Element.ElementType;
 import javaish.JavaishVal.JavaishType;
-import javaish.Variables.VarType;
+
 
 public class Element {
-    enum ElementType {
+    public enum ElementType {
         PLUS, MINUS, DIVIDE, MULTIPLY, FLOAT, INTEGER, VARIABLE, FUNCTION, EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_EQUAL, GREATER_THAN_EQUAL, STRING, BOOL, AND, OR, NOT, EXPRESSION, CAST, SHOWINPUTBOX
     }
 

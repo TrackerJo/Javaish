@@ -1,10 +1,11 @@
 package javaish;
 
+
+
 import java.util.ArrayList;
 import java.util.List;
 
 import javaish.JavaishVal.JavaishType;
-import javaish.Variables.VarType;
 
 public class Expression {
     enum ExpressionReturnType {
@@ -318,7 +319,7 @@ public class Expression {
             return new PlusElmt();
         } else if(element.equals("subtract") || element.equals("-")){
             return new MinusElmt();
-        } else if(element.equals("multiply") || element.equals("*")){
+        } else if(element.equals("times") || element.equals("*")){
             return new MultiplyElmt();
         } else if(element.equals("divide") || element.equals("/")){
             return new DivideElmt();

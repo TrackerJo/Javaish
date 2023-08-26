@@ -1,5 +1,7 @@
 package javaish;
 
+
+
 public class Error {
     public static void UnexpectedStmt(String stmt, int lineNumber) {
         System.err.println("Error: Unknown statement at line " + lineNumber + ":" + stmt);

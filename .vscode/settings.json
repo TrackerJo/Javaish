@@ -1,8 +1,16 @@
 {
-    "java.project.sourcePaths": ["src"],
+    "java.project.sourcePaths": [
+        "src"
+    ],
     "java.project.outputPath": "bin",
-    "java.project.referencedLibraries": [
-        "lib/**/*.jar",
-        "/Users/nathanielkemmenash/Downloads/turtle.jar"
-    ]
+    "java.project.referencedLibraries": {
+        "include": [
+            "lib/**/*.jar",
+            "/Users/nathanielkemmenash/Downloads/turtle.jar"
+        ],
+        "exclude": [
+            "lib/turtle.jar",
+            "/Users/nathanielkemmenash/Downloads/turtle.jar/"
+        ]
+    }
 }

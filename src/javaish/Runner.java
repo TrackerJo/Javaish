@@ -1,3 +1,4 @@
+
 package javaish;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -7,7 +8,7 @@ import java.util.List;
 
 import javaish.JavaishVal.JavaishType;
 import javaish.Statements.StmtType;
-import javaish.Variables.VarType;
+
 
 public class Runner {
 

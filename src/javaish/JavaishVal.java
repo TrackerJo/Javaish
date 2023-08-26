@@ -1,16 +1,22 @@
 package javaish;
+
+
 public sealed interface JavaishVal {
     public Object getValue();
     public JavaishType getType();
     public String typeString();
-    enum JavaishType {
+    public enum JavaishType {
         INT,
         FLOAT,
         STRING,
-        BOOLEAN
+        BOOLEAN,
+        TURTLE,
+        WORLD
     }
    
 }
+
+
 
 final class JavaishInt implements JavaishVal {
     int value;
@@ -82,3 +88,4 @@ final class JavaishBoolean implements JavaishVal {
         return "boolean";
     }
 }
+
