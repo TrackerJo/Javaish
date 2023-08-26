@@ -1,5 +1,4 @@
 package javaish;
-
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -10,17 +9,9 @@ import javaish.JavaishVal.JavaishType;
 import javaish.Statements.StmtType;
 import javaish.Variables.VarType;
 
-public class javaish {
-   
-     public static void main(String[] args) throws IOException {
-       
-        String path = "javaish/goal.javaish";
-        
-        
-        runFile(path);
-    }
+public class Runner {
 
-    private static void runFile(String path) throws IOException {
+    public static void runFile(String path) throws IOException {
         byte[] bytes = Files.readAllBytes(Paths.get(path));
         String file = new String(bytes, Charset.defaultCharset());
         Variables variables = new Variables();
