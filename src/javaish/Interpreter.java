@@ -124,7 +124,7 @@ public class Interpreter {
                 break;
             case WHILE:
                 WhileStmt whileStmt = (WhileStmt) stmt;
-                evalWhile(whileStmt);
+                evalWhile(whileStmt, localVariables, isGlobal);
                 break;
             case FOREACH:
                 ForEachStmt foreachStmt = (ForEachStmt) stmt;
@@ -884,7 +884,19 @@ public class Interpreter {
 
     }
 
-    private void evalWhile(WhileStmt whileStmt){
+    private void evalWhile(WhileStmt whileStmt, Variables localVariables, boolean isGlobal){
+        Expression condition = whileStmt.getCondition();
+        JavaishVal result = evalExpression(condition, localVariables, isGlobal);
+        if(result == null){
+            return;
+        }
+        while(((JavaishBoolean) result).getValue() == true){
+            interpretBody(whileStmt.getBody(), localVariables, false);
+            result = evalExpression(condition, localVariables, isGlobal);
+            if(result == null){
+                return;
+            }
+        }
 
     }
 

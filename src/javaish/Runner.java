@@ -155,6 +155,17 @@ public class Runner {
                     ShowMsgBoxStmt showMsgBoxStmt = (ShowMsgBoxStmt) statement;
                     System.out.println("ShowMsgBox: " + showMsgBoxStmt.getValue().toString());
                     break;
+                case PRINT:
+                    PrintStmt printStmt = (PrintStmt) statement;
+                    System.out.println("Print: " + printStmt.getValue().toString());
+                    break;
+                case WHILE:
+                    WhileStmt whileStmt = (WhileStmt) statement;
+                    System.out.println("While: " + whileStmt.getCondition());
+                    if(whileStmt.getBody() != null){
+                        printStmts(whileStmt.getBody(), indent + 1);
+                    }
+                    break;
                 default:
                     break;
             }
