@@ -16,6 +16,7 @@ public class Expression {
     
     }
     private int line;
+    private boolean goal;
     private ExpressionReturnType returnType;
     private Element[] elements;
     public Expression(Element[] elements, ExpressionReturnType returnType, int line) {
@@ -37,7 +38,10 @@ public class Expression {
     }
 
     private Element[] parseExpression(String expression, int column) {
-        System.out.println("PARSING EXPRESSION: "+expression);
+        if(goal){
+            System.out.println("EXPRESSION: " + expression);
+        }
+        int iter = 0;
         //TODO: Parse Expression
         int i = 0;
         boolean readingString = false;
@@ -55,15 +59,19 @@ public class Expression {
         String currentFunctionArgs = "";
         int currentExpressionDepth = 0;
         int currentCastDepth = 0;
+        int currentFunctionDepth = 0;
         List<Expression> functionArgs = new ArrayList<Expression>();
         while(i<expression.length()){
             char c = expression.charAt(i);
+          
+           
             if(c=='(' && !readingFunction && !readingString){
                 if(readingExpression && !readingCast){
                     currentExpressionDepth++;
                     currentElement += c;
                 } else if(possibleFunctionName(currentElement) && !readingCast){
-                    System.out.println("READING FUNCTION NAME: " + currentElement);
+                    //System.out .println("READING FUNCTION NAME: " + currentElement);
+                    currentFunctionDepth++;
                     readingFunction = true;
                     currentFunctionName = currentElement;
                     currentElement = "";
@@ -83,6 +91,7 @@ public class Expression {
                 if(readingExpression){
                     currentExpressionDepth--;
                     if(currentExpressionDepth==0){
+                        
                         readingExpression = false;
                         elements.add(new ExpressionElmt(new Expression(parseExpression(currentElement, column + i), ExpressionReturnType.NUMBER, line)));
                         currentElement = "";
@@ -103,6 +112,8 @@ public class Expression {
                 } else {
                     currentElement += c;
                 }
+               
+            
             } else if(c=='"' && !readingFunction && !readingExpression && !readingCast){
                 if(readingString){
                     readingString = false;
@@ -114,7 +125,7 @@ public class Expression {
                 }else{
                     readingString = true;
                 }
-            } else if (c== '"' && readingFunction){
+            } else if (c== '"' && readingFunction ){
                 if(readingString){
                     readingString = false;
                     currentElement += c;
@@ -125,11 +136,11 @@ public class Expression {
                 }
             }
             else if(c==' '){
-                if(readingString || readingExpression || readingCast){
+                if(readingString || readingExpression || readingCast || readingFunctionArgs){
                     currentElement += c;
                 } 
                 else if(currentElement.equals("call") && !readingFunction){
-                    System.out.println("READING FUNCTION");
+                    //System.out .println("READING FUNCTION");
                     readingFunction = true;
                     currentElement = "";
                     readingFunctionName = true;
@@ -163,60 +174,89 @@ public class Expression {
                 
                 else{
                     if(currentElement.length()>0 && !currentElement.equals("not") && !readingFunction){
-                        System.out.println("PARSING ELEMENT: "+currentElement);
+                        //System.out .println("PARSING ELEMENT: "+currentElement);
                         elements.add(parseElement(currentElement, column + i));
                         currentElement = "";
                         lastReadString = false;
                     }
                 }
-            } else if(readingFunction && readingFunctionName && c == '('){
-                System.out.println("PARSING FUNCTION NAME: "+currentElement);
-                readingFunctionName = false;
-                readingFunctionArgs = true;
-                currentFunctionName = currentElement;
-                currentElement = "";
-            } 
-            else if(readingFunction && readingFunctionArgs && c == ',' && !readingString){
-                System.out.println("PARSING FUNCTION ARG: "+currentElement);
-                functionArgs.add(new Expression(parseExpression(currentElement, column + i), ExpressionReturnType.NUMBER, line));
-                currentElement = "";
-            } else if(readingFunction && readingFunctionArgs && c == ')' && !readingString){
-                System.out.println("PARSING FUNCTION ARG: "+currentElement);
-                functionArgs.add(new Expression(parseExpression(currentElement, column + i), ExpressionReturnType.NUMBER, line));
-                currentElement = "";
-                readingFunctionArgs = false;
-                readingFunction = false;
-                if(currentFunctionName.equals("toString") ) {
-                 if(functionArgs.size()!=1){
-                        Error.ArgumentLengthMismatch(currentFunctionName, 1, functionArgs.size(), getLine());
-                    }
-                    elements.add(new CastElmt(JavaishType.STRING, functionArgs.get(0)));
-               
-                } else if(currentFunctionName.equals("toFloat")){
-                     if(functionArgs.size()!=1){
-                        Error.ArgumentLengthMismatch(currentFunctionName, 1, functionArgs.size(), getLine());
-                    }
-                    elements.add(new CastElmt(JavaishType.FLOAT, functionArgs.get(0)));
-               
-                } else if(currentFunctionName.equals("toInt")){
-                    if(functionArgs.size()!=1){
-                        Error.ArgumentLengthMismatch(currentFunctionName, 1, functionArgs.size(), getLine());
-                    }
-                    elements.add(new CastElmt(JavaishType.INT, functionArgs.get(0)));
-                } else if(currentFunctionName.equals("toBool")){
-                     if(functionArgs.size()!=1){
-                        Error.ArgumentLengthMismatch(currentFunctionName, 1, functionArgs.size(), getLine());
-                    }
-                    elements.add(new CastElmt(JavaishType.BOOLEAN, functionArgs.get(0)));
+            }
+            // else if(readingFunction && readingFunctionName && c == '('){
                 
-                } else {
-                    Expression[] functionArgsArray = functionArgs.toArray(new Expression[functionArgs.size()]);
-                    elements.add(new FunctionElmt(currentFunctionName, functionArgsArray));
-                }
-                
-                currentFunctionName = "";
-                currentFunctionArgs = "";
+            //     //System.out .println("PARSING FUNCTION NAME: "+currentElement);
+            //     readingFunctionName = false;
+            //     readingFunctionArgs = true;
+            //     currentFunctionName = currentElement;
+            //     currentElement = "";
+            // } 
 
+            else if(readingFunction && readingFunctionArgs && c == ',' && !readingString){
+                //System.out .println("PARSING FUNCTION ARG: "+currentElement);
+                functionArgs.add(new Expression(parseExpression(currentElement, column + i), ExpressionReturnType.NUMBER, line));
+                currentElement = "";
+            } else if(readingFunction && c == ')' && !readingString){
+
+                currentFunctionDepth--;
+                if(currentFunctionDepth == 0){
+                    iter++;
+                    if(currentFunctionName.equals("showInputDialog")){
+                        goal = true;
+                    }
+                    System.out.println("ORIGINAL EXPR: "+expression);
+                    System.out.println(iter + " PARSING("+ currentFunctionName + ")FUNCTION ARG: "+currentElement);
+                    functionArgs.add(new Expression(parseExpression(currentElement, column + i), ExpressionReturnType.NUMBER, line));
+
+                    currentElement = "";
+                    readingFunctionArgs = false;
+                    readingFunction = false;
+                    if(currentFunctionName.equals("toString") ) {
+                        if(functionArgs.size()!=1){
+                            Error.ArgumentLengthMismatch(currentFunctionName,  getLine(), 1,functionArgs.size());
+                        }
+                        elements.add(new CastElmt(JavaishType.STRING, functionArgs.get(0)));
+                        System.out .println("CAST TO STRING: " + functionArgs.get(0).toString());
+                    
+                    } else if(currentFunctionName.equals("toFloat")){
+                            if(functionArgs.size()!=1){
+                            Error.ArgumentLengthMismatch(currentFunctionName, getLine(),1, functionArgs.size() );
+                        }
+                        elements.add(new CastElmt(JavaishType.FLOAT, functionArgs.get(0)));
+                    
+                    } else if(currentFunctionName.equals("toInt")){
+                        if(functionArgs.size()!=1){
+                            Error.ArgumentLengthMismatch(currentFunctionName,  getLine(),1, functionArgs.size());
+                        }
+                        elements.add(new CastElmt(JavaishType.INT, functionArgs.get(0)));
+                    } else if(currentFunctionName.equals("toBool")){
+                            if(functionArgs.size()!=1){
+                            Error.ArgumentLengthMismatch(currentFunctionName, getLine(), 1, functionArgs.size() );
+                        }
+                        elements.add(new CastElmt(JavaishType.BOOLEAN, functionArgs.get(0)));
+                    
+                    } else if(currentFunctionName.equals("showInputDialog")){
+                            if(functionArgs.size()!=1){
+                                Error.ArgumentLengthMismatch("showInputDialog", getLine(), 1, functionArgs.size()); 
+                            }
+                            //System.out .println("SHOW INPUT DIALOG ARG: " + functionArgs.get(0).toString());
+                            
+                            elements.add(new ShowInputBoxElmt(functionArgs.get(0)));
+                        }
+                    else {
+                        Expression[] functionArgsArray = functionArgs.toArray(new Expression[functionArgs.size()]);
+                        elements.add(new FunctionElmt(currentFunctionName, functionArgsArray));
+                    }
+                    
+                    currentFunctionName = "";
+                    currentFunctionArgs = "";
+                    functionArgs = new ArrayList<Expression>();
+
+
+                } else {
+                    currentElement += c;
+                }
+            } else if(c=='(' && readingFunction && !readingString){
+                currentFunctionDepth++;
+                currentElement += c;
             }
             
             else {

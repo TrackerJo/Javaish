@@ -3,12 +3,13 @@ package javaish;
 import java.util.ArrayList;
 import java.util.List;
 
+import javaish.Element.ElementType;
 import javaish.JavaishVal.JavaishType;
 import javaish.Variables.VarType;
 
 public class Element {
     enum ElementType {
-        PLUS, MINUS, DIVIDE, MULTIPLY, FLOAT, INTEGER, VARIABLE, FUNCTION, EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_EQUAL, GREATER_THAN_EQUAL, STRING, BOOL, AND, OR, NOT, EXPRESSION, CAST
+        PLUS, MINUS, DIVIDE, MULTIPLY, FLOAT, INTEGER, VARIABLE, FUNCTION, EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_EQUAL, GREATER_THAN_EQUAL, STRING, BOOL, AND, OR, NOT, EXPRESSION, CAST, SHOWINPUTBOX
     }
 
     ElementType type;
@@ -32,6 +33,9 @@ public class Element {
         } else if(type == ElementType.CAST){
             CastElmt cast = (CastElmt) this;
             return "CAST(" + cast.castType.toString() + ", " + cast.element.toString() + ")";
+        } else if(type == ElementType.SHOWINPUTBOX){
+            ShowInputBoxElmt showInputBox = (ShowInputBoxElmt) this;
+            return "SHOWINPUTBOX(" + showInputBox.value.toString() + ")";
         }
          
         return type.toString();
@@ -331,5 +335,18 @@ class CastElmt extends Element {
     }
 }
 
+class ShowInputBoxElmt extends Element {
+    Expression value;
+    public ShowInputBoxElmt(Expression value) {
+
+        this.value = value;
+        this.type = ElementType.SHOWINPUTBOX;
+    }
+
+    public Expression getValue() {
+        return value;
+    }
+
+}
 
 

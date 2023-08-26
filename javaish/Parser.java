@@ -153,7 +153,7 @@ public class Parser {
                         parents.add(forStmt);
                             
                     } else {
-                        System.out.println("Error: Invalid for loop declaration at line " + lineNumber + ":" + line);
+                        //System.out .println("Error: Invalid for loop declaration at line " + lineNumber + ":" + line);
                         System.exit(0);
                     }
                       
@@ -211,7 +211,10 @@ public class Parser {
                     String[] functionDeclaration = parseFunction(line);
                     String functionName = functionDeclaration[0];
                     String[] functionArgs = functionDeclaration[1].split(",");
-                    Argument[] arguments = new Argument[functionArgs.length];
+                    if(functionArgs.length == 1 && functionArgs[0].equals("")){
+                        functionArgs = new String[0];
+                    }
+                    List<Argument> arguments = new ArrayList<>();
                     
                     for(int i = 0; i < functionArgs.length; i++){
                         if(functionArgs[i].isEmpty()){
@@ -224,10 +227,12 @@ public class Parser {
                         }
                         String argName = arg[1];
                         JavaishType argType = getType(arg[0]);
-                        arguments[i] = new Argument(argType, argName);
+                        arguments.add(new Argument(argType, argName));
                     }
+
+                    Argument[] argumentsArr = arguments.toArray(new Argument[arguments.size()]);
                     
-                    FunctionStmt functionStmt = new FunctionStmt(lineNumber, functionName, arguments);
+                    FunctionStmt functionStmt = new FunctionStmt(lineNumber, functionName, argumentsArr);
                     parents.add(functionStmt);
                     break;
                    
@@ -242,8 +247,9 @@ public class Parser {
                         
                     } else if(possibleFunctionName(words[0])){
                     String[] functionCall = parseFunctionCall(line);
-                    //System.out.println("FunctionCall: " + functionCall[0] + " " + functionCall[1]);
+                    ////System.out .println("FunctionCall: " + functionCall[0] + " " + functionCall[1]);
                     String functionCallName = functionCall[0];
+                    //System.out .println("FunctionCallName: " + functionCallName);
                     String[] functionCallArgs = functionCall[1].split(",");
                     Expression[] functionArgExpressions = new Expression[functionCallArgs.length];
                     for(int i = 0; i < functionCallArgs.length; i++){
@@ -257,7 +263,8 @@ public class Parser {
                         functionArgExpressions[i] = new Expression(arg, argType, lineNumber);
                     }
                     if(functionCallName.equals("print")){
-                        //System.out.println("FunctionCall: " + functionCall[0] + " " + functionCall[1]);
+                        ////System.out .println("ADDING PRINT STMt");
+                        ////System.out .println("FunctionCall: " + functionCall[0] + " " + functionCall[1]);
                         if(functionArgExpressions.length != 1){
                            Error.ArgumentLengthMismatch("print", lineNumber, 1, functionArgExpressions.length );
                         }
@@ -277,7 +284,7 @@ public class Parser {
                         ShowMsgBoxStmt showMsgBoxStmt = new ShowMsgBoxStmt(lineNumber, functionArgExpressions[0]);
                         parents.get(parents.size() - 1).addStatement(showMsgBoxStmt);
                         break;
-                    }
+                    } 
                     CallStmt functionCallStmt = new CallStmt(lineNumber, functionCallName, functionArgExpressions);
                     parents.get(parents.size() - 1).addStatement(functionCallStmt);
                     }
@@ -303,7 +310,7 @@ public class Parser {
        //Check if contains parenthesis
          if(name.contains("(")){
             String[] splitName = name.split("\\(");
-            System.out.println("SplitName: " + splitName[0]);
+            //System.out .println("SplitName: " + splitName[0]);
             String functionName = splitName[0];
             if(variableNames.contains(functionName) || functionName.contains(" ") || functionName.length() == 0){
                 return false;
@@ -506,6 +513,7 @@ public class Parser {
             } 
             if(c == '"'){
                 readingString = !readingString;
+                rString += c;
             } else
             if(c == ' ' && !readingString){
                 if(readingName){
@@ -546,6 +554,8 @@ public class Parser {
         String args = "";
         String argName = "";
 
+        int functionDepth = 0;
+
         while(i < line.length()){
             char c = line.charAt(i);
             if(c == '"'){
@@ -563,12 +573,17 @@ public class Parser {
                     rString += c;
                 }
             } else if(readingName && c == '('){
+                    functionDepth++;
                     functionName = rString;
                     readingName = false;
                     readingArgs = true;
                     readingArgName = true;
                     rString = "";
-            } 
+            } else if(c == '(' && !readingString){
+                functionDepth++;
+                rString += c;
+                
+            }
             else if(c == ','){
                 argName = rString;
                 args += argName + ",";
@@ -578,11 +593,16 @@ public class Parser {
                 readingArgName = true;
                 rString = "";
             } else if(c == ')'){
+                functionDepth--;
+                if(functionDepth == 0){
                 argName = rString;
                 args += argName;
                
                 readingArgName = false;
                 rString = "";
+                } else {
+                    rString += c;
+                }
             } 
             else {
                 if((c != ' ' || c != '(' || c != ')') && !readingString){
@@ -635,7 +655,7 @@ public class Parser {
                     readingArgName = true;
                     rString = "";
                 } else if(readingArgName && rString.contains(",")){
-                    //System.out.println("ArgName: " + rString);
+                    ////System.out .println("ArgName: " + rString);
                     argName = rString;
                     args += argType + ":" + argName + ",";
                     argName = "";
@@ -654,7 +674,7 @@ public class Parser {
                 argName = rString;
                 if(!argName.equals("")){
                     args += argType + ":" + argName;
-                    System.out.println("ArgName: " + rString);
+                    //System.out .println("ArgName: " + rString);
                 }
                
                 readingArgType = false;

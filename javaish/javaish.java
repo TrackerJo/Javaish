@@ -14,7 +14,7 @@ public class javaish {
    
      public static void main(String[] args) throws IOException {
        
-        String path = "javaish/code.javaish";
+        String path = "javaish/goal.javaish";
         
         
         runFile(path);
@@ -129,7 +129,7 @@ public class javaish {
                     break;
                 case FUNCTION:
                     FunctionStmt functionStmt = (FunctionStmt) statement;
-                    System.out.println("Function: " + functionStmt.getName() + " " + getArgsString(functionStmt.getArgs()));
+                    System.out.println("Function: " + functionStmt.getName() + " " + getArgsString(functionStmt.getArgs()) + "ARG Length: " + functionStmt.getArgs().length);
                     
                     if(functionStmt.getBody() != null){
                         printStmts(functionStmt.getBody(), indent + 1);
@@ -160,6 +160,10 @@ public class javaish {
                     if(forwhenStmt.getBody() != null){
                         printStmts(forwhenStmt.getBody(), indent + 1);
                     }
+                case SHOWMSGBOX:
+                    ShowMsgBoxStmt showMsgBoxStmt = (ShowMsgBoxStmt) statement;
+                    System.out.println("ShowMsgBox: " + showMsgBoxStmt.getValue().toString());
+                    break;
                 default:
                     break;
             }

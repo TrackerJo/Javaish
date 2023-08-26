@@ -4,42 +4,43 @@ function main(){
 }
 
 function eventName(){
-    let String eventName equal showInputDialog("Enter the name of the event").
+    let String eventName = showInputDialog("Enter the name of the event").
     getAmounts(eventName).
 }
 
 function getAmounts(String eventName){
-    let int numTickets equal toInt(showInputDialog("How many tickets do you want to the " + eventName + "?")).
-    let String seatingType equal showInputDialog("What type of seating do you want for the " + eventName + "? (premium/general)").
-    let int valOfVoucher equal toInt(showInputDialog("How much do you want on a food/merchandise voucher (whole number) to the "+ eventName +"?")).
+    let String ticketsText = "How many tickets do you want to the " + eventName + "?".
+    let int numTickets = toInt(showInputDialog("How many tickets do you want to the " + eventName + "?")).
+    let String seatingText = "What type of seating do you want for the " + eventName + "? (premium/general)".
+    let String seatingType = showInputDialog(seatingText).
+    let String valText = "How much do you want on a food/merchandise voucher (whole number) to the " + eventName + "?".
+    let int valOfVoucher = toInt(showInputDialog(valText)).
 
-    let int total equal getTotal(numTickets, seatingType, valOfVoucher).
+    let int total = getTotal(numTickets, seatingType, valOfVoucher).
     displayTotal(numTickets, valOfVoucher, total, eventName).
-
-    function test(){
-        return "hi".
-    }
 }
 
 function getTotal(int numTickets, String seatingType, int valOfVoucher){
-    let int total equal 0.
-    let int PREMIUM equal 60.
-    let int GENERAL equal 25.
+    let int total = 0.
+    let int PREMIUM = 60.
+    let int GENERAL = 25.
 
-    if seatingType equals ("premium" + " dog") {
-        total equals numTickets * PREMIUM.
-    } else if seatingType equals "general" {
-        total equals numTickets * GENERAL.
+    if seatingType == "premium" {
+        total = numTickets * PREMIUM.
+    } else if seatingType == "general" {
+        total = numTickets * GENERAL.
     } else {
         showMessageDialog("Seating type entered is not available").
-        total equals numTickets * GENERAL.
+        total = numTickets * GENERAL.
     }
-
+    print(total).
     return total.
 }
 
 function displayTotal(int numTickets, int valOfVoucher, int total, String eventName){
-     showMessageDialog("The price for " + numTickets + " tickets and a $" + valOfVoucher + " merchandise voucher to the " + eventName + " is $" + total).
+    print(toString(total)).
+    showMessageDialog("The price for " + toString(numTickets) + " tickets and a $" + toString(valOfVoucher) + " merchandise voucher to the " + eventName + " is $" + toString(total)).
 }
 
- main().
+main().
+

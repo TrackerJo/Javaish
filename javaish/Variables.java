@@ -42,7 +42,7 @@ class Variables{
             case "String":
                 return JavaishType.STRING;
             default:
-                System.out.println("Invalid type");
+                //System.out .println("Invalid type");
                 System.exit(0);
                 return null;
         }
@@ -207,7 +207,7 @@ class Variables{
    }
 
    public JavaishVal getVariableValue(String name){
-         System.out.println(name);
+         //System.out .println(name);
          JavaishType t = allVariables.get(name);
          switch (t) {
               case INT:

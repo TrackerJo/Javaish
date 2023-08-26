@@ -7,8 +7,7 @@ multiply x by 1.
 add 1 to y.
 subtract 10 from x.
 divide x by 2.
-print("HELLO WORLD!").
-showMessageDialog("HELLO WORLD!").
+
 
 function test(int val){
     x = val.
@@ -23,5 +22,4 @@ function test2(float val){
     
    
 }
-
-z = test(500).
+test(500).
