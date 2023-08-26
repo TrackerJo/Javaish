@@ -242,6 +242,7 @@ public class Parser {
                         
                     } else if(possibleFunctionName(words[0])){
                     String[] functionCall = parseFunctionCall(line);
+                    //System.out.println("FunctionCall: " + functionCall[0] + " " + functionCall[1]);
                     String functionCallName = functionCall[0];
                     String[] functionCallArgs = functionCall[1].split(",");
                     Expression[] functionArgExpressions = new Expression[functionCallArgs.length];
@@ -254,6 +255,28 @@ public class Parser {
                         ExpressionReturnType argType = ExpressionReturnType.STRING;
                         
                         functionArgExpressions[i] = new Expression(arg, argType, lineNumber);
+                    }
+                    if(functionCallName.equals("print")){
+                        //System.out.println("FunctionCall: " + functionCall[0] + " " + functionCall[1]);
+                        if(functionArgExpressions.length != 1){
+                           Error.ArgumentLengthMismatch("print", lineNumber, 1, functionArgExpressions.length );
+                        }
+                        if(functionCall[1].equals("")){
+                            Error.ArgumentLengthMismatch("print", lineNumber, 1, 0 );
+                        }
+                        PrintStmt printStmt = new PrintStmt(lineNumber, functionArgExpressions[0]);
+                        parents.get(parents.size() - 1).addStatement(printStmt);
+                        break;
+                    } else if(functionCallName.equals("showMessageDialog")){
+                        if(functionArgExpressions.length != 1){
+                           Error.ArgumentLengthMismatch("showMessageDialog", lineNumber, 1, functionArgExpressions.length );
+                        }
+                        if(functionCall[1].equals("")){
+                            Error.ArgumentLengthMismatch("showMessageDialog", lineNumber, 1, 0 );
+                        }
+                        ShowMsgBoxStmt showMsgBoxStmt = new ShowMsgBoxStmt(lineNumber, functionArgExpressions[0]);
+                        parents.get(parents.size() - 1).addStatement(showMsgBoxStmt);
+                        break;
                     }
                     CallStmt functionCallStmt = new CallStmt(lineNumber, functionCallName, functionArgExpressions);
                     parents.get(parents.size() - 1).addStatement(functionCallStmt);
@@ -273,6 +296,8 @@ public class Parser {
 
         return parents.get(0);
     }
+
+   
 
     private boolean possibleFunctionName(String name){
        //Check if contains parenthesis

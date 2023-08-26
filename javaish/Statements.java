@@ -8,7 +8,7 @@ import javaish.Variables.VarType;
 
 public class Statements {
     enum StmtType {
-        FUNCTION, IF, WHILE, FOREACH, RETURN, CALL, ASSIGNMENT, DECLARATION, VARIABLE, MUTATION, END, ELSE, CLASS, ELSEIF, FORWHEN, PRINT
+        FUNCTION, IF, WHILE, FOREACH, RETURN, CALL, ASSIGNMENT, DECLARATION, VARIABLE, MUTATION, END, ELSE, CLASS, ELSEIF, FORWHEN, PRINT, SHOWMSGBOX
     }
 
     enum MutationType {
@@ -340,6 +340,40 @@ class ElseIfStmt extends Statements {
 
     public Expression getCondition() {
         return condition;
+    }
+
+     public int getLine() {
+        return line;
+    }
+}
+
+class PrintStmt extends Statements {
+    Expression value;
+    public PrintStmt(int line,Expression value) {
+        this.line = line;
+        this.value = value;
+        this.type = StmtType.PRINT;
+    }
+
+    public Expression getValue() {
+        return value;
+    }
+
+     public int getLine() {
+        return line;
+    }
+}
+
+class ShowMsgBoxStmt extends Statements {
+    Expression value;
+    public ShowMsgBoxStmt(int line,Expression value) {
+        this.line = line;
+        this.value = value;
+        this.type = StmtType.SHOWMSGBOX;
+    }
+
+    public Expression getValue() {
+        return value;
     }
 
      public int getLine() {

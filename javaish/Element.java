@@ -163,22 +163,26 @@ class VariableElmt extends Element {
 
 class FunctionElmt extends Element {
     public String name;
-    public List<Element[]> args;
+    public Expression[] params;
 
-    public FunctionElmt(String name, List<Element[]> args) {
+    public FunctionElmt(String name, Expression[] params) {
         type = ElementType.FUNCTION;
         this.name = name;
-        this.args = args;
+        this.params = params;
+    }
+
+    public String getName(){
+        return name;
+    }
+
+    public Expression[] getParams(){
+        return params;
     }
 
     public String toString(){
         String str = name + "(";
-        for (Element[] argA : args) {
-            String argStr = "";
-            for (Element arg : argA){
-                argStr += arg.toString() + " ";
-            }
-            str += argStr + ", ";
+        for (Expression expression : params) {
+            str += expression.toString() + ", ";
         }
         str = str.substring(0, str.length() - 2);
         str += ")";

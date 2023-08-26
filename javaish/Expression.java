@@ -55,7 +55,7 @@ public class Expression {
         String currentFunctionArgs = "";
         int currentExpressionDepth = 0;
         int currentCastDepth = 0;
-        List<Element[]> functionArgs = new ArrayList<Element[]>();
+        List<Expression> functionArgs = new ArrayList<Expression>();
         while(i<expression.length()){
             char c = expression.charAt(i);
             if(c=='(' && !readingFunction && !readingString){
@@ -178,11 +178,11 @@ public class Expression {
             } 
             else if(readingFunction && readingFunctionArgs && c == ',' && !readingString){
                 System.out.println("PARSING FUNCTION ARG: "+currentElement);
-                functionArgs.add(parseExpression(currentElement, column + i));
+                functionArgs.add(new Expression(parseExpression(currentElement, column + i), ExpressionReturnType.NUMBER, line));
                 currentElement = "";
             } else if(readingFunction && readingFunctionArgs && c == ')' && !readingString){
                 System.out.println("PARSING FUNCTION ARG: "+currentElement);
-                functionArgs.add(parseExpression(currentElement, column + i));
+                functionArgs.add(new Expression(parseExpression(currentElement, column + i), ExpressionReturnType.NUMBER, line));
                 currentElement = "";
                 readingFunctionArgs = false;
                 readingFunction = false;
@@ -190,27 +190,28 @@ public class Expression {
                  if(functionArgs.size()!=1){
                         Error.ArgumentLengthMismatch(currentFunctionName, 1, functionArgs.size(), getLine());
                     }
-                    elements.add(new CastElmt(JavaishType.STRING, new Expression(functionArgs.get(0), ExpressionReturnType.NUMBER, line)));
+                    elements.add(new CastElmt(JavaishType.STRING, functionArgs.get(0)));
                
                 } else if(currentFunctionName.equals("toFloat")){
                      if(functionArgs.size()!=1){
                         Error.ArgumentLengthMismatch(currentFunctionName, 1, functionArgs.size(), getLine());
                     }
-                    elements.add(new CastElmt(JavaishType.FLOAT, new Expression(functionArgs.get(0), ExpressionReturnType.NUMBER, line)));
+                    elements.add(new CastElmt(JavaishType.FLOAT, functionArgs.get(0)));
                
                 } else if(currentFunctionName.equals("toInt")){
                     if(functionArgs.size()!=1){
                         Error.ArgumentLengthMismatch(currentFunctionName, 1, functionArgs.size(), getLine());
                     }
-                    elements.add(new CastElmt(JavaishType.INT, new Expression(functionArgs.get(0), ExpressionReturnType.NUMBER, line)));
+                    elements.add(new CastElmt(JavaishType.INT, functionArgs.get(0)));
                 } else if(currentFunctionName.equals("toBool")){
                      if(functionArgs.size()!=1){
                         Error.ArgumentLengthMismatch(currentFunctionName, 1, functionArgs.size(), getLine());
                     }
-                    elements.add(new CastElmt(JavaishType.BOOLEAN, new Expression(functionArgs.get(0), ExpressionReturnType.NUMBER, line)));
+                    elements.add(new CastElmt(JavaishType.BOOLEAN, functionArgs.get(0)));
                 
                 } else {
-                    elements.add(new FunctionElmt(currentFunctionName, functionArgs));
+                    Expression[] functionArgsArray = functionArgs.toArray(new Expression[functionArgs.size()]);
+                    elements.add(new FunctionElmt(currentFunctionName, functionArgsArray));
                 }
                 
                 currentFunctionName = "";
