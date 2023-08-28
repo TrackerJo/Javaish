@@ -82,4 +82,9 @@ public class Error {
         System.err.println("Error: Function " + name + " not global at line " + lineNumber);
         System.exit(0);
     }
+
+    public static void CantPerformOperation(String operation, String type, int lineNumber) {
+        System.err.println("Error: Can't perform operation " + operation + " on " + type + " at line " + lineNumber);
+        System.exit(0);
+    }
 }

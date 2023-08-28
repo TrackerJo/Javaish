@@ -123,7 +123,7 @@ public class Interpreter {
                 break;
             case IF:
                 IfStmt ifStmt = (IfStmt) stmt;
-                evalIf(ifStmt, localVariables, isGlobal);
+                evalIf(ifStmt, localVariables, isGlobal, pastResult);
                 break;
             case WHILE:
                 WhileStmt whileStmt = (WhileStmt) stmt;
@@ -390,6 +390,127 @@ public class Interpreter {
                         total = performOperation(operation, total, input);
                     }
                     break;
+                case LIST:
+                    
+                    ListElmt list = (ListElmt) elmt;
+                    JavaishType type = list.getListType();
+                    List<Expression> listExpressions = list.getList();
+                    List<JavaishVal> listVals = new ArrayList<JavaishVal>();
+                    for (Expression listExpression : listExpressions) {
+                        listVals.add(evalExpression(listExpression, localVariables, isGlobal));
+                    }
+                    switch (type) {
+                        case INTLIST:
+                        
+                            List<JavaishInt> intList = new ArrayList<JavaishInt>();
+                            for (JavaishVal listVal : listVals) {
+                                if(listVal instanceof JavaishInt){
+                                    intList.add((JavaishInt) listVal);
+                                } else {
+                                    Error.TypeMismatch("Int", listVal.typeString(), lineNumber);
+                                    return null;
+                                }
+                            }
+                            
+                            JavaishIntList intListVal = new JavaishIntList(intList);
+                            if(isComp){
+                                if(operation != null){
+                                    Error.CantPerformOperation(operation.toString(), "IntList", lineNumber);
+                                } else {
+                                    compVal = new JavaishListVal(intListVal);
+                                }
+                            } else {
+                                 if(operation != null){
+                                    Error.CantPerformOperation(operation.toString(), "IntList", lineNumber);
+                                } else {
+                                    total = new JavaishListVal(intListVal);
+                                }
+                            }
+                           
+                            break;
+                        case FLOATLIST:
+                            List<JavaishFloat> floatList = new ArrayList<JavaishFloat>();
+                            for (JavaishVal listVal : listVals) {
+                                if(listVal instanceof JavaishFloat){
+                                    floatList.add((JavaishFloat) listVal);
+                                } else {
+                                    Error.TypeMismatch("Float", listVal.typeString(), lineNumber);
+                                    return null;
+                                }
+                            }
+                            
+                            JavaishFloatList floatListVal = new JavaishFloatList(floatList);
+                            if(isComp){
+                                if(operation != null){
+                                    Error.CantPerformOperation(operation.toString(), "FloatList", lineNumber);
+                                } else {
+                                    compVal = new JavaishListVal(floatListVal);
+                                }
+                            } else {
+                                 if(operation != null){
+                                    Error.CantPerformOperation(operation.toString(), "FloatList", lineNumber);
+                                } else {
+                                    total = new JavaishListVal(floatListVal);
+                                }
+                            }
+                            break;
+                        case STRINGLIST:
+                            List<JavaishString> stringList = new ArrayList<JavaishString>();
+                            for (JavaishVal listVal : listVals) {
+                                if(listVal instanceof JavaishString){
+                                    stringList.add((JavaishString) listVal);
+                                } else {
+                                    Error.TypeMismatch("String", listVal.typeString(), lineNumber);
+                                    return null;
+                                }
+                            }
+                            
+                            JavaishStringList stringListVal = new JavaishStringList(stringList);
+                            if(isComp){
+                                if(operation != null){
+                                    Error.CantPerformOperation(operation.toString(), "StringList", lineNumber);
+                                } else {
+                                    compVal = new JavaishListVal(stringListVal);
+                                }
+                            } else {
+                                 if(operation != null){
+                                    Error.CantPerformOperation(operation.toString(), "StringList", lineNumber);
+                                } else {
+                                    total = new JavaishListVal(stringListVal);
+                                }
+                            }
+                            break;
+                        case BOOLEANLIST:
+                            List<JavaishBoolean> booleanList = new ArrayList<JavaishBoolean>();
+                            for (JavaishVal listVal : listVals) {
+                                if(listVal instanceof JavaishBoolean){
+                                    booleanList.add((JavaishBoolean) listVal);
+                                } else {
+                                    Error.TypeMismatch("Boolean", listVal.typeString(), lineNumber);
+                                    return null;
+                                }
+                            }
+                            
+                            JavaishBooleanList booleanListVal = new JavaishBooleanList(booleanList);
+                            if(isComp){
+                                if(operation != null){
+                                    Error.CantPerformOperation(operation.toString(), "BooleanList", lineNumber);
+                                } else {
+                                    compVal = new JavaishListVal(booleanListVal);
+                                }
+                            } else {
+                                 if(operation != null){
+                                    Error.CantPerformOperation(operation.toString(), "BooleanList", lineNumber);
+                                } else {
+                                    total = new JavaishListVal(booleanListVal);
+                                }
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                    
+
                 default:
                     break;
             }
@@ -786,14 +907,39 @@ public class Interpreter {
                 //System.out.println("Declaration: Type:" + declaration.getVarType()+ " Name: "+ declaration.getName() + " Value:" + value.getValue());
                 return;
             }
+            if(value.getType() == JavaishType.LIST){
+                JavaishListVal listVal = (JavaishListVal)value;
+                JavaishList list = listVal.getValue();
+                if(list.getType() == type){
+                    if(isGlobal){
+                        globalVariables.addList(declaration.getName(), type, list);
+                    } else {
+                        localVariables.addList(declaration.getName(), type, list);
+                    }
+                    return;
+                }
+            }
           //  System.out.println("Type Mismatch");
             Error.TypeMismatch(type.toString(), value.typeString(), lineNumber);
             return;
         }
         if(isGlobal){
-            globalVariables.addVariable(declaration.getName(), type, value);
+            if(type == JavaishType.LIST){
+                    JavaishListVal listVal = (JavaishListVal)value.getValue();
+                    globalVariables.addList(declaration.getName(), type, listVal.getValue());
+                
+            } else {
+                globalVariables.addVariable(declaration.getName(), type, value);
+            }
+            
         } else {
-            localVariables.addVariable(declaration.getName(), type, value);
+            if(type == JavaishType.LIST){
+                    JavaishListVal listVal = (JavaishListVal)value.getValue();
+                    localVariables.addList(declaration.getName(), type, listVal.getValue());
+                
+            } else {
+                localVariables.addVariable(declaration.getName(), type, value);
+             }
         }
         //System.out.println("Declaration: Type:" + declaration.getVarType()+ " Name: "+ declaration.getName() + " Value:" + value.getValue());
     }
@@ -844,12 +990,16 @@ public class Interpreter {
 
     }
 
-    private void evalIf(IfStmt ifStmt, Variables localVariables, boolean isGlobal){
+    private void evalIf(IfStmt ifStmt, Variables localVariables, boolean isGlobal, Result pastResult){
         Expression condition = ifStmt.getCondition();
         List<Statements> body = ifStmt.getBody();
         JavaishBoolean result = (JavaishBoolean) evalExpression(condition, localVariables, isGlobal);
         if(result.getValue() == true){
+            pastResult.setResult(true);
             interpretBody(body, localVariables, false);
+           
+        } else {
+            pastResult.setResult(false);
         }
 
     }
@@ -867,12 +1017,13 @@ public class Interpreter {
         Expression condition = elseifStmt.getCondition();
         List<Statements> body = elseifStmt.getBody();
         JavaishBoolean result = (JavaishBoolean) evalExpression(condition, localVariables, isGlobal);
+        System.out.println("EVAL ELSE IF: " + result.getValue() + " PASSED: " + pastResult.getResult());
         if(pastResult.getResult() == true){
             return;
         }
         if(result.getValue() == true){
            
-
+            pastResult.setResult(true);
             interpretBody(body, localVariables, false);
         }
 
@@ -947,9 +1098,37 @@ public class Interpreter {
     private void evalMutation(MutationStmt mutationStmt, Variables localVariables, boolean isGlobal){
         MutationType type = mutationStmt.getMutationType();
         String name = mutationStmt.getVarName();
+        JavaishType varType = globalVariables.getVariableType(name);
         JavaishVal value = evalExpression(mutationStmt.getValue(), localVariables, isGlobal);
+        if(varType == JavaishType.STRINGLIST || varType == JavaishType.BOOLEANLIST || varType == JavaishType.INTLIST || varType == JavaishType.FLOATLIST){
+            
+            JavaishList varList = null;
+            if(localVariables.isVariable(name)){
+                varList = localVariables.getList(name).getValue();
+            } else {
+                varList = globalVariables.getList(name).getValue();
+            }
+            if(varList == null){
+                Error.VariableNotDeclared(name, lineNumber);
+                return;
+            }
+            JavaishList list = performListOperation(mutationTypeToOperator(type), varList, value, null);
 
-        JavaishVal variable = globalVariables.getVariableValue(name);
+            if(localVariables.isVariable(name)){
+                
+                localVariables.setVariableValue(name, new JavaishListVal(list), lineNumber);
+                return;
+            }
+            globalVariables.setVariableValue(name, new JavaishListVal(list), lineNumber);
+            return;
+        }
+
+        JavaishVal variable = null;
+        if(localVariables.isVariable(name)){
+            variable = localVariables.getVariableValue(name);
+        } else {
+            variable = globalVariables.getVariableValue(name);
+        }
         if(variable == null){
             Error.VariableNotDeclared(name, lineNumber);
             return;
@@ -960,14 +1139,69 @@ public class Interpreter {
                 return;
             }
         }
-
+        
+        
+            
         JavaishVal newVal = performOperation(mutationTypeToOperator(type), variable, value);
-        if(localVariables.isVariable(name)){
-            localVariables.setVariableValue(name, newVal, lineNumber);
-            return;
+                if(localVariables.isVariable(name)){
+        localVariables.setVariableValue(name, newVal, lineNumber);
+        return;
         }
         globalVariables.setVariableValue(name, newVal, lineNumber);
+    
+  
 
+    }
+
+    private JavaishList performListOperation(Operator operation, JavaishList list, JavaishVal val, JavaishVal index){
+        JavaishList result = null;
+        switch (operation) {
+            case PLUS:
+                JavaishType listInnerType = list.getInnerType();
+                JavaishType valType = val.getType();
+                if(listInnerType != valType){
+                    Error.TypeMismatch(listInnerType.toString(), valType.toString(), lineNumber);
+                    return null;
+                }
+                if(list.getType() == JavaishType.BOOLEANLIST){
+                    JavaishBooleanList booleanList = (JavaishBooleanList) list;
+                    List<JavaishBoolean> booleanListVal = booleanList.getValue();
+                    JavaishBoolean booleanVal = (JavaishBoolean) val;
+                    booleanListVal.add(booleanVal);
+                    result = new JavaishBooleanList(booleanListVal);
+                    
+                } else if(list.getType() == JavaishType.FLOATLIST){
+                    JavaishFloatList floatList = (JavaishFloatList) list;
+                    List<JavaishFloat> floatListVal = floatList.getValue();
+                    if(val.getType() == JavaishType.INT){
+                        JavaishInt intVal = (JavaishInt) val;
+                        floatListVal.add(new JavaishFloat(intVal.getValue()));
+                    } else {
+                        JavaishFloat floatVal = (JavaishFloat) val;
+                        floatListVal.add(floatVal);
+                    }
+                    result = new JavaishFloatList(floatListVal);
+                } else if(list.getType() == JavaishType.INTLIST){
+                    JavaishIntList intList = (JavaishIntList) list;
+                    List<JavaishInt> intListVal = intList.getValue();
+                    JavaishInt intVal = (JavaishInt) val;
+                    intListVal.add(intVal);
+                    result = new JavaishIntList(intListVal);
+                } else if(list.getType() == JavaishType.STRINGLIST){
+                    JavaishStringList stringList = (JavaishStringList) list;
+                    List<JavaishString> stringListVal = stringList.getValue();
+                    JavaishString stringVal = (JavaishString) val;
+                    stringListVal.add(stringVal);
+                    result = new JavaishStringList(stringListVal);
+                }
+
+                
+                break;
+        
+            default:
+                break;
+        }
+        return result;
     }
 
     private Operator mutationTypeToOperator(MutationType type){

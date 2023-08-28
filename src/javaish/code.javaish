@@ -1,5 +1,2 @@
-let int count = 0.
-while count < 10 {
-    print(count).
-    add 1 to count.
-}
+let float[] arr = [0.6,1.0,2.0,3.0].
+add toFloat(5) to arr.

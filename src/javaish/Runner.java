@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 import javaish.JavaishVal.JavaishType;
@@ -23,6 +24,7 @@ public class Runner {
         Interpreter interpreter = new Interpreter(variables);
         interpreter.interpretFunction(statements.getBody(), null, null, "", true);
         printVars(variables);
+        
         // Organizer organizer = new Organizer(statements);
         // List<Elements> elements = organizer.organize();
         //System.out.println(elements);
@@ -34,23 +36,75 @@ public class Runner {
     private static void printVars(Variables variables) {
         System.out.println("Variables:");
         System.out.println("Integers:");
-        for (intVar intVar : variables.intVariables) {
+        for (IntVar intVar : variables.intVariables) {
             System.out.println(intVar.name + ": " + intVar.value.getValue());
         }
         System.out.println("Floats:");
-        for (floatVar floatVar : variables.floatVariables) {
+        for (FloatVar floatVar : variables.floatVariables) {
             System.out.println(floatVar.name + ": " + floatVar.value.getValue());
         }
         System.out.println("Booleans:");
-        for (boolVar boolVar : variables.boolVariables) {
+        for (BoolVar boolVar : variables.boolVariables) {
             System.out.println(boolVar.name + ": " + boolVar.value.getValue());
         }
         System.out.println("Strings:");
-        for (stringVar stringVar : variables.stringVariables) {
+        for (StringVar stringVar : variables.stringVariables) {
             System.out.println(stringVar.name + ": " + stringVar.value.getValue());
         }
+        System.out.println("Int Lists:");
+        for (IntList intListVar : variables.intLists) {
+            List<JavaishInt> list = intListVar.getValue().getValue();
+            String listString = "[";
+            for (JavaishInt javaishInt : list) {
+                listString += javaishInt.getValue() + ", ";
+            }
+            listString = listString.substring(0, listString.length() - 2);
+            listString += "]";
+            System.out.println(intListVar.name + ": " + listString);
+            
+
+        }
+        System.out.println("Float Lists:");
+        for (FloatList floatListVar : variables.floatLists) {
+            List<JavaishFloat> list = floatListVar.getValue().getValue();
+            String listString = "[";
+            for (JavaishFloat javaishFloat : list) {
+                listString += javaishFloat.getValue() + ", ";
+            }
+            listString = listString.substring(0, listString.length() - 2);
+            listString += "]";
+            System.out.println(floatListVar.name + ": " + listString);
+            
+
+        }
+        System.out.println("String Lists:");
+        for (StringList stringListVar : variables.stringLists) {
+            List<JavaishString> list = stringListVar.getValue().getValue();
+            String listString = "[";
+            for (JavaishString javaishString : list) {
+                listString += javaishString.getValue() + ", ";
+            }
+            listString = listString.substring(0, listString.length() - 2);
+            listString += "]";
+            System.out.println(stringListVar.name + ": " + listString);
+            
+
+        }
+        System.out.println("Booleans Lists:");
+        for (BoolList boolListVar : variables.boolLists) {
+            List<JavaishBoolean> list = boolListVar.getValue().getValue();
+            String listString = "[";
+            for (JavaishBoolean javaishBool : list) {
+                listString += javaishBool.getValue() + ", ";
+            }
+            listString = listString.substring(0, listString.length() - 2);
+            listString += "]";
+            System.out.println(boolListVar.name + ": " + listString);
+            
+
+        }
         System.out.println("Functions:");
-        for (functionVar functionVar : variables.functions.values()) {
+        for (FunctionVar functionVar : variables.functions.values()) {
             System.out.println(functionVar.name + "(" + getArgsString(functionVar.args) + ")");
             
         }

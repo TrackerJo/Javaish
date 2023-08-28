@@ -4,7 +4,7 @@ function main(){
 }
 
 function eventName(){
-    let String eventName = showInputDialog("Enter the name of the event").
+    let String eventName equal showInputDialog("Enter the name of the event").
     getAmounts(eventName).
 }
 

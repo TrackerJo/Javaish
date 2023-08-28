@@ -1,5 +1,6 @@
 package javaish;
 
+import java.util.List;
 
 public sealed interface JavaishVal {
     public Object getValue();
@@ -10,8 +11,13 @@ public sealed interface JavaishVal {
         FLOAT,
         STRING,
         BOOLEAN,
-        TURTLE,
-        WORLD
+        INTLIST,
+        FLOATLIST,
+        STRINGLIST,
+        BOOLEANLIST,
+        LIST
+ 
+
     }
    
 }
@@ -89,3 +95,19 @@ final class JavaishBoolean implements JavaishVal {
     }
 }
 
+final class JavaishListVal implements JavaishVal {
+    JavaishList list;
+    JavaishType type = JavaishType.LIST;
+    public JavaishList getValue() {
+        return list;
+    }
+    JavaishListVal(JavaishList value){
+        this.list = value;
+    }
+    public JavaishType getType() {
+        return type;
+    }
+    public String typeString(){
+        return "List";
+    }
+}

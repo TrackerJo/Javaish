@@ -13,7 +13,11 @@ public class Expression {
         FLOAT,
         STRING,
         BOOL,
-        NUMBER
+        NUMBER,
+        INTLIST,
+        FLOATLIST,
+        STRINGLIST,
+        BOOLEANLIST,
     
     }
     private int line;
@@ -52,6 +56,7 @@ public class Expression {
         boolean readingFunctionArgs = false;
         boolean readingExpression = false;
         boolean readingCast = false;
+        boolean readingArray = false;
         JavaishType castType = null;
         ExpressionReturnType castReturnType = ExpressionReturnType.NUMBER;
         List<Element> elements = new ArrayList<Element>();
@@ -62,6 +67,7 @@ public class Expression {
         int currentCastDepth = 0;
         int currentFunctionDepth = 0;
         List<Expression> functionArgs = new ArrayList<Expression>();
+        List<Expression> arrayElmts = new ArrayList<Expression>();
         while(i<expression.length()){
             char c = expression.charAt(i);
           
@@ -115,11 +121,13 @@ public class Expression {
                 }
                
             
-            } else if(c=='"' && !readingFunction && !readingExpression && !readingCast){
+            } else if(c=='"' && !readingFunction && !readingExpression && !readingCast && !readingArray){
                 if(readingString){
                     readingString = false;
                     
-                    elements.add(new StringElmt(currentElement));
+                    if(!readingArray) {
+                        elements.add(new StringElmt(currentElement));
+                    } 
                     currentElement = "";
                     lastReadString = true;
                     
@@ -258,6 +266,51 @@ public class Expression {
             } else if(c=='(' && readingFunction && !readingString){
                 currentFunctionDepth++;
                 currentElement += c;
+            } else if(c == '[' && !readingArray && !readingString && !readingFunction){
+                if(currentElement.equals("")){
+                    readingArray = true;
+                    
+                }
+            } else if(c == ',' && !readingString && readingArray){
+                Expression arrayElmt = new Expression(parseExpression(currentElement, column + i), ExpressionReturnType.NUMBER, line);
+                currentElement = "";
+                arrayElmts.add(arrayElmt);
+            } else if(c==']' && !readingString && readingArray){
+                Expression arrayElmt = new Expression(parseExpression(currentElement, column + i), ExpressionReturnType.NUMBER, line);
+                arrayElmts.add(arrayElmt);
+                elements.add(new ListElmt(arrayElmts, returnTypeToJavaishType(getReturnType())));
+                readingArray = false;
+                currentElement = "";
+                arrayElmts = new ArrayList<Expression>();
+            } else if(c=='<' && !readingString && !readingFunction && !readingExpression && !readingCast){
+                if(currentElement.equals("")){
+                    readingCast = true;
+                    currentElement += c;
+                }
+            } else if(c=='>' && !readingString && readingCast){
+                currentCastDepth--;
+                if(currentCastDepth==0){
+                    readingCast = false;
+                    String castTypeStr = currentElement.substring(1);
+                    if(castTypeStr.equals("int")){
+                        castType = JavaishType.INT;
+                        castReturnType = ExpressionReturnType.INT;
+                    } else if(castTypeStr.equals("float")){
+                        castType = JavaishType.FLOAT;
+                        castReturnType = ExpressionReturnType.FLOAT;
+                    } else if(castTypeStr.equals("string")){
+                        castType = JavaishType.STRING;
+                        castReturnType = ExpressionReturnType.STRING;
+                    } else if(castTypeStr.equals("bool")){
+                        castType = JavaishType.BOOLEAN;
+                        castReturnType = ExpressionReturnType.BOOL;
+                    } else {
+                        Error.UnexpectedElmt(castTypeStr, getLine(), column + i);
+                    }
+                    currentElement = "";
+                } else {
+                    currentElement += c;
+                }
             }
             
             else {
@@ -392,6 +445,30 @@ public class Expression {
             str = str.substring(0, str.length()-1);
         }
         return str;
+    }
+
+    private JavaishType returnTypeToJavaishType(ExpressionReturnType returnType) {
+        switch (returnType) {
+            case INT:
+                return JavaishType.INT;
+            case FLOAT:
+                return JavaishType.FLOAT;
+            case STRING:
+                return JavaishType.STRING;
+            case BOOL:
+                return JavaishType.BOOLEAN;
+            
+            case INTLIST:
+                return JavaishType.INTLIST;
+            case FLOATLIST:
+                return JavaishType.FLOATLIST;
+            case STRINGLIST:
+                return JavaishType.STRINGLIST;
+            case BOOLEANLIST:
+                return JavaishType.BOOLEANLIST;
+            default:
+                return null;
+        }
     }
     
 }

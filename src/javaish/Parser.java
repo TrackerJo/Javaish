@@ -63,6 +63,7 @@ public class Parser {
                     String varName = declaration[0];
                     JavaishType varType = getType(declaration[1]);
                     String varValue = declaration[2];
+                    System.out.println("Expression: " + varValue);
                     ExpressionReturnType expressionType = ExpressionReturnType.STRING;
                     switch (varType) {
                         case STRING:
@@ -81,7 +82,19 @@ public class Parser {
                         case BOOLEAN:
                             expressionType = ExpressionReturnType.BOOL;
                             break;
-                    
+                        case INTLIST:
+                            expressionType = ExpressionReturnType.INTLIST;
+                            break;
+                        case FLOATLIST:
+                            expressionType = ExpressionReturnType.FLOATLIST;
+                            break;
+                        case STRINGLIST:
+                            expressionType = ExpressionReturnType.STRINGLIST;
+                            break;
+                        case BOOLEANLIST:
+                            expressionType = ExpressionReturnType.BOOLEANLIST;
+                            break;
+                        
                         default:
                             break;
                     }
@@ -182,6 +195,7 @@ public class Parser {
                     String[] addMutation = parseMutationAS(line, "add");
                     String addVarName = addMutation[0];
                     String addChange = addMutation[1];
+                    
                     Expression addExpression = new Expression(addChange, ExpressionReturnType.NUMBER, lineNumber);
                     MutationStmt addStmt = new MutationStmt(lineNumber, addVarName, addExpression,MutationType.ADD);
                     parents.get(parents.size() - 1).addStatement(addStmt);
@@ -964,6 +978,14 @@ public class Parser {
                 return JavaishType.FLOAT;
             case "bool":
                 return JavaishType.BOOLEAN;
+            case "String[]":
+                return JavaishType.STRINGLIST;
+            case "int[]":
+                return JavaishType.INTLIST;
+            case "float[]":
+                return JavaishType.FLOATLIST;
+            case "bool[]":
+                return JavaishType.BOOLEANLIST;
             default:
                 return null;
         }
