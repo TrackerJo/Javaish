@@ -57,23 +57,28 @@ public class Expression {
         boolean readingExpression = false;
         boolean readingCast = false;
         boolean readingArray = false;
+        boolean readingArrayElmt = false;
+        boolean readingArrayElmtArgs = false;
+        boolean readingArrayArgExpression = false;
         JavaishType castType = null;
         ExpressionReturnType castReturnType = ExpressionReturnType.NUMBER;
         List<Element> elements = new ArrayList<Element>();
         String currentElement = "";
         String currentFunctionName = "";
         String currentFunctionArgs = "";
+        String currentArrayName = "";
         int currentExpressionDepth = 0;
         int currentCastDepth = 0;
         int currentFunctionDepth = 0;
+        int currentArrayArgDepth = 0;
         List<Expression> functionArgs = new ArrayList<Expression>();
         List<Expression> arrayElmts = new ArrayList<Expression>();
         while(i<expression.length()){
             char c = expression.charAt(i);
           
            
-            if(c=='(' && !readingFunction && !readingString){
-                if(readingExpression && !readingCast){
+            if(c=='(' && !readingFunction && !readingString ){
+                if(readingExpression && !readingCast && !readingArrayElmtArgs){
                     currentExpressionDepth++;
                     currentElement += c;
                 } else if(possibleFunctionName(currentElement) && !readingCast){
@@ -86,6 +91,10 @@ public class Expression {
                 } else if(readingCast){
                     currentCastDepth++;
                     currentElement += c;
+                } else if(readingArrayElmtArgs){
+                    currentArrayArgDepth++;
+                    readingArrayArgExpression = true;
+                    currentElement += c;
                 }
                  
                 else {
@@ -94,7 +103,7 @@ public class Expression {
                     
                     currentExpressionDepth++;
                 }
-            } else if(c==')' && !readingFunction && !readingString ){
+            } else if(c==')' && !readingFunction && !readingString){
                 if(readingExpression){
                     currentExpressionDepth--;
                     if(currentExpressionDepth==0){
@@ -116,7 +125,22 @@ public class Expression {
                     }
                     
                     
-                } else {
+                } else if(readingArrayElmtArgs){
+                    currentArrayArgDepth--;
+                    if(currentArrayArgDepth==0){
+                        readingArrayElmtArgs = false;
+                        readingArrayArgExpression = false;
+                        currentElement += c;
+                        System.out.println("ARRAY ARG EXPR: " + currentElement);
+                        Expression index = new Expression(parseExpression(currentElement, column + i), ExpressionReturnType.NUMBER, line);
+                        elements.add(new ListValElmt(currentArrayName, index));
+                        currentElement = "";
+                    } else {
+                        currentElement += c;
+                    }
+                }
+                
+                else {
                     currentElement += c;
                 }
                
@@ -145,7 +169,7 @@ public class Expression {
                 }
             }
             else if(c==' '){
-                if(readingString || readingExpression || readingCast || readingFunctionArgs){
+                if(readingString || readingExpression || readingCast || readingFunctionArgs || readingArrayArgExpression){
                     currentElement += c;
                 } 
                 else if(currentElement.equals("call") && !readingFunction){
@@ -179,8 +203,19 @@ public class Expression {
                         i+=4;
                         currentElement = "";
                     }
+                } else if(nextWord(expression, i+1).equals("sub") && !readingString && !readingFunctionArgs && !readingExpression){
+                    readingArrayElmt = true;
+                    currentArrayName = currentElement;
+                    currentElement = "";
+                } else if(currentElement.equals("sub") && !readingString && readingArrayElmt){
+                    readingArrayElmtArgs = true;
+                    currentElement = "";
                 }
-                
+                else if(readingArrayElmtArgs && !readingString && !readingArrayArgExpression){
+                    Expression index = new Expression(parseExpression(currentElement, column + i), ExpressionReturnType.NUMBER, line);
+                    elements.add(new ListValElmt(currentArrayName, index));
+                    currentElement = "";
+                }
                 else{
                     if(currentElement.length()>0 && !currentElement.equals("not") && !readingFunction){
                         //System.out .println("PARSING ELEMENT: "+currentElement);
@@ -322,7 +357,13 @@ public class Expression {
 
         if(currentElement.length()>0 && !lastReadString){
             
-            elements.add(parseElement(currentElement, column + i));
+            if(readingArrayElmtArgs){
+                  Expression index = new Expression(parseExpression(currentElement, column + i), ExpressionReturnType.NUMBER, line);
+                    elements.add(new ListValElmt(currentArrayName, index));
+                    currentElement = "";
+            } else {
+                elements.add(parseElement(currentElement, column + i));
+            }
             
         }
 

@@ -53,7 +53,7 @@ public class Runner {
         }
         System.out.println("Int Lists:");
         for (IntList intListVar : variables.intLists) {
-            List<JavaishInt> list = intListVar.getValue().getValue();
+            List<JavaishInt> list = intListVar.getValue().getList();
             String listString = "[";
             for (JavaishInt javaishInt : list) {
                 listString += javaishInt.getValue() + ", ";
@@ -66,7 +66,7 @@ public class Runner {
         }
         System.out.println("Float Lists:");
         for (FloatList floatListVar : variables.floatLists) {
-            List<JavaishFloat> list = floatListVar.getValue().getValue();
+            List<JavaishFloat> list = floatListVar.getValue().getList();
             String listString = "[";
             for (JavaishFloat javaishFloat : list) {
                 listString += javaishFloat.getValue() + ", ";
@@ -79,7 +79,7 @@ public class Runner {
         }
         System.out.println("String Lists:");
         for (StringList stringListVar : variables.stringLists) {
-            List<JavaishString> list = stringListVar.getValue().getValue();
+            List<JavaishString> list = stringListVar.getValue().getList();
             String listString = "[";
             for (JavaishString javaishString : list) {
                 listString += javaishString.getValue() + ", ";
@@ -92,7 +92,7 @@ public class Runner {
         }
         System.out.println("Booleans Lists:");
         for (BoolList boolListVar : variables.boolLists) {
-            List<JavaishBoolean> list = boolListVar.getValue().getValue();
+            List<JavaishBoolean> list = boolListVar.getValue().getList();
             String listString = "[";
             for (JavaishBoolean javaishBool : list) {
                 listString += javaishBool.getValue() + ", ";
@@ -220,6 +220,18 @@ public class Runner {
                     if(whileStmt.getBody() != null){
                         printStmts(whileStmt.getBody(), indent + 1);
                     }
+                    break;
+                case REMOVEALLFROM:
+                    RemoveAllFromStmt removeAllFromStmt = (RemoveAllFromStmt) statement;
+                    System.out.println("RemoveAll: " + removeAllFromStmt.getValue() + " From:" + removeAllFromStmt.getListName());
+                    break;
+                case REMOVEFROM:
+                    RemoveFromStmt removeFromStmt = (RemoveFromStmt) statement;
+                    System.out.println("Remove: " + removeFromStmt.getValue() + " From:" + removeFromStmt.getListName());
+                    break;
+                case REMOVEAT:
+                    RemoveAtStmt removeAtStmt = (RemoveAtStmt) statement;
+                    System.out.println("RemoveAt: " + removeAtStmt.getLocation() + " From:" + removeAtStmt.getListName());
                     break;
                 default:
                     break;

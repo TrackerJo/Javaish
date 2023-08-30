@@ -224,28 +224,28 @@ class Variables{
              case INTLIST:
                for(IntList i : intLists){
                     if(i.name.equals(name)){
-                         return new JavaishListVal(new JavaishIntList(i.getValue().getValue()));
+                         return new JavaishListVal(new JavaishIntList(i.getValue().getList()));
                     }
                }
                break;
                case FLOATLIST:
                 for(FloatList i : floatLists){
                      if(i.name.equals(name)){
-                           return new JavaishListVal(new JavaishFloatList(i.getValue().getValue()));
+                           return new JavaishListVal(new JavaishFloatList(i.getValue().getList()));
                      }
                 }
                 break;
                case BOOLEANLIST:
                 for(BoolList i : boolLists){
                      if(i.name.equals(name)){
-                           return new JavaishListVal(new JavaishBooleanList(i.getValue().getValue()));
+                           return new JavaishListVal(new JavaishBooleanList(i.getValue().getList()));
                      }
                 }
                 break;
                case STRINGLIST:
                 for(StringList i : stringLists){
                      if(i.name.equals(name)){
-                           return new JavaishListVal(new JavaishStringList(i.getValue().getValue()));
+                           return new JavaishListVal(new JavaishStringList(i.getValue().getList()));
                      }
                 }
                 break;
@@ -317,7 +317,7 @@ class Variables{
                for(IntList i : intLists){
                     if(i.name.equals(name)){
                          if(value.getType() == JavaishType.INT){
-                                List<JavaishInt> list = i.getValue().getValue();
+                                List<JavaishInt> list = i.getValue().getList();
                                 list.set(index, (JavaishInt)value);
                                 i.setValue(new JavaishIntList(list));
                              }
@@ -332,7 +332,7 @@ class Variables{
                 for(FloatList i : floatLists){
                      if(i.name.equals(name)){
                             if(value.getType() == JavaishType.FLOAT){
-                                    List<JavaishFloat> list = i.getValue().getValue();
+                                    List<JavaishFloat> list = i.getValue().getList();
                                     list.set(index, (JavaishFloat)value);
                                     i.setValue(new JavaishFloatList(list));
                                  }
@@ -346,7 +346,7 @@ class Variables{
                 for(BoolList i : boolLists){
                      if(i.name.equals(name)){
                             if(value.getType() == JavaishType.BOOLEAN){
-                                    List<JavaishBoolean> list = i.getValue().getValue();
+                                    List<JavaishBoolean> list = i.getValue().getList();
                                     list.set(index, (JavaishBoolean)value);
                                     i.setValue(new JavaishBooleanList(list));
                                  }
@@ -360,7 +360,7 @@ class Variables{
                 for(StringList i : stringLists){
                      if(i.name.equals(name)){
                             if(value.getType() == JavaishType.STRING){
-                                    List<JavaishString> list = i.getValue().getValue();
+                                    List<JavaishString> list = i.getValue().getList();
                                     list.set(index, ((JavaishString)value));
                                     i.setValue(new JavaishStringList(list));
                                  }

@@ -87,4 +87,9 @@ public class Error {
         System.err.println("Error: Can't perform operation " + operation + " on " + type + " at line " + lineNumber);
         System.exit(0);
     }
+
+    public static void IndexOutOfBounds(int index, int lineNumber, int arrayLength) {
+        System.err.println("Error: Index bigger than array length at line " + lineNumber + ": Got:" + index + ", Max: " + (arrayLength - 1));
+        System.exit(0);
+    }
 }

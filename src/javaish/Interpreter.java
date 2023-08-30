@@ -17,7 +17,7 @@ public class Interpreter {
    
     Variables globalVariables;
     enum Operator {
-        PLUS, MINUS, DIVIDE, MULTIPLY, EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_EQUAL, GREATER_THAN_EQUAL
+        PLUS, MINUS, DIVIDE, MULTIPLY, EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_EQUAL, GREATER_THAN_EQUAL, REMOVEALLFROM, REMOVEAT, REMOVEFROM
     }
     public Interpreter( Variables variables){
         
@@ -145,7 +145,18 @@ public class Interpreter {
                 ShowMsgBoxStmt showMsgBoxStmt = (ShowMsgBoxStmt) stmt;
                 evalShowMsgBox(showMsgBoxStmt, localVariables, isGlobal);
                 break;
-
+            case REMOVEAT:
+                RemoveAtStmt removeAtStmt = (RemoveAtStmt) stmt;
+                evalRemoveAt(removeAtStmt, localVariables, isGlobal);
+                break;
+            case REMOVEFROM:
+                RemoveFromStmt removeFromStmt = (RemoveFromStmt) stmt;
+                evalRemoveFrom(removeFromStmt, localVariables, isGlobal);
+                break;
+            case REMOVEALLFROM:
+                RemoveAllFromStmt removeAllFromStmt = (RemoveAllFromStmt) stmt;
+                evalRemoveAllFrom(removeAllFromStmt, localVariables, isGlobal);
+                break;
 
             default:
                 break;
@@ -390,6 +401,44 @@ public class Interpreter {
                         total = performOperation(operation, total, input);
                     }
                     break;
+                case LISTVAL:
+                    
+                    ListValElmt listVal = (ListValElmt) elmt;
+                    JavaishVal index = evalExpression(listVal.getIndex(), localVariables, isGlobal);
+                    JavaishInt indexInt = null;
+                    if(index instanceof JavaishInt){
+                        indexInt = (JavaishInt) index;
+                    } else {
+                        Error.TypeMismatch("Int", index.typeString(), lineNumber);
+                        return null;
+                    }
+                    JavaishList listValList = null;
+                    if(localVariables.isVariable(listVal.getListName())){
+                        JavaishVal valListVal = localVariables.getVariableValue(listVal.getListName());
+                        JavaishListVal valList = (JavaishListVal) valListVal;
+                        listValList = valList.getValue();
+                    } else if(globalVariables.isVariable(listVal.getListName())){
+                        JavaishVal valListVal = globalVariables.getVariableValue(listVal.getListName());
+                        JavaishListVal valList = (JavaishListVal) valListVal;
+                        listValList = valList.getValue();
+                    } else {
+                        Error.VariableNotDeclared(listVal.getListName(), lineNumber);
+                        return null;
+                    } 
+                    int listLength = listValList.getLength();
+                    if(indexInt.getValue() >= listLength){
+                        Error.IndexOutOfBounds(indexInt.getValue(), lineNumber, listLength);
+                        return null;
+                    }
+                    JavaishVal listValVal = listValList.getValue(indexInt.getValue());
+                    if(isComp){
+                        compVal = performOperation(operation, compVal, listValVal);
+                    } else {
+                        total = performOperation(operation, total, listValVal);
+                    }
+                    break;
+
+                    
                 case LIST:
                     
                     ListElmt list = (ListElmt) elmt;
@@ -403,11 +452,11 @@ public class Interpreter {
                         case INTLIST:
                         
                             List<JavaishInt> intList = new ArrayList<JavaishInt>();
-                            for (JavaishVal listVal : listVals) {
-                                if(listVal instanceof JavaishInt){
-                                    intList.add((JavaishInt) listVal);
+                            for (JavaishVal listValI : listVals) {
+                                if(listValI instanceof JavaishInt){
+                                    intList.add((JavaishInt) listValI);
                                 } else {
-                                    Error.TypeMismatch("Int", listVal.typeString(), lineNumber);
+                                    Error.TypeMismatch("Int", listValI.typeString(), lineNumber);
                                     return null;
                                 }
                             }
@@ -430,11 +479,11 @@ public class Interpreter {
                             break;
                         case FLOATLIST:
                             List<JavaishFloat> floatList = new ArrayList<JavaishFloat>();
-                            for (JavaishVal listVal : listVals) {
-                                if(listVal instanceof JavaishFloat){
-                                    floatList.add((JavaishFloat) listVal);
+                            for (JavaishVal listValI : listVals) {
+                                if(listValI instanceof JavaishFloat){
+                                    floatList.add((JavaishFloat) listValI);
                                 } else {
-                                    Error.TypeMismatch("Float", listVal.typeString(), lineNumber);
+                                    Error.TypeMismatch("Float", listValI.typeString(), lineNumber);
                                     return null;
                                 }
                             }
@@ -456,11 +505,11 @@ public class Interpreter {
                             break;
                         case STRINGLIST:
                             List<JavaishString> stringList = new ArrayList<JavaishString>();
-                            for (JavaishVal listVal : listVals) {
-                                if(listVal instanceof JavaishString){
-                                    stringList.add((JavaishString) listVal);
+                            for (JavaishVal listValI : listVals) {
+                                if(listValI instanceof JavaishString){
+                                    stringList.add((JavaishString) listValI);
                                 } else {
-                                    Error.TypeMismatch("String", listVal.typeString(), lineNumber);
+                                    Error.TypeMismatch("String", listValI.typeString(), lineNumber);
                                     return null;
                                 }
                             }
@@ -482,11 +531,11 @@ public class Interpreter {
                             break;
                         case BOOLEANLIST:
                             List<JavaishBoolean> booleanList = new ArrayList<JavaishBoolean>();
-                            for (JavaishVal listVal : listVals) {
-                                if(listVal instanceof JavaishBoolean){
-                                    booleanList.add((JavaishBoolean) listVal);
+                            for (JavaishVal listValI : listVals) {
+                                if(listValI instanceof JavaishBoolean){
+                                    booleanList.add((JavaishBoolean) listValI);
                                 } else {
-                                    Error.TypeMismatch("Boolean", listVal.typeString(), lineNumber);
+                                    Error.TypeMismatch("Boolean", listValI.typeString(), lineNumber);
                                     return null;
                                 }
                             }
@@ -506,10 +555,13 @@ public class Interpreter {
                                 }
                             }
                             break;
+                        
+
                         default:
                             break;
                     }
-                    
+
+               
 
                 default:
                     break;
@@ -1112,7 +1164,7 @@ public class Interpreter {
                 Error.VariableNotDeclared(name, lineNumber);
                 return;
             }
-            JavaishList list = performListOperation(mutationTypeToOperator(type), varList, value, null);
+            JavaishList list = performListOperation(mutationTypeToOperator(type), varList, value, 0);
 
             if(localVariables.isVariable(name)){
                 
@@ -1153,7 +1205,100 @@ public class Interpreter {
 
     }
 
-    private JavaishList performListOperation(Operator operation, JavaishList list, JavaishVal val, JavaishVal index){
+    private void evalRemoveAt(RemoveAtStmt removeAtStmt, Variables localVariables, boolean isGlobal){
+        String name = removeAtStmt.getListName();
+        JavaishType varType = globalVariables.getVariableType(name);
+        JavaishVal index = evalExpression(removeAtStmt.getLocation(), localVariables, isGlobal);
+        if(varType == JavaishType.STRINGLIST || varType == JavaishType.BOOLEANLIST || varType == JavaishType.INTLIST || varType == JavaishType.FLOATLIST){
+            
+            JavaishList varList = null;
+            if(localVariables.isVariable(name)){
+                varList = localVariables.getList(name).getValue();
+            } else {
+                varList = globalVariables.getList(name).getValue();
+            }
+            if(varList == null){
+                Error.VariableNotDeclared(name, lineNumber);
+                return;
+            }
+            if(index.getType() != JavaishType.INT){
+                Error.TypeMismatch("Int", index.typeString(), lineNumber);
+                return;
+            }
+            int indexVal = ((JavaishInt) index).getValue();
+            JavaishList list = performListOperation(Operator.REMOVEAT, varList, null, indexVal);
+
+            if(localVariables.isVariable(name)){
+                
+                localVariables.setVariableValue(name, new JavaishListVal(list), lineNumber);
+                return;
+            }
+            globalVariables.setVariableValue(name, new JavaishListVal(list), lineNumber);
+            return;
+        }
+        Error.TypeMismatch("List", varType.toString(), lineNumber);
+        return;
+    }
+
+    private void evalRemoveFrom(RemoveFromStmt removeFromStmt, Variables localVariables, boolean isGlobal){
+        String name = removeFromStmt.getListName();
+        JavaishType varType = globalVariables.getVariableType(name);
+        JavaishVal value = evalExpression(removeFromStmt.getValue(), localVariables, isGlobal);
+        if(varType == JavaishType.STRINGLIST || varType == JavaishType.BOOLEANLIST || varType == JavaishType.INTLIST || varType == JavaishType.FLOATLIST){
+            
+            JavaishList varList = null;
+            if(localVariables.isVariable(name)){
+                varList = localVariables.getList(name).getValue();
+            } else {
+                varList = globalVariables.getList(name).getValue();
+            }
+            if(varList == null){
+                Error.VariableNotDeclared(name, lineNumber);
+                return;
+            }
+            JavaishList list = performListOperation(Operator.REMOVEFROM, varList, value, 0);
+            System.out.println("LIST: " + list.listString());
+
+            if(localVariables.isVariable(name)){
+                
+                localVariables.setVariableValue(name, new JavaishListVal(list), lineNumber);
+                return;
+            }
+            globalVariables.setVariableValue(name, new JavaishListVal(list), lineNumber);
+            return;
+        }
+    }
+
+    private void evalRemoveAllFrom(RemoveAllFromStmt removeAllFromStmt, Variables localVariables, boolean isGlobal){
+        String name = removeAllFromStmt.getListName();
+        JavaishType varType = globalVariables.getVariableType(name);
+        JavaishVal value = evalExpression(removeAllFromStmt.getValue(), localVariables, isGlobal);
+        if(varType == JavaishType.STRINGLIST || varType == JavaishType.BOOLEANLIST || varType == JavaishType.INTLIST || varType == JavaishType.FLOATLIST){
+            
+            JavaishList varList = null;
+            if(localVariables.isVariable(name)){
+                varList = localVariables.getList(name).getValue();
+            } else {
+                varList = globalVariables.getList(name).getValue();
+            }
+            if(varList == null){
+                Error.VariableNotDeclared(name, lineNumber);
+                return;
+            }
+            JavaishList list = performListOperation(Operator.REMOVEALLFROM, varList, value, 0);
+            System.out.println("LIST: " + list.listString());
+
+            if(localVariables.isVariable(name)){
+                
+                localVariables.setVariableValue(name, new JavaishListVal(list), lineNumber);
+                return;
+            }
+            globalVariables.setVariableValue(name, new JavaishListVal(list), lineNumber);
+            return;
+        }
+    }
+
+    private JavaishList performListOperation(Operator operation, JavaishList list, JavaishVal val, int index){
         JavaishList result = null;
         switch (operation) {
             case PLUS:
@@ -1165,14 +1310,14 @@ public class Interpreter {
                 }
                 if(list.getType() == JavaishType.BOOLEANLIST){
                     JavaishBooleanList booleanList = (JavaishBooleanList) list;
-                    List<JavaishBoolean> booleanListVal = booleanList.getValue();
+                    List<JavaishBoolean> booleanListVal = booleanList.getList();
                     JavaishBoolean booleanVal = (JavaishBoolean) val;
                     booleanListVal.add(booleanVal);
                     result = new JavaishBooleanList(booleanListVal);
                     
                 } else if(list.getType() == JavaishType.FLOATLIST){
                     JavaishFloatList floatList = (JavaishFloatList) list;
-                    List<JavaishFloat> floatListVal = floatList.getValue();
+                    List<JavaishFloat> floatListVal = floatList.getList();
                     if(val.getType() == JavaishType.INT){
                         JavaishInt intVal = (JavaishInt) val;
                         floatListVal.add(new JavaishFloat(intVal.getValue()));
@@ -1183,19 +1328,158 @@ public class Interpreter {
                     result = new JavaishFloatList(floatListVal);
                 } else if(list.getType() == JavaishType.INTLIST){
                     JavaishIntList intList = (JavaishIntList) list;
-                    List<JavaishInt> intListVal = intList.getValue();
+                    List<JavaishInt> intListVal = intList.getList();
                     JavaishInt intVal = (JavaishInt) val;
                     intListVal.add(intVal);
                     result = new JavaishIntList(intListVal);
                 } else if(list.getType() == JavaishType.STRINGLIST){
                     JavaishStringList stringList = (JavaishStringList) list;
-                    List<JavaishString> stringListVal = stringList.getValue();
+                    List<JavaishString> stringListVal = stringList.getList();
                     JavaishString stringVal = (JavaishString) val;
                     stringListVal.add(stringVal);
                     result = new JavaishStringList(stringListVal);
                 }
 
                 
+                break;
+            case REMOVEAT:
+                if(list.getType() == JavaishType.BOOLEANLIST){
+                    JavaishBooleanList booleanList = (JavaishBooleanList) list;
+                    List<JavaishBoolean> booleanListVal = booleanList.getList();
+                    
+                    booleanListVal.remove(index);
+                    result = new JavaishBooleanList(booleanListVal);
+                    
+                } else if(list.getType() == JavaishType.FLOATLIST){
+                    JavaishFloatList floatList = (JavaishFloatList) list;
+                    List<JavaishFloat> floatListVal = floatList.getList();
+                    
+                    floatListVal.remove(index);
+                    result = new JavaishFloatList(floatListVal);
+                } else if(list.getType() == JavaishType.INTLIST){
+                    JavaishIntList intList = (JavaishIntList) list;
+                    List<JavaishInt> intListVal = intList.getList();
+                    
+                    intListVal.remove(index);
+                    result = new JavaishIntList(intListVal);
+                } else if(list.getType() == JavaishType.STRINGLIST){
+                    JavaishStringList stringList = (JavaishStringList) list;
+                    List<JavaishString> stringListVal = stringList.getList();
+                    
+                    stringListVal.remove(index);
+                    result = new JavaishStringList(stringListVal);
+                }
+                break;
+            case REMOVEFROM:
+                if(list.getType() == JavaishType.BOOLEANLIST){
+                    JavaishBooleanList booleanList = (JavaishBooleanList) list;
+                    List<JavaishBoolean> booleanListVal = booleanList.getList();
+                    JavaishBoolean booleanVal = (JavaishBoolean) val;
+                    for(int i = 0; i < booleanListVal.size(); i++){
+                        if(booleanListVal.get(i).getValue() == booleanVal.getValue()){
+                            booleanListVal.remove(i);
+                            break;
+                        }
+                    }
+                    result = new JavaishBooleanList(booleanListVal);
+                    
+                } else if(list.getType() == JavaishType.FLOATLIST){
+                    JavaishFloatList floatList = (JavaishFloatList) list;
+                    List<JavaishFloat> floatListVal = floatList.getList();
+                    JavaishFloat floatVal = null;
+                    if(val.getType() == JavaishType.INT){
+                        JavaishInt intVal = (JavaishInt) val;
+                        floatVal = new JavaishFloat(intVal.getValue());
+                        
+                    } else {
+                        floatVal = (JavaishFloat) val;
+                    }
+                    for(int i = 0; i < floatListVal.size(); i++){
+                        if(floatListVal.get(i).getValue() == floatVal.getValue()){
+                            floatListVal.remove(i);
+                            break;
+                        }
+                    }
+                    result = new JavaishFloatList(floatListVal);
+                } else if(list.getType() == JavaishType.INTLIST){
+                    JavaishIntList intList = (JavaishIntList) list;
+                    List<JavaishInt> intListVal = intList.getList();
+                    JavaishInt intVal = (JavaishInt) val;
+                    for(int i = 0; i < intListVal.size(); i++){
+                        if(intListVal.get(i).getValue() == intVal.getValue()){
+                            intListVal.remove(i);
+                            break;
+                        }
+                    }
+                    result = new JavaishIntList(intListVal);
+                    System.out.println("REMOVE FROM: " + intVal.getType() + " " + intListVal.size());
+                } else if(list.getType() == JavaishType.STRINGLIST){
+                    JavaishStringList stringList = (JavaishStringList) list;
+                    List<JavaishString> stringListVal = stringList.getList();
+                    JavaishString stringVal = (JavaishString) val;
+                    for(int i = 0; i < stringListVal.size(); i++){
+                        if(stringListVal.get(i).getValue().equals(stringVal.getValue())){
+                            stringListVal.remove(i);
+                            break;
+                        }
+                    }
+                    result = new JavaishStringList(stringListVal);
+                }
+                break;
+            case REMOVEALLFROM:
+                if(list.getType() == JavaishType.BOOLEANLIST){
+                    JavaishBooleanList booleanList = (JavaishBooleanList) list;
+                    List<JavaishBoolean> booleanListVal = booleanList.getList();
+                    JavaishBoolean booleanVal = (JavaishBoolean) val;
+                    //Remove all with same val using for loop
+                    for(int i = 0; i < booleanListVal.size(); i++){
+                        if(booleanListVal.get(i).getValue() == booleanVal.getValue()){
+                            booleanListVal.remove(i);
+                            i--;
+                        }
+                    }
+                    result = new JavaishBooleanList(booleanListVal);
+                    
+                } else if(list.getType() == JavaishType.FLOATLIST){
+                    JavaishFloatList floatList = (JavaishFloatList) list;
+                    List<JavaishFloat> floatListVal = floatList.getList();
+                    JavaishFloat floatVal = null;
+                    if(val.getType() == JavaishType.INT){
+                        JavaishInt intVal = (JavaishInt) val;
+                        floatVal = new JavaishFloat(intVal.getValue());
+                    } else {
+                        floatVal = (JavaishFloat) val;
+                    }
+                    for(int i = 0; i < floatListVal.size(); i++){
+                        if(floatListVal.get(i).getValue() == floatVal.getValue()){
+                            floatListVal.remove(i);
+                            i--;
+                        }
+                    }
+                    result = new JavaishFloatList(floatListVal);
+                } else if(list.getType() == JavaishType.INTLIST){
+                    JavaishIntList intList = (JavaishIntList) list;
+                    List<JavaishInt> intListVal = intList.getList();
+                    JavaishInt intVal = (JavaishInt) val;
+                    for(int i = 0; i < intListVal.size(); i++){
+                        if(intListVal.get(i).getValue() == intVal.getValue()){
+                            intListVal.remove(i);
+                            i--;
+                        }
+                    }
+                    result = new JavaishIntList(intListVal);
+                } else if(list.getType() == JavaishType.STRINGLIST){
+                    JavaishStringList stringList = (JavaishStringList) list;
+                    List<JavaishString> stringListVal = stringList.getList();
+                    JavaishString stringVal = (JavaishString) val;
+                    for(int i = 0; i < stringListVal.size(); i++){
+                        if(stringListVal.get(i).getValue().equals(stringVal.getValue())){
+                            stringListVal.remove(i);
+                            i--;
+                        }
+                    }
+                    result = new JavaishStringList(stringListVal);
+                }
                 break;
         
             default:

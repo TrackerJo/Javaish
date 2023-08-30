@@ -252,6 +252,34 @@ public class Parser {
                     FunctionStmt functionStmt = new FunctionStmt(lineNumber, functionName, argumentsArr);
                     parents.add(functionStmt);
                     break;
+                case "removeAll":
+                    String[] removeAll = parseRemoveFrom(line, "removeAll");
+                    String removeAllVarName = removeAll[0];
+                    String removeAllValue = removeAll[1];
+                    Expression removeAllExpression = new Expression(removeAllValue, ExpressionReturnType.STRING, lineNumber);
+                    RemoveAllFromStmt removeAllStmt = new RemoveAllFromStmt(lineNumber, removeAllVarName, removeAllExpression);
+                    parents.get(parents.size() - 1).addStatement(removeAllStmt);
+                    break;
+                case "remove":
+                    String[] remove = parseRemoveFrom(line, "remove");
+                    String removeVarName = remove[0];
+                    String removeValue = remove[1];
+
+                    Expression removeValExpression = new Expression(removeValue, ExpressionReturnType.STRING, lineNumber);
+                    RemoveFromStmt removeStmt = new RemoveFromStmt(lineNumber, removeValExpression, removeVarName);
+                    parents.get(parents.size() - 1).addStatement(removeStmt);
+                    break;
+                    
+                case "removeAt":
+                    String[] removeAt = parseRemoveAt(line);
+                    String removeAtVarName = removeAt[0];
+                    String removeAtLocation = removeAt[1];
+                    Expression removeAtExpression = new Expression(removeAtLocation, ExpressionReturnType.NUMBER, lineNumber);
+                    RemoveAtStmt removeAtStmt = new RemoveAtStmt(lineNumber, removeAtExpression, removeAtVarName);
+                    parents.get(parents.size() - 1).addStatement(removeAtStmt);
+                    break;
+
+
                    
                 default:
                     if(variableNames.contains(words[0]) && (nextWord(line, words[0].length() + 1).equals("equals") || nextWord(line, words[0].length() + 1).equals("="))){
@@ -321,7 +349,107 @@ public class Parser {
         return parents.get(0);
     }
 
-   
+    private String[] parseRemoveFrom(String line, String type){
+        int i = 0;
+        boolean readingId = true;
+        boolean readingValue = false;
+        boolean readingVar = false;
+        boolean readingString = false;
+
+        String rString = "";
+        String varName = "";
+        String value = "";
+        while(i < line.length()){
+            char c = line.charAt(i);
+            boolean hasNext = i < line.length() - 1;
+            char nextChar = ' ';
+            if(hasNext){
+                nextChar = line.charAt(i + 1);
+            } 
+            if(c =='"'){
+                readingString = !readingString;
+                rString += c;
+            } else if(c == ' ' && !readingString){
+                if(rString.equals(type) && readingId){
+                    readingId = false;
+                    readingValue = true;
+                    rString = "";
+                } else if(readingValue && nextWord(line, i+1).equals("from")){
+                    readingValue = false;
+                    value = rString;
+                    readingVar = true;
+                    rString = "";
+                } else if(varName.equals("") && readingVar && rString.equals("from")){
+                    rString = "";
+                } else {
+                    rString += c;
+                }
+            } else if(c == '.' && !readingString && !hasNext){
+                varName = rString;
+                rString = "";
+            } else {
+                rString += c;
+            }
+            i++;
+        }
+
+        String[] returnArray = {varName, value};
+        return returnArray;
+
+
+    }
+
+    private String[] parseRemoveAt(String line){
+        int i = 0;
+        boolean readingId = true;
+        boolean readingLocation = false;
+        boolean readingVar = false;
+        boolean readingString = false;
+
+
+        String rString = "";
+        String varName = "";
+        String location = "";
+        while(i < line.length()){
+            char c = line.charAt(i);
+            boolean hasNext = i < line.length() - 1;
+            char nextChar = ' ';
+            if(hasNext){
+                nextChar = line.charAt(i + 1);
+            } 
+            if(c =='"'){
+                readingString = !readingString;
+                rString += c;
+            } else if(c == ' ' && !readingString){
+                if(rString.equals("removeAt") && readingId){
+                    readingId = false;
+                    readingVar = true;
+                    rString = "";
+                } else if(readingVar && nextWord(line, i+1).equals("sub")){
+                    readingVar = false;
+                    varName = rString;
+                    readingLocation = true;
+                    rString = "";
+                } else if(location.equals("") && readingLocation && rString.equals("sub")){
+                    rString = "";
+                } else {
+                    rString += c;
+                }
+            } else if(c == '.' && !readingString && !hasNext){
+                location = rString;
+                rString = "";
+            } else {
+                rString += c;
+            }
+            i++;
+        }
+
+        String[] returnArray = {varName, location};
+        return returnArray;
+
+
+    }
+
 
     private boolean possibleFunctionName(String name){
        //Check if contains parenthesis

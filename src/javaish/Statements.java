@@ -10,7 +10,7 @@ import javaish.JavaishVal.JavaishType;
 
 public class Statements {
     enum StmtType {
-        FUNCTION, IF, WHILE, FOREACH, RETURN, CALL, ASSIGNMENT, DECLARATION, VARIABLE, MUTATION, END, ELSE, CLASS, ELSEIF, FORWHEN, PRINT, SHOWMSGBOX
+        FUNCTION, IF, WHILE, FOREACH, RETURN, CALL, ASSIGNMENT, DECLARATION, VARIABLE, MUTATION, END, ELSE, CLASS, ELSEIF, FORWHEN, PRINT, SHOWMSGBOX, REMOVEAT, REMOVEFROM, REMOVEALLFROM
     }
 
     enum MutationType {
@@ -383,5 +383,68 @@ class ShowMsgBoxStmt extends Statements {
     }
 }
 
+class RemoveAtStmt extends Statements {
+    Expression location;
+    String listName;
+    
+    public RemoveAtStmt(int line, Expression location, String name){
+        this.location = location;
+        this.listName = name;
+        this.type = StmtType.REMOVEAT;
+        this.line = line;
+    }
+
+    public Expression getLocation() {
+        return location;
+    }
+
+    public String getListName() {
+        return listName;
+    }
+
+
+}
+
+class RemoveFromStmt extends Statements {
+    Expression value;
+    String listName;
+
+    
+    public RemoveFromStmt(int line,Expression value, String name){
+        this.value = value;
+        this.listName = name;
+        this.type = StmtType.REMOVEFROM;
+        this.line = line;
+    }
+
+    public Expression getValue() {
+        return value;
+    }
+
+    public String getListName() {
+        return listName;
+    }
+}
+
+class RemoveAllFromStmt extends Statements {
+    String listName;
+    Expression value;
+
+    
+    public RemoveAllFromStmt(int line,String name, Expression value){
+        this.listName = name;
+        this.type = StmtType.REMOVEALLFROM;
+        this.value = value;
+        this.line = line;
+    }
+
+    public String getListName() {
+        return listName;
+    }
+    
+    public Expression getValue() {
+        return value;
+    }
+}
 
 
