@@ -1,7 +1,7 @@
 let int[] arr = [0,1,2,3,4,5].
 add 5 to arr.
 removeAt arr sub 1.
-remove 0 from arr.
+remove (0 + 1) from arr.
 removeAll 5 from arr.
 
 let int test = arr sub (2 - 1).

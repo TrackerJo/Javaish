@@ -92,4 +92,19 @@ public class Error {
         System.err.println("Error: Index bigger than array length at line " + lineNumber + ": Got:" + index + ", Max: " + (arrayLength - 1));
         System.exit(0);
     }
+
+    public static void UnclosedParenthesis(int lineNumber, int columnNumber) {
+        System.err.println("Error: Unclosed parenthesis at line " + lineNumber + " column " + columnNumber);
+        System.exit(0);
+    }
+
+    public static void MissingPeriod(int lineNumber) {
+        System.err.println("Error: Missing period at end of statement at line " + lineNumber);
+        System.exit(0);
+    }
+
+    public static void UnclosedBracket(int lineNumber, int columnNumber) {
+        System.err.println("Error: Unclosed bracket at line " + lineNumber + " column " + columnNumber);
+        System.exit(0);
+    }
 }

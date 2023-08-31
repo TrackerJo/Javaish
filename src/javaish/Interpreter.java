@@ -948,7 +948,9 @@ public class Interpreter {
 
     private void evalDeclaration(DeclarationStmt declaration,Variables localVariables ,boolean isGlobal){
         JavaishType type = declaration.getVarType();
+        System.out.println("Declaration: Type:" + declaration.getVarType()+ " Name: "+ declaration.getName() + " Value:" + declaration.getValue());
         JavaishVal value = evalExpression(declaration.getValue(), localVariables, isGlobal);
+
         if(type != value.getType()){
             if(type == JavaishType.FLOAT && value.getType() == JavaishType.INT){
                 if(isGlobal){

@@ -24,18 +24,19 @@ public class Expression {
     private boolean goal;
     private ExpressionReturnType returnType;
     private Element[] elements;
+    private int startColumn;
     public Expression(Element[] elements, ExpressionReturnType returnType, int line) {
         this.elements = elements;
         this.returnType = returnType;
         this.line = line;
     }
 
-    public Expression(String expression,ExpressionReturnType returnType, int line) {
+    public Expression(String expression,ExpressionReturnType returnType, int line, int column) {
         this.returnType = returnType;
         this.line = line;
         //Parse Expression
         
-        this.elements = parseExpression(expression, 1);
+        this.elements = parseExpression(expression, column);
     }
 
     public int getLine() {
@@ -353,6 +354,14 @@ public class Expression {
             }
 
             i++;
+        }
+
+        if(currentArrayArgDepth > 0 || currentExpressionDepth > 0 || currentFunctionDepth > 0 || currentCastDepth > 0){
+            Error.UnclosedParenthesis(getLine(), column + i);
+        }
+
+        if(readingArray){
+            Error.UnclosedBracket(getLine(), column + i);
         }
 
         if(currentElement.length()>0 && !lastReadString){

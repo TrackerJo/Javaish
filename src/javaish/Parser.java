@@ -98,7 +98,8 @@ public class Parser {
                         default:
                             break;
                     }
-                    Expression expression = new Expression(varValue, expressionType, lineNumber);
+                    int columnVar = line.indexOf(varValue);
+                    Expression expression = new Expression(varValue, expressionType, lineNumber, columnVar);
                     DeclarationStmt dec = new DeclarationStmt(lineNumber,varName, varType, expression);
                     parents.get(parents.size() - 1).addStatement(dec);
                    
@@ -113,7 +114,8 @@ public class Parser {
                         parents.remove(parents.size() - 1);
                         parents.get(parents.size() - 1).addStatement(parent);
                         String condition = parseElseIf(line, "if");
-                        Expression boolExpression = new Expression(condition, ExpressionReturnType.BOOL, lineNumber);
+                        int columnIC = line.indexOf(condition);
+                        Expression boolExpression = new Expression(condition, ExpressionReturnType.BOOL, lineNumber, columnIC);
                         ElseIfStmt elseIfStmt = new ElseIfStmt(lineNumber, boolExpression);
                         parents.add(elseIfStmt);
                     } else if(words.length > 1 && words[1].equals("else")){
@@ -131,7 +133,8 @@ public class Parser {
                     break;
                 case "if":
                     String condition = parseLoop(line, "if");
-                    Expression boolExpression = new Expression(condition, ExpressionReturnType.BOOL, lineNumber);
+                    int columnC = line.indexOf(condition);
+                    Expression boolExpression = new Expression(condition, ExpressionReturnType.BOOL, lineNumber, columnC);
                     IfStmt ifStmt = new IfStmt(lineNumber, boolExpression);
                     parents.add(ifStmt);
                     break;
@@ -143,7 +146,8 @@ public class Parser {
                         
                        
                         String conditionE = parseElseIf(line, "if");
-                        Expression boolExpressionE = new Expression(conditionE, ExpressionReturnType.BOOL, lineNumber);
+                        int columnE = line.indexOf(conditionE);
+                        Expression boolExpressionE = new Expression(conditionE, ExpressionReturnType.BOOL, lineNumber, columnE);
                         ElseIfStmt elseIfStmt = new ElseIfStmt(lineNumber, boolExpressionE);
                         parents.add(elseIfStmt);
                     } else {
@@ -156,8 +160,10 @@ public class Parser {
                         String[] forLoop = parseForWhen(line);
                         String forCondition = forLoop[0];
                         String forIncrement = forLoop[1];
-                        Expression forConditionExpression = new Expression(forCondition, ExpressionReturnType.STRING, lineNumber);
-                        Expression forIncrementExpression = new Expression(forIncrement, ExpressionReturnType.NUMBER, lineNumber);
+                        int columnFC = line.indexOf(forCondition);
+                        int columnFI = line.indexOf(forIncrement);
+                        Expression forConditionExpression = new Expression(forCondition, ExpressionReturnType.STRING, lineNumber, columnFC);
+                        Expression forIncrementExpression = new Expression(forIncrement, ExpressionReturnType.NUMBER, lineNumber, columnFI);
                         ForWhenStmt forStmt = new ForWhenStmt(lineNumber, forConditionExpression, forIncrementExpression);
                         parents.add(forStmt); 
                     } else if(words[1].equals("each")){
@@ -176,27 +182,30 @@ public class Parser {
                     break;
                 case "while":
                     String whileCondition = parseLoop(line, "while");
-                    Expression whileBoolExpression = new Expression(whileCondition, ExpressionReturnType.BOOL, lineNumber);
+                    int columnW = line.indexOf(whileCondition);
+                    Expression whileBoolExpression = new Expression(whileCondition, ExpressionReturnType.BOOL, lineNumber, columnW);
                     WhileStmt whileStmt = new WhileStmt(lineNumber, whileBoolExpression);
                     parents.add(whileStmt);
                     break;
                 case "return":
                     String returnVal = parseReturn(line);
                     boolean hasReturn = returnVal != "";
-                    Expression returnExpression = new Expression(returnVal, ExpressionReturnType.STRING, lineNumber);
+                    int columnRe = line.indexOf(returnVal);
+
+                    Expression returnExpression = new Expression(returnVal, ExpressionReturnType.STRING, lineNumber, columnRe);
                     ReturnStmt returnStmt = new ReturnStmt(lineNumber, returnExpression, hasReturn);
                     parents.get(parents.size() - 1).addStatement(returnStmt);
                     break;
                 case "return.":
-                    ReturnStmt returnStmt2 = new ReturnStmt(lineNumber, new Expression("", ExpressionReturnType.STRING, lineNumber), false);
+                    ReturnStmt returnStmt2 = new ReturnStmt(lineNumber, new Expression("", ExpressionReturnType.STRING, lineNumber, 0), false);
                     parents.get(parents.size() - 1).addStatement(returnStmt2);
                     break;
                 case "add":
                     String[] addMutation = parseMutationAS(line, "add");
                     String addVarName = addMutation[0];
                     String addChange = addMutation[1];
-                    
-                    Expression addExpression = new Expression(addChange, ExpressionReturnType.NUMBER, lineNumber);
+                    int columnA = line.indexOf(addChange);
+                    Expression addExpression = new Expression(addChange, ExpressionReturnType.NUMBER, lineNumber, columnA);
                     MutationStmt addStmt = new MutationStmt(lineNumber, addVarName, addExpression,MutationType.ADD);
                     parents.get(parents.size() - 1).addStatement(addStmt);
                     break;
@@ -204,7 +213,8 @@ public class Parser {
                     String[] subtractMutation = parseMutationAS(line, "subtract");
                     String subtractVarName = subtractMutation[0];
                     String subtractChange = subtractMutation[1];
-                    Expression subtractExpression = new Expression(subtractChange, ExpressionReturnType.NUMBER, lineNumber);
+                    int columnS = line.indexOf(subtractChange);
+                    Expression subtractExpression = new Expression(subtractChange, ExpressionReturnType.NUMBER, lineNumber, columnS);
                     MutationStmt subtractStmt = new MutationStmt(lineNumber, subtractVarName, subtractExpression,MutationType.SUBTRACT);
                     parents.get(parents.size() - 1).addStatement(subtractStmt);
                     break;
@@ -212,7 +222,8 @@ public class Parser {
                     String[] multiplyMutation = parseMutationMD(line, "multiply");
                     String multiplyVarName = multiplyMutation[1];
                     String multiplyChange = multiplyMutation[0];
-                    Expression multiplyExpression = new Expression(multiplyChange, ExpressionReturnType.NUMBER, lineNumber);
+                    int columnM = line.indexOf(multiplyChange); 
+                    Expression multiplyExpression = new Expression(multiplyChange, ExpressionReturnType.NUMBER, lineNumber, columnM);
                     MutationStmt multiplyStmt = new MutationStmt(lineNumber, multiplyVarName, multiplyExpression,MutationType.MULTIPLY);
                     parents.get(parents.size() - 1).addStatement(multiplyStmt);
                     break;
@@ -220,7 +231,8 @@ public class Parser {
                     String[] divideMutation = parseMutationMD(line, "divide");
                     String divideVarName = divideMutation[1];
                     String divideChange = divideMutation[0];
-                    Expression divideExpression = new Expression(divideChange, ExpressionReturnType.NUMBER, lineNumber);
+                    int columnD = line.indexOf(divideChange);
+                    Expression divideExpression = new Expression(divideChange, ExpressionReturnType.NUMBER, lineNumber, columnD);
                     MutationStmt divideStmt = new MutationStmt(lineNumber, divideVarName, divideExpression,MutationType.DIVIDE);
                     parents.get(parents.size() - 1).addStatement(divideStmt);
                     break;
@@ -256,7 +268,8 @@ public class Parser {
                     String[] removeAll = parseRemoveFrom(line, "removeAll");
                     String removeAllVarName = removeAll[0];
                     String removeAllValue = removeAll[1];
-                    Expression removeAllExpression = new Expression(removeAllValue, ExpressionReturnType.STRING, lineNumber);
+                    int columnRAll = line.indexOf(removeAllValue);
+                    Expression removeAllExpression = new Expression(removeAllValue, ExpressionReturnType.STRING, lineNumber, columnRAll);
                     RemoveAllFromStmt removeAllStmt = new RemoveAllFromStmt(lineNumber, removeAllVarName, removeAllExpression);
                     parents.get(parents.size() - 1).addStatement(removeAllStmt);
                     break;
@@ -264,8 +277,8 @@ public class Parser {
                     String[] remove = parseRemoveFrom(line, "remove");
                     String removeVarName = remove[0];
                     String removeValue = remove[1];
-
-                    Expression removeValExpression = new Expression(removeValue, ExpressionReturnType.STRING, lineNumber);
+                    int columnR = line.indexOf(removeValue);
+                    Expression removeValExpression = new Expression(removeValue, ExpressionReturnType.STRING, lineNumber, columnR);
                     RemoveFromStmt removeStmt = new RemoveFromStmt(lineNumber, removeValExpression, removeVarName);
                     parents.get(parents.size() - 1).addStatement(removeStmt);
                     break;
@@ -274,7 +287,8 @@ public class Parser {
                     String[] removeAt = parseRemoveAt(line);
                     String removeAtVarName = removeAt[0];
                     String removeAtLocation = removeAt[1];
-                    Expression removeAtExpression = new Expression(removeAtLocation, ExpressionReturnType.NUMBER, lineNumber);
+                    int columnRA = line.indexOf(removeAtLocation);
+                    Expression removeAtExpression = new Expression(removeAtLocation, ExpressionReturnType.NUMBER, lineNumber, columnRA);
                     RemoveAtStmt removeAtStmt = new RemoveAtStmt(lineNumber, removeAtExpression, removeAtVarName);
                     parents.get(parents.size() - 1).addStatement(removeAtStmt);
                     break;
@@ -286,7 +300,8 @@ public class Parser {
                         String assignment = parseAssignment(line, words[0]);
                         
                         String varValueA = assignment;
-                        Expression expressionA = new Expression(varValueA, ExpressionReturnType.STRING, lineNumber);
+                        int columnVarA = line.indexOf(varValueA);
+                        Expression expressionA = new Expression(varValueA, ExpressionReturnType.STRING, lineNumber, columnVarA);
                         AssignmentStmt assignmentStmt = new AssignmentStmt(lineNumber, words[0], expressionA);
                         parents.get(parents.size() - 1).addStatement(assignmentStmt);
                         
@@ -304,8 +319,9 @@ public class Parser {
                         String arg = functionCallArgs[i];
                        
                         ExpressionReturnType argType = ExpressionReturnType.STRING;
+                        int columnArg = line.indexOf(arg);
                         
-                        functionArgExpressions[i] = new Expression(arg, argType, lineNumber);
+                        functionArgExpressions[i] = new Expression(arg, argType, lineNumber, columnArg);
                     }
                     if(functionCallName.equals("print")){
                         ////System.out .println("ADDING PRINT STMt");
@@ -355,6 +371,7 @@ public class Parser {
         boolean readingValue = false;
         boolean readingVar = false;
         boolean readingString = false;
+        boolean readPeriod = false;
 
         String rString = "";
         String varName = "";
@@ -387,10 +404,14 @@ public class Parser {
             } else if(c == '.' && !readingString && !hasNext){
                 varName = rString;
                 rString = "";
+                readPeriod = true;
             } else {
                 rString += c;
             }
             i++;
+        }
+         if(!readPeriod){
+            Error.MissingPeriod(lineNumber);
         }
 
         String[] returnArray = {varName, value};
@@ -405,6 +426,7 @@ public class Parser {
         boolean readingLocation = false;
         boolean readingVar = false;
         boolean readingString = false;
+        boolean readPeriod = false;
 
 
         String rString = "";
@@ -438,10 +460,15 @@ public class Parser {
             } else if(c == '.' && !readingString && !hasNext){
                 location = rString;
                 rString = "";
+                readPeriod = true;
             } else {
                 rString += c;
             }
             i++;
+        }
+
+         if(!readPeriod){
+            Error.MissingPeriod(lineNumber);
         }
 
         String[] returnArray = {varName, location};
@@ -646,6 +673,7 @@ public class Parser {
         boolean readingName = true;
         boolean readingValue = false;
         boolean readingString = false;
+        boolean readPeriod = false;
         String rString = "";
         String varValue = "";
 
@@ -675,11 +703,16 @@ public class Parser {
                 varValue = rString;
                 rString = "";
                 readingValue = false;
+                readPeriod = true;
             } 
             else{
                 rString += c;
             }
             i++;
+        }
+
+        if(!readPeriod){
+            Error.MissingPeriod(lineNumber);
         }
 
         return varValue;
@@ -693,6 +726,7 @@ public class Parser {
         boolean readingArgs = false;
         boolean readingArgName = false;
         boolean readingString = false;
+        boolean readPeriod = false;
 
         String rString = "";
         String functionName = "";
@@ -748,7 +782,10 @@ public class Parser {
                 } else {
                     rString += c;
                 }
+            } else if(c == '.' && !readingString){
+               readPeriod = true;
             } 
+           
             else {
                 if((c != ' ' || c != '(' || c != ')') && !readingString){
                     rString += c;
@@ -759,6 +796,10 @@ public class Parser {
                 
             }
             i++;
+        }
+
+         if(!readPeriod){
+            Error.MissingPeriod(lineNumber);
         }
 
         String[] functionCall = {functionName, args};
@@ -846,6 +887,7 @@ public class Parser {
         boolean readingChange = false;
         boolean readingVar = false;
         boolean readingString = false;
+        boolean readPeriod = false;
 
         String id = "to";
         if(type.equals("subtract")){
@@ -882,10 +924,15 @@ public class Parser {
             } else if(c == '.' && !readingString && !hasNext){
                 varName = rString;
                 rString = "";
+                readPeriod = true;
             } else {
                 rString += c;
             }
             i++;
+        }
+
+         if(!readPeriod){
+            Error.MissingPeriod(lineNumber);
         }
 
         String[] returnArray = {varName, change};
@@ -900,6 +947,7 @@ public class Parser {
         boolean readingChange = false;
         boolean readingVar = false;
         boolean readingString = false;
+        boolean readPeriod = false;
 
         String rString = "";
         String varName = "";
@@ -932,10 +980,15 @@ public class Parser {
             } else if(c == '.' && !readingString && !hasNext){
                 varName = rString;
                 rString = "";
+                readPeriod = true;
             } else {
                 rString += c;
             }
             i++;
+        }
+
+         if(!readPeriod){
+            Error.MissingPeriod(lineNumber);
         }
 
         String[] returnArray = {varName, change};
@@ -962,6 +1015,7 @@ public class Parser {
     private String parseReturn (String line){
         int i = 0;
         boolean readingId = true;
+        boolean readPeriod = false;
 
         String rString = "";
         String returnVal = "";
@@ -982,11 +1036,16 @@ public class Parser {
                 }
             } else if(c == '.' && !hasNext){
                 returnVal = rString;
+                readPeriod = true;
                 rString = "";
             } else {
                 rString += c;
             }
             i++;
+        }
+
+         if(!readPeriod){
+            Error.MissingPeriod(lineNumber);
         }
 
         return returnVal;
@@ -1031,7 +1090,7 @@ public class Parser {
         boolean readingName = false;
         boolean readingValue = false;
         boolean readingString = false;
-        
+        boolean readPeriod = false;
         
         String varName = "";
         String varType = "";
@@ -1079,11 +1138,15 @@ public class Parser {
                 }
             } else if(c == '.' && !readingString && !hasNext){
                 varValue = rString;
+                readPeriod = true;
             }else {
                 rString += c;
                 
             }
             i++;
+        }
+        if(!readPeriod){
+            Error.MissingPeriod(lineNumber);
         }
 
         variableNames.add(varName);
