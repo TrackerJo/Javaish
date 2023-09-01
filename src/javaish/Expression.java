@@ -61,6 +61,7 @@ public class Expression {
         boolean readingArrayElmt = false;
         boolean readingArrayElmtArgs = false;
         boolean readingArrayArgExpression = false;
+        boolean readingGetArrayLength = false;
         JavaishType castType = null;
         ExpressionReturnType castReturnType = ExpressionReturnType.NUMBER;
         List<Element> elements = new ArrayList<Element>();
@@ -211,6 +212,18 @@ public class Expression {
                 } else if(currentElement.equals("sub") && !readingString && readingArrayElmt){
                     readingArrayElmtArgs = true;
                     currentElement = "";
+                } else if(currentElement.equals("length") ){
+                    System.out.println("LENGTH NEXT WORD: " + nextWord(expression, i+1));
+                    if(nextWord(expression, i + 1).equals("of")){
+                        readingGetArrayLength = true;
+                        currentElement = "";
+                        
+                        i+=3;
+                    }
+                } else if(readingGetArrayLength){
+                    elements.add(new ArrayLengthElmt(currentElement));
+                    currentElement = "";
+                    readingGetArrayLength = false;
                 }
                 else if(readingArrayElmtArgs && !readingString && !readingArrayArgExpression){
                     Expression index = new Expression(parseExpression(currentElement, column + i), ExpressionReturnType.NUMBER, line);
@@ -370,7 +383,12 @@ public class Expression {
                   Expression index = new Expression(parseExpression(currentElement, column + i), ExpressionReturnType.NUMBER, line);
                     elements.add(new ListValElmt(currentArrayName, index));
                     currentElement = "";
-            } else {
+            } else 
+            if(readingGetArrayLength){
+                elements.add(new ArrayLengthElmt(currentElement));
+                currentElement = "";
+                readingGetArrayLength = false;
+            }else {
                 elements.add(parseElement(currentElement, column + i));
             }
             

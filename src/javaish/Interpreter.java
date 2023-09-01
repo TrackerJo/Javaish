@@ -562,7 +562,33 @@ public class Interpreter {
                     }
 
                
-
+                    break;
+                case ARRAYLENGTH:
+                    ArrayLengthElmt arrayLength = (ArrayLengthElmt) elmt;
+                    String arrayName = arrayLength.getArrayName();
+                    JavaishVal arrayVal = null;
+                    if(localVariables.isVariable(arrayName)){
+                        arrayVal = localVariables.getVariableValue(arrayName);
+                    } else if(globalVariables.isVariable(arrayName)){
+                        arrayVal = globalVariables.getVariableValue(arrayName);
+                    } else {
+                        Error.VariableNotDeclared(arrayName, lineNumber);
+                        return null;
+                    }
+                    if(arrayVal instanceof JavaishListVal){
+                        JavaishListVal listLVal = (JavaishListVal) arrayVal;
+                        JavaishList listL = listLVal.getValue();
+                        JavaishInt length = new JavaishInt(listL.getLength());
+                        if(isComp){
+                            compVal = performOperation(operation, compVal, length);
+                        } else {
+                            total = performOperation(operation, total, length);
+                        }
+                    } else {
+                        Error.TypeMismatch("List", arrayVal.typeString(), lineNumber);
+                        return null;
+                    }
+                    break;
                 default:
                     break;
             }

@@ -10,7 +10,7 @@ import javaish.JavaishVal.JavaishType;
 
 public class Element {
     public enum ElementType {
-        PLUS, MINUS, DIVIDE, MULTIPLY, FLOAT, INTEGER, VARIABLE, FUNCTION, EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_EQUAL, GREATER_THAN_EQUAL, STRING, BOOL, AND, OR, NOT, EXPRESSION, CAST, SHOWINPUTBOX, LIST, LISTVAL
+        PLUS, MINUS, DIVIDE, MULTIPLY, FLOAT, INTEGER, VARIABLE, FUNCTION, EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_EQUAL, GREATER_THAN_EQUAL, STRING, BOOL, AND, OR, NOT, EXPRESSION, CAST, SHOWINPUTBOX, LIST, LISTVAL, ARRAYLENGTH
     }
 
     ElementType type;
@@ -397,5 +397,21 @@ class ListValElmt extends Element{
 
     public String toString(){
         return listName + "[" + index.toString() + "]";
+    }
+}
+
+class ArrayLengthElmt extends Element{
+    String arrayName;
+    public ArrayLengthElmt(String arrayName){
+        this.arrayName = arrayName;
+        this.type = ElementType.ARRAYLENGTH;
+    }
+
+    public String getArrayName(){
+        return arrayName;
+    }
+
+    public String toString(){
+        return arrayName + ".length";
     }
 }
