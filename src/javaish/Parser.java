@@ -159,17 +159,20 @@ public class Parser {
                     if(words[1].equals("when")){
                         String[] forLoop = parseForWhen(line);
                         String forCondition = forLoop[0];
-                        String forIncrement = forLoop[1];
+                        String forIncrementVar = forLoop[2];
+                        String forIncrementVal = forLoop[1];
+                        System.out.println("ForCondition: " + forCondition);
                         int columnFC = line.indexOf(forCondition);
-                        int columnFI = line.indexOf(forIncrement);
+                        int columnFIV = line.indexOf(forIncrementVal);
                         Expression forConditionExpression = new Expression(forCondition, ExpressionReturnType.STRING, lineNumber, columnFC);
-                        Expression forIncrementExpression = new Expression(forIncrement, ExpressionReturnType.NUMBER, lineNumber, columnFI);
-                        ForWhenStmt forStmt = new ForWhenStmt(lineNumber, forConditionExpression, forIncrementExpression);
+                        Expression forIncrementExpression = new Expression(forIncrementVal, ExpressionReturnType.NUMBER, lineNumber, columnFIV);
+                        ForWhenStmt forStmt = new ForWhenStmt(lineNumber, forConditionExpression, forIncrementExpression, forIncrementVar);
                         parents.add(forStmt); 
                     } else if(words[1].equals("each")){
                         String[] forLoop = parseForEach(line);
                         String forVarName = forLoop[0];
                         String forListName = forLoop[1];
+                        
                         
                         ForEachStmt forStmt = new ForEachStmt(lineNumber, forVarName, forListName);
                         parents.add(forStmt);
@@ -552,13 +555,15 @@ public class Parser {
         boolean readingId = true;
         boolean readingWhen = false;
         boolean readingCondition = false;
-        boolean readingIncrement = false;
+        boolean readingIncrementVar = false;
+        boolean readingIncrementVal = false;
         boolean readingString = false;
         boolean readingExpression = false;
         int parenCount = 0;
         String rString = "";
         String condition = "";
         String increment = "";
+        String incrementVar = "";
         while(i < line.length()){
             char c = line.charAt(i);
             if(c == '"'){
@@ -594,11 +599,17 @@ public class Parser {
                     
                     rString = "";
                 } else if(rString.equals("increment")){
-                    readingIncrement = true;
+                    readingIncrementVar = true;
                     rString = "";
+                } else if(readingIncrementVar && nextWord(line, i + 1).equals("by")){
+                    readingIncrementVar = false;
+                    readingIncrementVal = true;
+                    incrementVar = rString;
+                    rString = "";
+                    i += 3;
                 }
-                else if(readingIncrement){
-                    readingIncrement = false;
+                else if(readingIncrementVal){
+                    readingIncrementVal = false;
                     increment = rString;
                     
                     rString = "";
@@ -617,7 +628,7 @@ public class Parser {
             i++;
         }
 
-        return new String[]{condition, increment};
+        return new String[]{condition, increment, incrementVar};
 
     }
 

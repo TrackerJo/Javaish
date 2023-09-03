@@ -331,37 +331,8 @@ public class Expression {
                 readingArray = false;
                 currentElement = "";
                 arrayElmts = new ArrayList<Expression>();
-            } else if(c=='<' && !readingString && !readingFunction && !readingExpression && !readingCast){
-                if(currentElement.equals("")){
-                    readingCast = true;
-                    currentElement += c;
-                }
-            } else if(c=='>' && !readingString && readingCast){
-                currentCastDepth--;
-                if(currentCastDepth==0){
-                    readingCast = false;
-                    String castTypeStr = currentElement.substring(1);
-                    if(castTypeStr.equals("int")){
-                        castType = JavaishType.INT;
-                        castReturnType = ExpressionReturnType.INT;
-                    } else if(castTypeStr.equals("float")){
-                        castType = JavaishType.FLOAT;
-                        castReturnType = ExpressionReturnType.FLOAT;
-                    } else if(castTypeStr.equals("string")){
-                        castType = JavaishType.STRING;
-                        castReturnType = ExpressionReturnType.STRING;
-                    } else if(castTypeStr.equals("bool")){
-                        castType = JavaishType.BOOLEAN;
-                        castReturnType = ExpressionReturnType.BOOL;
-                    } else {
-                        Error.UnexpectedElmt(castTypeStr, getLine(), column + i);
-                    }
-                    currentElement = "";
-                } else {
-                    currentElement += c;
-                }
-            }
             
+            } 
             else {
                 currentElement += c;
             }

@@ -107,4 +107,9 @@ public class Error {
         System.err.println("Error: Unclosed bracket at line " + lineNumber + " column " + columnNumber);
         System.exit(0);
     }
+
+    public static void ListEmpty(int lineNumber, String listName) {
+        System.err.println("Error: List " + listName + " empty at line " + lineNumber);
+        System.exit(0);
+    }
 }

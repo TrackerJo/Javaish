@@ -126,13 +126,15 @@ class WhileStmt extends Statements {
 }
 
 class ForWhenStmt extends Statements {
-    Expression condition;
+    String incVar;
     Expression increment;
-    public ForWhenStmt(int line,Expression condition, Expression increment) {
+    Expression condition;
+    public ForWhenStmt(int line,Expression condition, Expression increment, String lineVar) {
         this.line = line;
         this.condition = condition;
         this.increment = increment;
         this.type = StmtType.FORWHEN;
+        this.incVar = lineVar;
         this.isBlock = true;
     }
 
@@ -142,6 +144,10 @@ class ForWhenStmt extends Statements {
 
     public Expression getIncrement() {
         return increment;
+    }
+    
+    public String getIncVar() {
+        return incVar;
     }
 
      public int getLine() {

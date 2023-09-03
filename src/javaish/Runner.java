@@ -5,6 +5,8 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import javax.swing.JOptionPane;
+
 import java.util.List;
 
 import javaish.JavaishVal.JavaishType;
@@ -21,6 +23,7 @@ public class Runner {
         Statements statements = parser.parse();
         System.out.println(statements.getBody());
         printStmts(statements.getBody(),0);
+      
         Interpreter interpreter = new Interpreter(variables);
         interpreter.interpretFunction(statements.getBody(), null, null, "", true);
         printVars(variables);
@@ -202,10 +205,11 @@ public class Runner {
                     break;
                 case FORWHEN:
                     ForWhenStmt forwhenStmt = (ForWhenStmt) statement;
-                    System.out.println("ForWhen: " + forwhenStmt.getCondition() + " Increment: " + forwhenStmt.getIncrement());
+                    System.out.println("ForWhen: " + forwhenStmt.getCondition() + " Increment " + forwhenStmt.getIncVar() + " by " + forwhenStmt.getIncrement());
                     if(forwhenStmt.getBody() != null){
                         printStmts(forwhenStmt.getBody(), indent + 1);
                     }
+                    break;
                 case SHOWMSGBOX:
                     ShowMsgBoxStmt showMsgBoxStmt = (ShowMsgBoxStmt) statement;
                     System.out.println("ShowMsgBox: " + showMsgBoxStmt.getValue().toString());
@@ -275,3 +279,4 @@ public class Runner {
         System.exit(1);
     }
 }
+

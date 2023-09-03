@@ -6,3 +6,11 @@ removeAll 5 from arr.
 
 let int test = arr sub (2 - 1).
 let int length = length of arr + 1.
+
+for when i < length increment i by 1 {
+    print("hello").
+}
+
+for each i in arr {
+    print(i).
+}

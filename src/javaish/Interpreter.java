@@ -15,6 +15,7 @@ public class Interpreter {
    int lineNumber = 0;
    
    
+   
     Variables globalVariables;
     enum Operator {
         PLUS, MINUS, DIVIDE, MULTIPLY, EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_EQUAL, GREATER_THAN_EQUAL, REMOVEALLFROM, REMOVEAT, REMOVEFROM
@@ -22,6 +23,7 @@ public class Interpreter {
     public Interpreter( Variables variables){
         
         this.globalVariables = variables;
+   
     }
 
     public JavaishVal interpretFunction(List<Statements> statements,  Argument[] args,  JavaishVal[] params, String name, boolean isGlobal){
@@ -54,7 +56,7 @@ public class Interpreter {
                 
             }
         }
-       
+        
         JavaishVal returnVal = interpretBody(statements, localVariables, isGlobal);
         if(returnVal != null){
             return returnVal;
@@ -72,10 +74,12 @@ public class Interpreter {
         
 
         for (Statements statement : statements) {
+        
             if(returnVal.hasReturn()){
                 return returnVal.getValue();
             }
             interpretStmt(statement, localVariables, isGlobal, pastResult, returnVal);
+            
         }
         if(returnVal.hasReturn()){
             return returnVal.getValue();
@@ -131,11 +135,11 @@ public class Interpreter {
                 break;
             case FOREACH:
                 ForEachStmt foreachStmt = (ForEachStmt) stmt;
-                evalForEach(foreachStmt);
+                evalForEach(foreachStmt, localVariables, isGlobal);
                 break;
             case FORWHEN:
                 ForWhenStmt forwhenStmt = (ForWhenStmt) stmt;
-                evalForWhen(forwhenStmt);
+                evalForWhen(forwhenStmt, localVariables, isGlobal);
                 break;
             case PRINT:
                 PrintStmt printStmt = (PrintStmt) stmt;
@@ -1135,12 +1139,140 @@ public class Interpreter {
 
     }
 
-    private void evalForEach(ForEachStmt foreachStmt){
+    private void evalForEach(ForEachStmt foreachStmt, Variables localVariables, boolean isGlobal){
+        String tempVarName = foreachStmt.getTempVar();
+        String listName = foreachStmt.getListVar();
+        JavaishVal listVal = null;
+        if(localVariables.isVariable(listName)){
+            listVal = localVariables.getVariableValue(listName);
+        } else if(globalVariables.isVariable(listName)){
+            listVal = globalVariables.getVariableValue(listName);
+        } else {
+            Error.VariableNotDeclared(listName, lineNumber);
+            return;
+        }
+        if(listVal.getType() != JavaishType.LIST){
+            Error.TypeMismatch("List", listVal.typeString(), lineNumber);
+            return;
+        }
+        JavaishListVal listLVal = (JavaishListVal) listVal;
+        JavaishList list = listLVal.getValue();
+        
+        if(list.getType() == JavaishType.STRINGLIST){
+            JavaishStringList stringList = (JavaishStringList) list;
+            List<JavaishString> listVals = stringList.getList();
+            if(listVals == null){
+                Error.ListEmpty(lineNumber, listName);
+                return;
+            }
+            //Create temp variable
+            if(isGlobal){
+                globalVariables.addVariable(tempVarName, JavaishType.STRING, new JavaishString(""));
+            } else {
+                localVariables.addVariable(tempVarName, JavaishType.STRING, new JavaishString(""));
+            }
+            for (JavaishString listValI : listVals) {
+                if(localVariables.isVariable(tempVarName)){
+                    localVariables.setVariableValue(tempVarName, listValI, lineNumber);
+                } else {
+                    globalVariables.setVariableValue(tempVarName, listValI, lineNumber);
+                }
+                interpretBody(foreachStmt.getBody(), localVariables, false);
+            }
+
+        } else if(list.getType() == JavaishType.BOOLEANLIST){
+            JavaishBooleanList booleanList = (JavaishBooleanList) list;
+            List<JavaishBoolean> listVals = booleanList.getList();
+            if(listVals == null){
+                Error.ListEmpty(lineNumber, listName);
+                return;
+            }
+            if(isGlobal){
+                globalVariables.addVariable(tempVarName, JavaishType.BOOLEAN, new JavaishBoolean(false));
+            } else {
+                localVariables.addVariable(tempVarName, JavaishType.BOOLEAN, new JavaishBoolean(false));
+            }
+            for (JavaishBoolean listValI : listVals) {
+                if(localVariables.isVariable(tempVarName)){
+                    localVariables.setVariableValue(tempVarName, listValI, lineNumber);
+                } else {
+                    globalVariables.setVariableValue(tempVarName, listValI, lineNumber);
+                }
+                interpretBody(foreachStmt.getBody(), localVariables, false);
+            }
+        } else if(list.getType() == JavaishType.INTLIST){
+            JavaishIntList intList = (JavaishIntList) list;
+            List<JavaishInt> listVals = intList.getList();
+            if(listVals == null){
+                Error.ListEmpty(lineNumber, listName);
+                return;
+            }
+            if(isGlobal){
+                globalVariables.addVariable(tempVarName, JavaishType.INT, new JavaishInt(0));
+            } else {
+                localVariables.addVariable(tempVarName, JavaishType.INT, new JavaishInt(0));
+            }
+            for (JavaishInt listValI : listVals) {
+                if(localVariables.isVariable(tempVarName)){
+                    localVariables.setVariableValue(tempVarName, listValI, lineNumber);
+                } else {
+                    globalVariables.setVariableValue(tempVarName, listValI, lineNumber);
+                }
+                interpretBody(foreachStmt.getBody(), localVariables, false);
+            }
+        } else if(list.getType() == JavaishType.FLOATLIST){
+            JavaishFloatList floatList = (JavaishFloatList) list;
+            List<JavaishFloat> listVals = floatList.getList();
+            if(listVals == null){
+                Error.ListEmpty(lineNumber, listName);
+                return;
+            }
+            if(isGlobal){
+                globalVariables.addVariable(tempVarName, JavaishType.FLOAT, new JavaishFloat(0));
+            } else {
+                localVariables.addVariable(tempVarName, JavaishType.FLOAT, new JavaishFloat(0));
+            }
+            for (JavaishFloat listValI : listVals) {
+                if(localVariables.isVariable(tempVarName)){
+                    localVariables.setVariableValue(tempVarName, listValI, lineNumber);
+                } else {
+                    globalVariables.setVariableValue(tempVarName, listValI, lineNumber);
+                }
+                interpretBody(foreachStmt.getBody(), localVariables, false);
+            }
+        } else {
+            Error.TypeMismatch("List", listVal.typeString(), lineNumber);
+            return;
+        }
 
     }
 
-    private void evalForWhen(ForWhenStmt forwhenStmt){
-
+    private void evalForWhen(ForWhenStmt forwhenStmt, Variables localVariables, boolean isGlobal){
+        String incVarName = forwhenStmt.getIncVar();
+        if(!localVariables.isVariable(incVarName)){
+            localVariables.addVariable(incVarName, JavaishType.INT, new JavaishInt(0));
+        }
+        Expression condition = forwhenStmt.getCondition();
+        JavaishVal result = evalExpression(condition, localVariables, isGlobal);
+        if(result == null){
+            return;
+        }
+        while(((JavaishBoolean) result).getValue() == true){
+            interpretBody(forwhenStmt.getBody(), localVariables, false);
+            JavaishVal incVal = localVariables.getVariableValue(incVarName);
+            if(incVal == null){
+                return;
+            }
+            JavaishInt incInt = (JavaishInt) incVal;
+            Expression incExpression = forwhenStmt.getIncrement();
+            JavaishVal incVal2 = evalExpression(incExpression, localVariables, isGlobal);
+            incInt = (JavaishInt) performOperation(Operator.PLUS, incInt, incVal2);
+            localVariables.setVariableValue(incVarName, incInt, lineNumber);
+            result = evalExpression(condition, localVariables, isGlobal);
+            if(result == null){
+                return;
+            }
+        }
     }
 
     private void evalShowMsgBox(ShowMsgBoxStmt showMsgStmt, Variables localVariables, boolean isGlobal){
