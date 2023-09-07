@@ -1263,10 +1263,15 @@ public class Interpreter {
             if(incVal == null){
                 return;
             }
-            JavaishInt incInt = (JavaishInt) incVal;
+            
             Expression incExpression = forwhenStmt.getIncrement();
             JavaishVal incVal2 = evalExpression(incExpression, localVariables, isGlobal);
-            incInt = (JavaishInt) performOperation(Operator.PLUS, incInt, incVal2);
+            JavaishVal incResult =  performOperation(Operator.PLUS, incVal, incVal2);
+            if(incResult.getType() != JavaishType.INT){
+                Error.TypeMismatch("Int", incResult.typeString(), lineNumber);
+                return;
+            }
+            JavaishInt incInt = (JavaishInt) incResult;
             localVariables.setVariableValue(incVarName, incInt, lineNumber);
             result = evalExpression(condition, localVariables, isGlobal);
             if(result == null){
