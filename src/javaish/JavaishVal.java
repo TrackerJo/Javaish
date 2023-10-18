@@ -15,14 +15,13 @@ public sealed interface JavaishVal {
         FLOATLIST,
         STRINGLIST,
         BOOLEANLIST,
-        LIST
+        LIST,
+        INPUT
  
 
     }
    
 }
-
-
 
 final class JavaishInt implements JavaishVal {
     int value;

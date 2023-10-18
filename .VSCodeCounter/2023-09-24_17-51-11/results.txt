@@ -1,0 +1,36 @@
+Date : 2023-09-24 17:51:11
+Directory : /Users/nathanielkemmenash/Desktop/VS Code Projects/Javaish/src/javaish
+Total : 12 files,  4711 codes, 82 comments, 755 blanks, all 5548 lines
+
+Languages
++----------+------------+------------+------------+------------+------------+
+| language | files      | code       | comment    | blank      | total      |
++----------+------------+------------+------------+------------+------------+
+| Java     |         12 |      4,711 |         82 |        755 |      5,548 |
++----------+------------+------------+------------+------------+------------+
+
+Directories
++-----------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                    | files      | code       | comment    | blank      | total      |
++-----------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                       |         12 |      4,711 |         82 |        755 |      5,548 |
++-----------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++-----------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| filename                                                                                | language | code       | comment    | blank      | total      |
++-----------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/Javaish/src/javaish/Argument.java    | Java     |         17 |          0 |          5 |         22 |
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/Javaish/src/javaish/Element.java     | Java     |        313 |          0 |        104 |        417 |
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/Javaish/src/javaish/Error.java       | Java     |         69 |         22 |         26 |        117 |
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/Javaish/src/javaish/Expression.java  | Java     |        430 |         16 |         68 |        514 |
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/Javaish/src/javaish/Identifiers.java | Java     |         12 |          0 |         10 |         22 |
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/Javaish/src/javaish/Interpreter.java | Java     |      1,532 |         20 |        165 |      1,717 |
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/Javaish/src/javaish/JavaishList.java | Java     |        148 |          0 |         19 |        167 |
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/Javaish/src/javaish/JavaishVal.java  | Java     |         98 |          0 |         15 |        113 |
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/Javaish/src/javaish/Parser.java      | Java     |      1,049 |         16 |        146 |      1,211 |
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/Javaish/src/javaish/Runner.java      | Java     |        231 |          5 |         47 |        283 |
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/Javaish/src/javaish/Statements.java  | Java     |        357 |          0 |        100 |        457 |
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/Javaish/src/javaish/Variables.java   | Java     |        455 |          3 |         50 |        508 |
+| Total                                                                                   |          |      4,711 |         82 |        755 |      5,548 |
++-----------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+

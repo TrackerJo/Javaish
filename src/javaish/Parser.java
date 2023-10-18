@@ -179,7 +179,7 @@ public class Parser {
                             
                     } else {
                         //System.out .println("Error: Invalid for loop declaration at line " + lineNumber + ":" + line);
-                        System.exit(0);
+                        //System.exit(0);
                     }
                       
                     break;
@@ -1147,7 +1147,7 @@ public class Parser {
                     readingString = false;
                     rString += c;
                 }
-            } else if(c == '.' && !readingString && !hasNext){
+            } else if(c == '.' && !readingString && (!hasNext || nextChar == ' ')){
                 varValue = rString;
                 readPeriod = true;
             }else {

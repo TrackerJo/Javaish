@@ -298,12 +298,14 @@ class BoolElmt extends Element {
 }
 
 class NotElmt extends Element {
-    public NotElmt() {
+  Expression expression;
+    public NotElmt(Expression expression) {
         type = ElementType.NOT;
+        this.expression = expression;
     }
 
     public String toString(){
-        return "!";
+        return "!" + expression.toString();
     }
 }
 
@@ -365,6 +367,24 @@ class ListElmt extends Element{
 
     public JavaishType getListType(){
         return listType;
+    }
+
+    public String getListTypeString(){
+       switch (listType) {
+        case FLOAT:
+            return "float";
+            
+        case INT:
+            return "int";
+        
+        case STRING:
+            return "String";
+        case BOOLEAN:
+            return "boolean";
+        default:
+            break;
+       }
+         return "";
     }
 
     public String toString(){

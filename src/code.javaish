@@ -1,0 +1,35 @@
+let String hi equal showInputDialog("hello").
+let String[] list = ["5", "3"].
+hi = toString(53).
+let int x = 5.
+if x == 2 {
+    hi = "now".
+} else if x == 5 {
+    hi = "yay".
+} else {
+    hi = "wow".
+}
+
+while x less than 3 {
+    x = 5.
+}
+
+for each name in list {
+    hi = name.
+}
+
+function test(String name){
+    print(name).
+    return "2".
+}
+test("t").
+hi = test("4").
+showMessageDialog("hi").
+
+function done(){
+    return.
+}
+
+for when x > 4 increment x by 3 {
+    print(x).
+}

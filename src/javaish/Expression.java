@@ -62,6 +62,7 @@ public class Expression {
         boolean readingArrayElmtArgs = false;
         boolean readingArrayArgExpression = false;
         boolean readingGetArrayLength = false;
+        boolean readingNot = false;
         JavaishType castType = null;
         ExpressionReturnType castReturnType = ExpressionReturnType.NUMBER;
         List<Element> elements = new ArrayList<Element>();
@@ -73,10 +74,15 @@ public class Expression {
         int currentCastDepth = 0;
         int currentFunctionDepth = 0;
         int currentArrayArgDepth = 0;
+      
         List<Expression> functionArgs = new ArrayList<Expression>();
         List<Expression> arrayElmts = new ArrayList<Expression>();
         while(i<expression.length()){
             char c = expression.charAt(i);
+             char nextChar = ' ';
+            if(i+1<expression.length()){
+                nextChar = expression.charAt(i+1);
+            }
           
            
             if(c=='(' && !readingFunction && !readingString ){
@@ -170,6 +176,10 @@ public class Expression {
                     currentElement += c;
                 }
             }
+            else if(c=='!' && !readingString && !readingArrayArgExpression && !readingCast && !readingExpression && !readingFunctionArgs && nextChar != '=' && nextChar != '<' && nextChar != '>'){
+                System.out.println("READING NOT");
+                readingNot = true;
+            }
             else if(c==' '){
                 if(readingString || readingExpression || readingCast || readingFunctionArgs || readingArrayArgExpression){
                     currentElement += c;
@@ -233,7 +243,15 @@ public class Expression {
                 else{
                     if(currentElement.length()>0 && !currentElement.equals("not") && !readingFunction){
                         //System.out .println("PARSING ELEMENT: "+currentElement);
-                        elements.add(parseElement(currentElement, column + i));
+                        
+                        if(readingNot){
+                            System.out.println("Adding NOT");
+                            elements.add(new NotElmt(new Expression(parseExpression(currentElement, column + i), ExpressionReturnType.NUMBER, line)));
+                            readingNot = false;
+                        } else {
+                            Element elmt = parseElement(currentElement, column + i);
+                            elements.add(elmt);
+                        }
                         currentElement = "";
                         lastReadString = false;
                     }
@@ -250,6 +268,7 @@ public class Expression {
 
             else if(readingFunction && readingFunctionArgs && c == ',' && !readingString){
                 //System.out .println("PARSING FUNCTION ARG: "+currentElement);
+                
                 functionArgs.add(new Expression(parseExpression(currentElement, column + i), ExpressionReturnType.NUMBER, line));
                 currentElement = "";
             } else if(readingFunction && c == ')' && !readingString){
@@ -289,7 +308,15 @@ public class Expression {
                             if(functionArgs.size()!=1){
                             Error.ArgumentLengthMismatch(currentFunctionName, getLine(), 1, functionArgs.size() );
                         }
-                        elements.add(new CastElmt(JavaishType.BOOLEAN, functionArgs.get(0)));
+                        if(readingNot){
+                            System.out.println("Adding NOT");
+                            Element[] notArgs = {new CastElmt(JavaishType.BOOLEAN, functionArgs.get(0))};
+                            elements.add(new NotElmt(new Expression(notArgs, ExpressionReturnType.NUMBER, line)));
+                            readingNot = false;
+                        } else {
+                            elements.add(new CastElmt(JavaishType.BOOLEAN, functionArgs.get(0)));
+                        }
+                        //elements.add(new CastElmt(JavaishType.BOOLEAN, functionArgs.get(0)));
                     
                     } else if(currentFunctionName.equals("showInputDialog")){
                             if(functionArgs.size()!=1){
@@ -300,8 +327,25 @@ public class Expression {
                             elements.add(new ShowInputBoxElmt(functionArgs.get(0)));
                         }
                     else {
-                        Expression[] functionArgsArray = functionArgs.toArray(new Expression[functionArgs.size()]);
-                        elements.add(new FunctionElmt(currentFunctionName, functionArgsArray));
+                        //Loop through function args and check if they are valid
+                        List<Expression> newFunctionArgs = new ArrayList<Expression>();
+                        for (Expression functionArg : functionArgs) {
+                            if(functionArg.elements.length != 0){
+                                newFunctionArgs.add(functionArg);
+                            }
+                            
+                        }
+                        Expression[] functionArgsArray = newFunctionArgs.toArray(new Expression[newFunctionArgs.size()]);
+                       
+                        Element[] notElements = {new FunctionElmt(currentFunctionName, functionArgsArray)};
+                        if(readingNot){
+                            System.out.println("Adding NOT");
+                            elements.add(new NotElmt(new Expression(notElements, ExpressionReturnType.NUMBER, line)));
+                            readingNot = false;
+                        } else {
+                            elements.add(new FunctionElmt(currentFunctionName, functionArgsArray));
+                        }
+                        //elements.add(new FunctionElmt(currentFunctionName, functionArgsArray));
                     }
                     
                     currentFunctionName = "";
@@ -360,7 +404,16 @@ public class Expression {
                 currentElement = "";
                 readingGetArrayLength = false;
             }else {
-                elements.add(parseElement(currentElement, column + i));
+                 
+                        if(readingNot){
+                            System.out.println("Adding NOT");
+                            elements.add(new NotElmt(new Expression(parseExpression(currentElement, column + i), ExpressionReturnType.NUMBER, line)));
+                            readingNot = false;
+                        } else {
+                            Element elmt = parseElement(currentElement, column + i);
+                            elements.add(elmt);
+                        }
+               // elements.add(parseElement(currentElement, column + i));
             }
             
         }

@@ -36,6 +36,32 @@ public class Runner {
         
     }
 
+    public static void convertFile(String path) throws IOException {
+          byte[] bytes = Files.readAllBytes(Paths.get(path));
+        String file = new String(bytes, Charset.defaultCharset());
+        Variables variables = new Variables();
+        Parser parser = new Parser(file, variables);
+        Statements statements = parser.parse();
+        System.out.println(statements.getBody());
+       // printStmts(statements.getBody(),0);
+        Translator translator = new Translator(variables);
+        translator.interpretFunction(statements.getBody(), null, null, "$main", true);
+        List<String> lines = translator.getJavaLines();
+        printJavaLines(lines);
+        //Create java file
+        String javaFile = "";
+        for (String line : lines) {
+            javaFile += line + "\n";
+        }
+        Files.write(Paths.get("src/Code.java"), javaFile.getBytes());
+    }
+
+    private static void printJavaLines(List<String> lines) {
+        for (String line : lines) {
+            System.out.println(line);
+        }
+    }
+
     private static void printVars(Variables variables) {
         System.out.println("Variables:");
         System.out.println("Integers:");

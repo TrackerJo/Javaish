@@ -193,9 +193,34 @@ public class Interpreter {
                     compVal = null;
                     isComp = false;
                     break;
+                case NOT:
+                    NotElmt not = (NotElmt) elmt;
+                    JavaishVal valNot = evalExpression(not.expression, localVariables, isGlobal);
+                    if(valNot instanceof JavaishBoolean){
+                        JavaishBoolean valB = (JavaishBoolean) valNot;
+                        if(valB.getValue() == true){
+                            valB = new JavaishBoolean(false);
+                        } else {
+                            valB = new JavaishBoolean(true);
+                        }
+                        if(isComp){
+                            compVal = performOperation(operation, compVal, valB);
+                        } else {
+                            total = performOperation(operation, total, valB);
+                        }
+                    } else {
+                        Error.TypeMismatch("Boolean", valNot.typeString(), lineNumber);
+                        
+                    }
+                    break;
                 case BOOL:
                     BoolElmt bool = (BoolElmt) elmt;
                     JavaishBoolean valB = new JavaishBoolean(bool.getValue());
+                    if(isComp){
+                        compVal = performOperation(operation, compVal, valB);
+                    } else {
+                        total = performOperation(operation, total, valB);
+                    }
                     
 
                     break;
@@ -238,9 +263,22 @@ public class Interpreter {
                                         val = new JavaishString(Float.toString(((JavaishFloat) val).getValue()));
                                     } else if(val instanceof JavaishInt){
                                         val = new JavaishString(Integer.toString(((JavaishInt) val).getValue()));
-                                    } 
+                                    }  else if(val instanceof JavaishBoolean){
+                                        val = new JavaishString(Boolean.toString(((JavaishBoolean) val).getValue()));
+                                    }
                                 } catch (Exception e) {
                                     Error.UnableToParse("String", lineNumber, val.typeString());
+                                }
+                            }
+                            break;
+                        case BOOLEAN:
+                            if(!(val instanceof JavaishBoolean)){
+                                try {
+                                    if(val instanceof JavaishString){
+                                        val = new JavaishBoolean(Boolean.parseBoolean(((JavaishString) val).getValue()));
+                                    } 
+                                } catch (Exception e) {
+                                    Error.UnableToParse("Boolean", lineNumber, val.typeString());
                                 }
                             }
                             break;
@@ -320,9 +358,7 @@ public class Interpreter {
                     MultiplyElmt multiply = (MultiplyElmt) elmt;
                     operation = Operator.MULTIPLY;
                     break;
-                case NOT:
-                    NotElmt not = (NotElmt) elmt;
-                    break;
+               
                 case NOT_EQUAL:
                     NotEqualElmt notEqual = (NotEqualElmt) elmt;
                     comparison = Operator.NOT_EQUAL;

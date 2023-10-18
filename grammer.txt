@@ -1,0 +1,64 @@
+DataTypes: String, bool, float, int, String[], bool[], float[], int[]
+Conditions (Short hand : long hand):
+ ==:"equals"
+ !=:"not equals"
+ <:"less than"
+ >:"greater than"
+ >=:"greater than or equal to"
+ <=:"less than or equal to"
+ &&:"and"
+ ||:"or"
+Operators: +, -, *, /
+Comments: //
+Expressions: Any DataTypes, functions, operators, conditions, variables
+    Expressions can be nested with parenthesis
+Loops:
+    While:
+        while [expression] {
+            [code]
+        }
+    For each:
+        for each [variable] in [expression] {
+            [code]
+        }
+    For when:
+        for when [expression] increment [variable] by [expression] {
+            [code]
+        }
+Declaration:
+    let [DataType] [name] = [expression].
+List:
+    [ [DataType], (repeated) ]
+ListSubscript:
+    [variable] sub [expression]
+MutationTypes: add, subtract, multiply, divide, remove, removeAll, removeAt
+Mutations:
+    Add:
+        add [expression] to [variable].
+    Subtract:
+        subtract [expression] from [variable].
+    Multiply:
+        multiply [variable] by [expression].
+    Divide:
+        divide [variable] by [expression].
+    Remove:
+        remove [expression] from [variable].
+    RemoveAt:
+        removeAt [ListSubscript].
+    RemoveAll:
+        removeAll [expression] from [variable].
+Return:
+    Return Expression:
+        return [expression].
+    Basic:
+        return.
+Parameters (Seperated by commas):
+    [DataType] [name]
+Function:
+    function [name]([parameters]){
+        [code]
+    }
+Arguments (Seperated by commas):
+    [variable]
+Function call:
+    [functionName]([arguments]).

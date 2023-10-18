@@ -1,0 +1,172 @@
+@top
+Program {
+  (Declaration | Mutation | FunctionDeclaration | FunctionCall | Loop | Conditional )*
+}
+
+Declaration {
+  "let" Type Identifier "=" Expression "."
+}
+
+Type {
+  "int" | "float" | "String" | "bool" | "int[]" | "float[]" | "String[]" | "bool[]"
+}
+
+Expression {
+  Number |
+  StringLiteral |
+  Variable |
+  FunctionCall |
+  BinaryExpression |
+  ParenthesizedExpression |
+  ListSubscript |
+  Condition |
+  List
+}
+
+Number {
+  Integer | Float
+}
+
+Integer {
+  /[0-9]+/
+}
+
+Float {
+  /[0-9]+\.[0-9]+/
+}
+
+StringLiteral {
+  /".*?"/
+}
+
+Variable {
+  Identifier
+}
+
+Mutation {
+  AddMutation | SubtractMutation | MultiplyMutation | DivideMutation |
+  RemoveMutation | RemoveAllMutation | RemoveAtMutation
+}
+
+AddMutation {
+  "add" Expression "to" Variable "."
+}
+
+SubtractMutation {
+  "subtract" Expression "from" Variable "."
+}
+
+MultiplyMutation {
+  "multiply" Variable "by" Expression "."
+}
+
+DivideMutation {
+  "divide" Variable "by" Expression "."
+}
+
+RemoveMutation {
+  "remove" Expression "from" Variable "."
+}
+
+RemoveAllMutation {
+  "removeAll" Expression "from" Variable "."
+}
+
+RemoveAtMutation {
+  "removeAt" ListSubscript "."
+}
+
+FunctionDeclaration {
+  "function" Identifier "(" (Parameter ("," Parameter)*)? ")" Block
+}
+
+Parameter {
+  Type Identifier
+}
+
+Block {
+  "{" (Statement)* "}"
+}
+
+FunctionCall {
+  Identifier "(" (Expression ("," Expression)*)? ")"
+}
+
+Loop {
+  WhileLoop | ForEachLoop | ForWhenLoop
+}
+
+WhileLoop {
+  "while" Expression Block
+}
+
+ForEachLoop {
+  "for" "each" Identifier "in" Expression Block
+}
+
+ForWhenLoop {
+  "for" "when" Expression "increment" Identifier "by" Expression Block
+}
+
+Conditional {
+  "if" Condition Block (ElseIfClause)* ("else" Block)?
+}
+
+ElseIfClause {
+  "else" "if" Condition Block
+}
+
+BinaryExpression {
+  Expression BinaryOperator Expression
+}
+
+BinaryOperator {
+  "+" | "-" | "*" | "/" | "==" | "!=" | "<" | ">" | "<=" | ">=" | "&&" | "||"
+}
+
+ParenthesizedExpression {
+  "(" Expression ")"
+}
+
+ArrayElement {
+  Expression
+}
+
+List {
+  "[" ArrayElement ("," ArrayElement)* "]"
+}
+
+ListSubscript {
+  Variable "sub" Expression
+}
+
+Condition {
+  Expression ConditionOperator Expression
+}
+
+ConditionOperator {
+  "==" | 
+  "!=" | 
+  "<" | 
+  ">" | 
+  "<=" | 
+  ">=" | 
+  "&&" | 
+  "||" | 
+  "equals" | 
+  "not equals" | 
+  "greater than" | 
+  "less than" | 
+  "greater than or eqaul to" |
+  "less than or equal to" |
+  "and" |
+  "or"
+}
+
+Comment {
+  /\/\/.*/
+}
+
+Identifier {
+  /[a-zA-Z_][a-zA-Z0-9_]*/
+}

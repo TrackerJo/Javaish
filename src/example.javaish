@@ -1,0 +1,149 @@
+
+//Integer declarations
+let int intS = 5. //Simple int
+let int intE = 2 * -2 + 10 - 399 / 2. //Using math operators
+let int intV = intS + intE + 1. //Variable in declarations
+let int intP = toInt("5"). //String parsing
+
+//Float declarations
+let float floatS = 4.3. //Simple float
+let float floatE = 54 * 2.1 + (8 / 5). //Using math operators
+let float floatV = intS + 3.1 + floatE / 2. //Variable and math operators
+let float floatP = toFloat("5.2") + toInt(2). //Parsing and math operators
+
+//String declarations
+let String stringS = "hello world!". //Simple String
+let String stringC = "hello " + "world!". //String concatination
+let String stringV = stringS + " Isn't this great!". //Variable and concatination
+let String stringP = toString(false) + toString(4). //concatination and parsing
+
+//Bool declarations
+let bool boolS = false. //Simple bool
+let bool boolE = intS == 5. //Bool expression
+let bool boolV = boolS. //Variable
+let bool boolP = toBool("false"). //Parsing
+
+//IntList declarations
+let int[] intListS = [2,5,23,2]. //Simple int list
+let int[] intListV = [intP,intV,intS]. //List with variables
+
+//FloatList declarations
+let float[] floatListS = [2.2,5.3,23.8,2.5]. //Simple float list
+let float[] floatListV = [floatP,floatV,floatS]. //List with variables
+
+//StringList declarations
+let String[] StringListS = ["help", "now"]. //Simple string list
+let String[] StringListV = [stringP,stringV,stringS]. //List with variables
+
+//BooleanList declarations
+let bool[] boolListS = [true, false]. //Simple bool list
+let bool[] boolListV = [boolP,boolV,boolS]. //List with variables
+
+
+add 5 to intS.
+subtract 5 from intS.
+divide floatS by 2.
+multiply intV by 10.
+add "hello" to stringS.
+
+intS = intListS sub 0.
+add floatListS sub 1 to floatS.
+
+function mutateList(int val){
+    //List mutation
+    removeAt intListS sub 0.
+    add 1000 to intListS.
+    add val to intListS.
+    removeAll 5 from intListS.
+    remove 2 from intListS.
+}
+
+
+mutateList(656).
+
+
+function basicReturn(int test){
+    //If stmt
+    //if syntax
+    //if [expression] {
+        // code
+    //}
+    //possible else or else if
+    if test > 100 {
+        return. //Simple return
+    } else if test == 97 {
+        print("Test is " + toString(test)). //Built in function
+    } else if test equals 92 {
+        return.
+    } else {
+        //Test is greater than 100
+        print("reached end").
+    }
+}
+
+
+basicReturn(92).
+
+
+let int inc = 0.
+
+while inc less than 5 {
+    showMessageDialog("HI"). //Built in function
+    add 1 to inc.
+}
+
+let int len = length of floatListS. //Gets length of list as an integer
+
+for when i <= length of intListS increment i by 1 {
+    print(i).
+}
+
+for when i less than length of intListS increment i by 1 {
+    print(i).
+}
+
+for when i <= 10 increment i by 1 {
+    print(i).
+}
+
+
+for when i less than inc increment i by 1 {
+    print(i).
+}
+
+for when i > (10 * intE) increment i by 1 {
+    print(i).
+}
+
+
+for each item in intListS {
+    print(item).
+}
+
+
+for each item in intListV {
+    print(item).
+}
+
+
+if inc equals 8 {
+    //Do something
+} else if inc != 7 {
+    //Do something
+} else if inc greater than 8 and inc less than or equal to 100 {
+    // Do something
+} else if inc >= 100 || inc == 30 or inc < 30 && inc greater than or equal to 10{
+    // Do Something
+} else {
+    //Do something
+}
+
+
+function returnFunc(int start){
+    return (5 * 2) + start - (6 + 2).
+}
+
+let String name = showInputDialog("Whats your name?").
+
+
+
