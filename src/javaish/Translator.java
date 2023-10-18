@@ -51,12 +51,15 @@ public class Translator {
         return javaLines;
     }
 
-    public JavaishVal interpretFunction(List<Statements> statements,  Argument[] args,  JavaishVal[] params, String name, boolean isGlobal){
+    public JavaishVal interpretFunction(List<Statements> statements,  Argument[] args,  JavaishVal[] params, String name, boolean isGlobal, boolean doTranslate){
         Variables localVariables = new Variables();
         List<String> javaPrinter = javaMain;
+        if(!doTranslate){
+            javaPrinter = new ArrayList<String>();
+        }
         //System.out .println("Interpreting Function: " + name);
         int funcJavaLine = javaLines.size();
-        if(!name.equals("$main")){
+        if(!name.equals("$main") && doTranslate){
             javaPrinter = javaLines;
             tabCount--;
            
@@ -102,14 +105,14 @@ public class Translator {
 
         
         JavaishVal returnVal = interpretBody(statements, localVariables, isGlobal, javaPrinter);
-        if(!name.equals("$main")){
+        if(!name.equals("$main") && doTranslate){
             tabCount--;
             javaPrinter.add(addTabCount() + "}");
             
 
         }
         if(returnVal != null){
-            if(!name.equals("$main")){
+            if(!name.equals("$main") && doTranslate){
                 //Replace old void function with value returning function
                 String funcLine = addTabCount() + "public static " + returnVal.typeString() + " " + name + "(";
                 for (int i = 0; i < args.length; i++) {
@@ -492,7 +495,7 @@ public class Translator {
                         paramVals.add(evalExpression(param, localVariables, isGlobal));
                     }
                     JavaishVal[] paramValsArr = paramVals.toArray(new JavaishVal[paramVals.size()]);
-                    JavaishVal valFunc = interpretFunction(body, args, paramValsArr, function.getName(), isGlobal);
+                    JavaishVal valFunc = interpretFunction(body, args, paramValsArr, function.getName(), isGlobal, false);
 
                     
                     
@@ -1383,7 +1386,7 @@ public class Translator {
             }
         }
         JavaishVal[] params = paramVals.toArray(new JavaishVal[paramVals.size()]);
-        interpretFunction(body, args, params, name, false);
+        interpretFunction(body, args, params, name, false, true);
         tabCount++;
 
 

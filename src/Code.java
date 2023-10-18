@@ -6,13 +6,9 @@ public class Code {
 		System.out.println(name);
 		return "2";
 	}
-	public static String test(String name) {
-		System.out.println(name);
-		return "2";
+	public static void done() {
+		return;
 	}
-public static void done() {
-	return;
-}
 	public static void main(String[] args) {
 		String hi = JOptionPane.showInputDialog("hello");;
 		ArrayList<String> list = new ArrayList<String>(Arrays.asList("5", "3"));
@@ -32,10 +28,10 @@ public static void done() {
 			hi = name;
 		}
 		test("t");
-	hi = test("4");
-	JOptionPane.showMessageDialog(null, "hi");
-	for(; x > 4; x += 3){
-		System.out.println(x);
-	}
+		hi = test("4");
+		JOptionPane.showMessageDialog(null, "hi");
+		for(; x > 4; x += 3){
+			System.out.println(x);
+		}
 	}
 }

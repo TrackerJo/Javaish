@@ -45,7 +45,7 @@ public class Runner {
         System.out.println(statements.getBody());
        // printStmts(statements.getBody(),0);
         Translator translator = new Translator(variables);
-        translator.interpretFunction(statements.getBody(), null, null, "$main", true);
+        translator.interpretFunction(statements.getBody(), null, null, "$main", true, true);
         List<String> lines = translator.getJavaLines();
         printJavaLines(lines);
         //Create java file
