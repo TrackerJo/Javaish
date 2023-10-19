@@ -1,37 +1,36 @@
-import java.util.Arrays;
-import java.util.ArrayList;
 import javax.swing.JOptionPane;
 public class Code {
-	public static String test(String name) {
-		System.out.println(name);
-		return "2";
-	}
-	public static void done() {
-		return;
-	}
+	public static int cookies = 0;
+	public static int inc = 1;
+	public static String t = JOptionPane.showInputDialog("You have " + String.valueOf(cookies) + " cookies! Do you want to click the cookie (Enter 0) or Do you want to open the shop (Enter 1)");
 	public static void main(String[] args) {
-		String hi = JOptionPane.showInputDialog("hello");;
-		ArrayList<String> list = new ArrayList<String>(Arrays.asList("5", "3"));
-		hi = String.valueOf(53);
-		int x = 5;
-		if(x == 2){
-			hi = "now";
-		} else if(x == 5){
-			hi = "yay";
+		displayCookie();
+	}
+	public static void displayCookie() {
+		int choice = Integer.parseInt(JOptionPane.showInputDialog("You have " + String.valueOf(cookies) + " cookies! Do you want to click the cookie (Enter 0) or Do you want to open the shop (Enter 1)"));
+		if(choice == 0){
+			displayCookie();
+		} else if(choice == 1){
+			showShop();
 		} else {
-			hi = "wow";
+			System.out.println(choice);
+			JOptionPane.showMessageDialog(null, "Thats not a valid choice!");
+			displayCookie();
 		}
-		while(x < 3){
-			x = 5;
-		}
-		for(String name : list){
-			hi = name;
-		}
-		test("t");
-		hi = test("4");
-		JOptionPane.showMessageDialog(null, "hi");
-		for(; x > 4; x += 3){
-			System.out.println(x);
+	}
+	public static void showShop() {
+		String choice = JOptionPane.showInputDialog("Do you want to buy click upgrade for 5 cookies? (y/n)");
+		if(choice == "y"){
+			if(cookies >= 5){
+				displayCookie();
+			} else {
+				JOptionPane.showMessageDialog(null, "You don't have enough cookies");
+				displayCookie();
+			}
+		} else if(choice == "n"){
+			displayCookie();
+		} else {
+			JOptionPane.showMessageDialog(null, "Thats not a valid choice!");
 		}
 	}
 }

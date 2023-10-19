@@ -18,6 +18,7 @@ public class Translator {
    List<String> javaLines = new ArrayList<String>();
    List<String> javaImports = new ArrayList<String>();
    List<String> javaMain = new ArrayList<String>();
+   List<String> publicVarDeclarations = new ArrayList<String>();
    boolean usedJOptionPane = false;
    boolean usedList = false;
    
@@ -28,27 +29,47 @@ public class Translator {
     public Translator( Variables variables){
         
         this.globalVariables = variables;
-        javaLines.add("public class Code {");
-        javaMain.add("\tpublic static void main(String[] args) {");
+        
    
     }
 
     public List<String> getJavaLines(){
-        
-        
+        List<String> finalJavaLines = new ArrayList<String>();
+         //Add public variable declarations to top of file
+
+       
         //Add imports to top of file
         for (String importString : javaImports) {
-            javaLines.add(0, importString);
+            finalJavaLines.add(importString);
         }
-        //Add main method to end of file
-        for (String mainString : javaMain) {
-            javaLines.add(mainString);
+        //Add Class declaration
+        finalJavaLines.add("public class Code {");
+
+        //Add public variable declarations to top of file
+         for (String publicVarDeclaration : publicVarDeclarations) {
+            finalJavaLines.add(publicVarDeclaration);
         }
-        //Add closing brackets
-        javaLines.add("\t}");
+
+        //Add main method declaration
+        finalJavaLines.add("\tpublic static void main(String[] args) {");
        
-        javaLines.add("}");
-        return javaLines;
+        //Add main method
+        for (String mainString : javaMain) {
+            finalJavaLines.add(mainString);
+        }
+         
+        //Add closing bracket
+        finalJavaLines.add("\t}");
+
+        //Add java lines
+        for (String javaLine : javaLines) {
+            finalJavaLines.add(javaLine);
+        }
+
+       
+       
+        finalJavaLines.add("}");
+        return finalJavaLines;
     }
 
     public JavaishVal interpretFunction(List<Statements> statements,  Argument[] args,  JavaishVal[] params, String name, boolean isGlobal, boolean doTranslate){
@@ -315,15 +336,18 @@ public class Translator {
                             }
                             break;
                         case INT:
+                            System.out .println("Parsing INT " + val.typeString());
+
                             if(!(val instanceof JavaishInt)){
                                 try {
                                     if(val instanceof JavaishFloat){
                                        val = new JavaishInt(Math.round(((JavaishFloat) val).getValue()));
                                     } else if(val instanceof JavaishString){
+                                        System.out .println("Parsing INT " + ((JavaishString) val).getValue());
                                         val =  new JavaishInt(Integer.parseInt(((JavaishString) val).getValue()));
                                     } 
                                 } catch (Exception e) {
-                                    Error.UnableToParse("Int", lineNumber, val.typeString());
+                                    Error.UnableToParse(val.typeString(), lineNumber, "Int");
                                 }
                             }
                             break;
@@ -507,8 +531,13 @@ public class Translator {
                     break;
                 case SHOWINPUTBOX:
                     ShowInputBoxElmt showInputBox = (ShowInputBoxElmt) elmt;
-                    JavaishString input = new JavaishString("");
-                    return input;
+                    JavaishString input = new JavaishString("0");
+                      if(isComp){
+                        compVal = performOperation(operation, compVal, input);
+                    } else {
+                        total = performOperation(operation, total, input);
+                    }
+                    break;
                     
                     
                 case LISTVAL:
@@ -965,7 +994,7 @@ public class Translator {
 
     private String translateExpression(Expression expression, Variables localVariables, boolean isGlobal, List<String> javaPrinter){
        String expr = "";
-        
+       
         
         for(Element elmt : expression.getElements()){
             switch (elmt.getType()) {
@@ -986,6 +1015,7 @@ public class Translator {
                     CastElmt cast = (CastElmt) elmt;
                     JavaishVal val = evalExpression(cast.element, localVariables, isGlobal);
                     String castExpr = translateExpression(cast.element, localVariables, isGlobal, javaPrinter);
+                    System.out.println("CastExpr: " + castExpr + " " + val.typeString());
                     //System.out .println("Cast: " + cast.castType + " " + val.typeString());
                     switch (cast.castType) {
                         case FLOAT:
@@ -993,7 +1023,7 @@ public class Translator {
                                 if(val instanceof JavaishInt){
                                     expr += "(float)" + castExpr;
                                 } else if(val instanceof JavaishString){
-                                    expr += "Float.parseFloat(\"" + castExpr + "\")";
+                                    expr += "Float.parseFloat(" + castExpr + ")";
                                 }
                             }
                             break;
@@ -1003,7 +1033,8 @@ public class Translator {
                             if(val instanceof JavaishFloat){
                                 expr += "(int)" + castExpr;
                             } else if(val instanceof JavaishString){
-                                expr += "Integer.parseInt(\"" + castExpr + "\")";
+                                
+                                expr += "Integer.parseInt(" + castExpr + ")";
                             } 
                             
                             
@@ -1018,7 +1049,7 @@ public class Translator {
                             if(!(val instanceof JavaishBoolean)){
                                 
                                 if(val instanceof JavaishString){
-                                    expr += "Boolean.parseBoolean(\"" + castExpr + "\")";
+                                    expr += "Boolean.parseBoolean(" + castExpr + ")";
                                 } 
                                 
                             }
@@ -1027,7 +1058,7 @@ public class Translator {
                             break;
                         
                     }
-                    
+                    System.out.println("CastExpr: " + expr);
                     break;
                 case DIVIDE:
                     expr += " / ";
@@ -1286,6 +1317,14 @@ public class Translator {
         String expr = translateExpression(declaration.getValue(), localVariables, isGlobal, javaPrinter);
         String typeS = "";
         String line = addTabCount();
+        int prevTabCount = tabCount;
+        if(isGlobal){
+            tabCount = 1;
+            line = addTabCount() + "public static ";
+            javaPrinter = publicVarDeclarations;
+            
+            
+        }
         if(type != value.getType()){
             if(type == JavaishType.FLOAT && value.getType() == JavaishType.INT){
                 typeS = "Float";
@@ -1347,6 +1386,7 @@ public class Translator {
                 localVariables.addVariable(declaration.getName(), type, value);
              }
         }
+        tabCount = prevTabCount;
         //System.out.println("Declaration: Type:" + declaration.getVarType()+ " Name: "+ declaration.getName() + " Value:" + value.getValue());
     }
 
@@ -1399,6 +1439,10 @@ public class Translator {
       
         String line = addTabCount() + name + "(";
         for (Expression param : params) {
+            if(param == null){
+                line += "),";
+                continue;
+            }
             String translatedParam = translateExpression(param, localVariables, isGlobal, javaPrinter);
             
             line += translatedParam + ", ";
@@ -1603,6 +1647,7 @@ public class Translator {
     }
 
     private String evalShowInputBox(ShowInputBoxElmt showInputBoxElmt, Variables localVariables, boolean isGlobal, List<String> javaPrinter){
+        System.out.println("ShowInputBox");
         String value = "";
         Expression expression = showInputBoxElmt.getValue();
         if(expression != null){
@@ -1612,7 +1657,8 @@ public class Translator {
             usedJOptionPane = true;
             javaImports.add("import javax.swing.JOptionPane;");
         }
-        String inputLine = "JOptionPane.showInputDialog(" + value + ");";
+        String inputLine = "JOptionPane.showInputDialog(" + value + ")";
+        System.out.println(inputLine);
         return inputLine;
 
 
