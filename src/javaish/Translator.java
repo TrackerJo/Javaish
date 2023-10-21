@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
+import javaish.Element.ElementType;
 import javaish.JavaishVal.JavaishType;
 import javaish.Statements.MutationType;
 
@@ -22,14 +23,15 @@ public class Translator {
    boolean usedJOptionPane = false;
    boolean usedList = false;
    
+    String projName;
     Variables globalVariables;
     enum Operator {
         PLUS, MINUS, DIVIDE, MULTIPLY, EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_EQUAL, GREATER_THAN_EQUAL, REMOVEALLFROM, REMOVEAT, REMOVEFROM
     }
-    public Translator( Variables variables){
+    public Translator( Variables variables, String projName){
         
         this.globalVariables = variables;
-        
+        this.projName = projName;
    
     }
 
@@ -43,7 +45,7 @@ public class Translator {
             finalJavaLines.add(importString);
         }
         //Add Class declaration
-        finalJavaLines.add("public class Code {");
+        finalJavaLines.add("public class " + projName + " {");
 
         //Add public variable declarations to top of file
          for (String publicVarDeclaration : publicVarDeclarations) {
@@ -119,7 +121,7 @@ public class Translator {
                     Error.ArgumentTypeMismatch(name, lineNumber, arg.getType().toString(), val.typeString());
                     return null;
                 }
-                localVariables.addVariable(arg.getName(), arg.getType(), val);
+                localVariables.addVariable(arg.getName(), arg.getType(), val, lineNumber);
                 
             }
         }
@@ -1074,7 +1076,7 @@ public class Translator {
                 case FLOAT:
                     FloatElmt floatElmt = (FloatElmt) elmt;
                     JavaishFloat valF = new JavaishFloat(floatElmt.getValue());
-                    expr += valF.getValue();
+                    expr += valF.getValue() + "f";
                     
                     break;
                 case GREATER_THAN:
@@ -1331,9 +1333,9 @@ public class Translator {
                 line += typeS + " " + declaration.getName() + " = " + expr + ";";
                 javaPrinter.add(line);
                 if(isGlobal){
-                 globalVariables.addVariable(declaration.getName(), type, new JavaishFloat(((JavaishInt) value).getValue()));
+                 globalVariables.addVariable(declaration.getName(), type, new JavaishFloat(((JavaishInt) value).getValue()), lineNumber);
                 } else {
-                    localVariables.addVariable(declaration.getName(), type, new JavaishFloat(((JavaishInt) value).getValue()));
+                    localVariables.addVariable(declaration.getName(), type, new JavaishFloat(((JavaishInt) value).getValue()), lineNumber);
                 }
                 //System.out.println("Declaration: Type:" + declaration.getVarType()+ " Name: "+ declaration.getName() + " Value:" + value.getValue());
                 return;
@@ -1346,9 +1348,9 @@ public class Translator {
                     line += typeS + " " + declaration.getName() + " = " + expr + ";";
                     javaPrinter.add(line);
                     if(isGlobal){
-                        globalVariables.addList(declaration.getName(), type, list);
+                        globalVariables.addList(declaration.getName(), type, list, lineNumber);
                     } else {
-                        localVariables.addList(declaration.getName(), type, list);
+                        localVariables.addList(declaration.getName(), type, list, lineNumber);
                     }
                     return;
                 }
@@ -1371,19 +1373,19 @@ public class Translator {
         if(isGlobal){
             if(type == JavaishType.LIST){
                     JavaishListVal listVal = (JavaishListVal)value.getValue();
-                    globalVariables.addList(declaration.getName(), type, listVal.getValue());
+                    globalVariables.addList(declaration.getName(), type, listVal.getValue(), lineNumber);
                 
             } else {
-                globalVariables.addVariable(declaration.getName(), type, value);
+                globalVariables.addVariable(declaration.getName(), type, value, lineNumber);
             }
             
         } else {
             if(type == JavaishType.LIST){
                     JavaishListVal listVal = (JavaishListVal)value.getValue();
-                    localVariables.addList(declaration.getName(), type, listVal.getValue());
+                    localVariables.addList(declaration.getName(), type, listVal.getValue(), lineNumber);
                 
             } else {
-                localVariables.addVariable(declaration.getName(), type, value);
+                localVariables.addVariable(declaration.getName(), type, value, lineNumber);
              }
         }
         tabCount = prevTabCount;
@@ -1400,7 +1402,7 @@ public class Translator {
             return;
         }
         
-        globalVariables.addFunction(name, body, args);
+        globalVariables.addFunction(name, body, args, lineNumber);
         if(args == null){
             Error.FunctionNotDeclared(name, lineNumber);
             return;
@@ -1549,9 +1551,9 @@ public class Translator {
         if(list.getType() == JavaishType.STRINGLIST){
             //Create temp variable
             if(isGlobal){
-                globalVariables.addVariable(tempVarName, JavaishType.STRING, new JavaishString(""));
+                globalVariables.addVariable(tempVarName, JavaishType.STRING, new JavaishString(""), lineNumber);
             } else {
-                localVariables.addVariable(tempVarName, JavaishType.STRING, new JavaishString(""));
+                localVariables.addVariable(tempVarName, JavaishType.STRING, new JavaishString(""), lineNumber);
             }
             String line = addTabCount() + "for(String " + tempVarName + " : " + listName + "){";
             javaPrinter.add(line);
@@ -1564,9 +1566,9 @@ public class Translator {
 
         } else if(list.getType() == JavaishType.BOOLEANLIST){
              if(isGlobal){
-                globalVariables.addVariable(tempVarName, JavaishType.BOOLEAN, new JavaishBoolean(false));
+                globalVariables.addVariable(tempVarName, JavaishType.BOOLEAN, new JavaishBoolean(false), lineNumber);
             } else {
-                localVariables.addVariable(tempVarName, JavaishType.BOOLEAN, new JavaishBoolean(false));
+                localVariables.addVariable(tempVarName, JavaishType.BOOLEAN, new JavaishBoolean(false), lineNumber);
             }
             String line = addTabCount() + "for(boolean " + tempVarName + " : " + listName + "){";
             javaPrinter.add(line);
@@ -1577,9 +1579,9 @@ public class Translator {
             javaPrinter.add(line);
         } else if(list.getType() == JavaishType.INTLIST){
            if(isGlobal){
-                globalVariables.addVariable(tempVarName, JavaishType.INT, new JavaishInt(0));
+                globalVariables.addVariable(tempVarName, JavaishType.INT, new JavaishInt(0), lineNumber);
             } else {
-                localVariables.addVariable(tempVarName, JavaishType.INT, new JavaishInt(0));
+                localVariables.addVariable(tempVarName, JavaishType.INT, new JavaishInt(0), lineNumber);
             }
             String line = addTabCount() + "for(int " + tempVarName + " : " + listName + "){";
             javaPrinter.add(line);
@@ -1590,9 +1592,9 @@ public class Translator {
             javaPrinter.add(line);
         } else if(list.getType() == JavaishType.FLOATLIST){
              if(isGlobal){
-                globalVariables.addVariable(tempVarName, JavaishType.FLOAT, new JavaishFloat(0));
+                globalVariables.addVariable(tempVarName, JavaishType.FLOAT, new JavaishFloat(0), lineNumber);
             } else {
-                localVariables.addVariable(tempVarName, JavaishType.FLOAT, new JavaishFloat(0));
+                localVariables.addVariable(tempVarName, JavaishType.FLOAT, new JavaishFloat(0), lineNumber);
             }
             String line = addTabCount() + "for(float " + tempVarName + " : " + listName + "){";
             javaPrinter.add(line);
@@ -1613,7 +1615,7 @@ public class Translator {
         boolean newVar = false;
         if(!localVariables.isVariable(incVarName)){
             newVar = true;
-            localVariables.addVariable(incVarName, JavaishType.INT, new JavaishInt(0));
+            localVariables.addVariable(incVarName, JavaishType.INT, new JavaishInt(0), lineNumber);
         }
         Expression condition = forwhenStmt.getCondition();
         
@@ -1699,7 +1701,8 @@ public class Translator {
                 return;
             }
             JavaishList list = performListOperation(mutationTypeToOperator(type), varList, value, 0);
-
+            String line = addTabCount() + name + ".add(" + translateExpression(mutationStmt.getValue(), localVariables, isGlobal, javaPrinter) + ");";
+            javaPrinter.add(line);
             if(localVariables.isVariable(name)){
                 
                 localVariables.setVariableValue(name, new JavaishListVal(list), lineNumber);
@@ -1725,8 +1728,61 @@ public class Translator {
                 return;
             }
         }
+        Expression expression = mutationStmt.getValue();
+        boolean exprJustOne = false;
+        Element[] elements = expression.getElements();
+        if(elements.length == 1){
+            if(elements[0].getType() == ElementType.INTEGER){
+                IntElmt integer = (IntElmt) elements[0];
+                if(integer.getValue() == 1){
+                    exprJustOne = true;
+                }
+                
+            }
+        }
+        String line = addTabCount();
+     
+    
         
+        switch (type) {
+            case ADD:
+                if(exprJustOne){
+                    line += name + "++;";
+                } else {
+                    line += name + " += " + translateExpression(expression, localVariables, isGlobal, javaPrinter) + ";";
+                }
+                
+                break;
+
+            case SUBTRACT:
+                if(exprJustOne){
+                    line += name + "--;";
+                } else {
+                    line += name + " -= " + translateExpression(expression, localVariables, isGlobal, javaPrinter) + ";";
+                }
+                break;
+
+            case MULTIPLY:
+                if(exprJustOne){
+                    line += name + " *= " + translateExpression(expression, localVariables, isGlobal, javaPrinter) + ";";
+                } else {
+                    line += name + " *= " + translateExpression(expression, localVariables, isGlobal, javaPrinter) + ";";
+                }
+                break;
+            
+            case DIVIDE:
+                if(exprJustOne){
+                    line += name + " /= " + translateExpression(expression, localVariables, isGlobal, javaPrinter) + ";";
+                } else {
+                    line += name + " /= " + translateExpression(expression, localVariables, isGlobal, javaPrinter) + ";";
+                }
+                break;
         
+            default:
+                break;
+            
+        }
+        javaPrinter.add(line);
             
         JavaishVal newVal = performOperation(mutationTypeToOperator(type), variable, value);
                 if(localVariables.isVariable(name)){
@@ -1762,6 +1818,9 @@ public class Translator {
             int indexVal = ((JavaishInt) index).getValue();
             JavaishList list = performListOperation(Operator.REMOVEAT, varList, null, indexVal);
 
+            String line = addTabCount() + name + ".remove(" + indexVal + ");";
+            javaPrinter.add(line);
+
             if(localVariables.isVariable(name)){
                 
                 localVariables.setVariableValue(name, new JavaishListVal(list), lineNumber);
@@ -1792,7 +1851,15 @@ public class Translator {
             }
             JavaishList list = performListOperation(Operator.REMOVEFROM, varList, value, 0);
             System.out.println("LIST: " + list.listString());
-
+           
+            if(varType == JavaishType.INTLIST){
+                String line = addTabCount() + name + ".remove(Integer.valueOf(" + translateExpression(removeFromStmt.getValue(), localVariables, isGlobal, javaPrinter) + "));";
+                javaPrinter.add(line);
+            } else {
+                String line = addTabCount() + name + ".remove(" + translateExpression(removeFromStmt.getValue(), localVariables, isGlobal, javaPrinter) + ");";
+                javaPrinter.add(line);
+            }
+          
             if(localVariables.isVariable(name)){
                 
                 localVariables.setVariableValue(name, new JavaishListVal(list), lineNumber);
@@ -1822,6 +1889,8 @@ public class Translator {
             JavaishList list = performListOperation(Operator.REMOVEALLFROM, varList, value, 0);
             System.out.println("LIST: " + list.listString());
 
+            String line = addTabCount() + name + ".removeAll(Arrays.asList(" + translateExpression(removeAllFromStmt.getValue(), localVariables, isGlobal, javaPrinter) + "));";
+            javaPrinter.add(line);
             if(localVariables.isVariable(name)){
                 
                 localVariables.setVariableValue(name, new JavaishListVal(list), lineNumber);
@@ -2017,6 +2086,7 @@ public class Translator {
                 break;
         
             default:
+                Error.CantPerformOperation(operation.toString(), list.typeString(),lineNumber);
                 break;
         }
         return result;

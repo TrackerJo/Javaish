@@ -36,7 +36,7 @@ public class Runner {
         
     }
 
-    public static void convertFile(String path) throws IOException {
+    public static void convertFile(String path, String projName) throws IOException {
           byte[] bytes = Files.readAllBytes(Paths.get(path));
         String file = new String(bytes, Charset.defaultCharset());
         Variables variables = new Variables();
@@ -44,7 +44,7 @@ public class Runner {
         Statements statements = parser.parse();
         System.out.println(statements.getBody());
        // printStmts(statements.getBody(),0);
-        Translator translator = new Translator(variables);
+        Translator translator = new Translator(variables, projName);
         translator.interpretFunction(statements.getBody(), null, null, "$main", true, true);
         List<String> lines = translator.getJavaLines();
         printJavaLines(lines);
@@ -53,7 +53,7 @@ public class Runner {
         for (String line : lines) {
             javaFile += line + "\n";
         }
-        Files.write(Paths.get("src/Code.java"), javaFile.getBytes());
+        Files.write(Paths.get("src/" + projName + ".java"), javaFile.getBytes());
     }
 
     private static void printJavaLines(List<String> lines) {

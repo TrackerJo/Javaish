@@ -113,4 +113,19 @@ public class Error {
         System.err.println("Error: List " + listName + " empty at line " + lineNumber);
        // System.exit(0);
     }
+
+     public static void FunctionAlreadyExists(String name, int lineNumber) {
+        
+        throw new RuntimeException("Function " + name + " already exists!");
+       // System.exit(0);
+    }
+
+
+     public static void VariableAlreadyExists(String name, int lineNumber) {
+        
+        throw new RuntimeException("Variable " + name + " already exists!");
+        //System.exit(0);
+    }
+
+    
 }

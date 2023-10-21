@@ -1,36 +1,42 @@
 import javax.swing.JOptionPane;
+import java.util.ArrayList;
+import java.util.Arrays;
 public class Code {
-	public static int cookies = 0;
-	public static int inc = 1;
-	public static String t = JOptionPane.showInputDialog("You have " + String.valueOf(cookies) + " cookies! Do you want to click the cookie (Enter 0) or Do you want to open the shop (Enter 1)");
+	public static String hi = JOptionPane.showInputDialog("hello");
+	public static ArrayList<String> list = new ArrayList<String>(Arrays.asList("5", "3"));
+	public static int x = 5;
 	public static void main(String[] args) {
-		displayCookie();
+	list.add("2");
+	list.remove(2);
+	list.remove("2");
+	list.add("3");
+	list.removeAll(Arrays.asList("3"));
+	hi = String.valueOf(53);
+	if(x == 2){
+		hi = "now";
+	} else if(x == 5){
+		hi = "yay";
+	} else {
+		hi = "wow";
 	}
-	public static void displayCookie() {
-		int choice = Integer.parseInt(JOptionPane.showInputDialog("You have " + String.valueOf(cookies) + " cookies! Do you want to click the cookie (Enter 0) or Do you want to open the shop (Enter 1)"));
-		if(choice == 0){
-			displayCookie();
-		} else if(choice == 1){
-			showShop();
-		} else {
-			System.out.println(choice);
-			JOptionPane.showMessageDialog(null, "Thats not a valid choice!");
-			displayCookie();
-		}
+	while(x < 3){
+		x = 5;
 	}
-	public static void showShop() {
-		String choice = JOptionPane.showInputDialog("Do you want to buy click upgrade for 5 cookies? (y/n)");
-		if(choice == "y"){
-			if(cookies >= 5){
-				displayCookie();
-			} else {
-				JOptionPane.showMessageDialog(null, "You don't have enough cookies");
-				displayCookie();
-			}
-		} else if(choice == "n"){
-			displayCookie();
-		} else {
-			JOptionPane.showMessageDialog(null, "Thats not a valid choice!");
-		}
+	for(String name : list){
+		hi = name;
 	}
+	test("t");
+	hi = test("4");
+	JOptionPane.showMessageDialog(null, "hi");
+	for(; x > 4; x += 3){
+		System.out.println(x);
+	}
+	}
+public static String test(String name) {
+	System.out.println(name);
+	return "2";
+}
+public static void done() {
+	return;
+}
 }

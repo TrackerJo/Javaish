@@ -1,6 +1,5 @@
 package javaish;
 
-
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -59,26 +58,26 @@ class Variables{
         }
     }
 
-    public void addVariable(String name, JavaishType type, JavaishVal value){
+    public void addVariable(String name, JavaishType type, JavaishVal value, int lineNumber){
         
         if(allVariables.containsKey(name)){
-            Error.VariableAlreadyExists(name);
+            Error.VariableAlreadyExists(name, lineNumber);
         }
         else{
             allVariables.put(name, type);
-            switch (type) {
-                case INT:
+            switch (type.toString()) {
+                case "INT":
                     intVariables.add(new IntVar((JavaishInt)value, name));
                     
                     break;
-                case FLOAT:
+                case "FLOAT":
                     floatVariables.add(new FloatVar((JavaishFloat)value, name));
                     break;
-                case BOOLEAN:
+                case "BOOLEAN":
                     boolVariables.add(new BoolVar((JavaishBoolean)value, name));
                     break;
 
-                case STRING:
+                case "STRING":
                     stringVariables.add(new StringVar((JavaishString)value, name));
                     break;
             
@@ -96,9 +95,9 @@ class Variables{
        return allVariables.containsKey(name);
    }
 
-   public void addFunction(String name, List<Statements> body, Argument[] args){
+   public void addFunction(String name, List<Statements> body, Argument[] args, int lineNumber){
         if(functions.containsKey(name)){
-            Error.FunctionAlreadyExists(name);
+            Error.FunctionAlreadyExists(name, lineNumber);
         }
         else{
             functions.put(name, new FunctionVar(name, body, args));
@@ -115,8 +114,8 @@ class Variables{
 
    public void setVariableValue(String name, JavaishVal value, int lineNumber){
         JavaishType t = allVariables.get(name);
-        switch (t) {
-             case INT:
+        switch (t.toString()) {
+             case "INT":
                for(IntVar i : intVariables){
                     if(i.name.equals(name)){
                          if(value.getType() == JavaishType.INT){
@@ -129,7 +128,7 @@ class Variables{
                     }
                }
                break;
-               case FLOAT:
+               case "FLOAT":
                 for(FloatVar i : floatVariables){
                      if(i.name.equals(name)){
                             if(value.getType() == JavaishType.FLOAT){
@@ -147,7 +146,7 @@ class Variables{
                      }
                 }
                 break;
-               case BOOLEAN:
+               case "BOOLEAN":
                 for(BoolVar i : boolVariables){
                      if(i.name.equals(name)){
                             if(value.getType() == JavaishType.BOOLEAN){
@@ -159,7 +158,7 @@ class Variables{
                      }
                 }
                 break;
-               case STRING:
+               case "STRING":
                 for(StringVar i : stringVariables){
                      if(i.name.equals(name)){
                             if(value.getType() == JavaishType.STRING){
@@ -179,29 +178,29 @@ class Variables{
    public JavaishVal getVariableValue(String name){
          //System.out .println(name);
          JavaishType t = allVariables.get(name);
-         switch (t) {
-              case INT:
+         switch (t.toString()) {
+              case "INT":
                 for(IntVar i : intVariables){
                      if(i.name.equals(name)){
                           return i.getValue();
                      }
                 }
                 break;
-                case FLOAT:
+                case "FLOAT":
                  for(FloatVar i : floatVariables){
                       if(i.name.equals(name)){
                             return i.getValue();
                       }
                  }
                  break;
-                case BOOLEAN:
+                case "BOOLEAN":
                  for(BoolVar i : boolVariables){
                       if(i.name.equals(name)){
                             return i.getValue();
                       }
                  }
                  break;
-                case STRING:
+                case "STRING":
                  for(StringVar i : stringVariables){
                       if(i.name.equals(name)){
                             return i.getValue();
@@ -220,29 +219,29 @@ class Variables{
    public JavaishListVal getList(String name){
         //System.out .println(name);
         JavaishType t = allVariables.get(name);
-        switch (t) {
-             case INTLIST:
+        switch (t.toString()) {
+             case "INTLIST":
                for(IntList i : intLists){
                     if(i.name.equals(name)){
                          return new JavaishListVal(new JavaishIntList(i.getValue().getList()));
                     }
                }
                break;
-               case FLOATLIST:
+               case "FLOATLIST":
                 for(FloatList i : floatLists){
                      if(i.name.equals(name)){
                            return new JavaishListVal(new JavaishFloatList(i.getValue().getList()));
                      }
                 }
                 break;
-               case BOOLEANLIST:
+               case "BOOLEANLIST":
                 for(BoolList i : boolLists){
                      if(i.name.equals(name)){
                            return new JavaishListVal(new JavaishBooleanList(i.getValue().getList()));
                      }
                 }
                 break;
-               case STRINGLIST:
+               case "STRINGLIST":
                 for(StringList i : stringLists){
                      if(i.name.equals(name)){
                            return new JavaishListVal(new JavaishStringList(i.getValue().getList()));
@@ -259,14 +258,14 @@ class Variables{
         return allVariables.get(name);
    }
 
-   public void addList(String name, JavaishType type, JavaishList value){
+   public void addList(String name, JavaishType type, JavaishList value, int lineNumber){
         if(allVariables.containsKey(name)){
-            Error.VariableAlreadyExists(name);
+            Error.VariableAlreadyExists(name, lineNumber);
         }
         else{
             allVariables.put(name, type);
-            switch (type) {
-                case INTLIST:
+            switch (type.toString()) {
+                case "INTLIST":
                     if(value instanceof JavaishIntList){
                         JavaishIntList v = (JavaishIntList)value;
                         intLists.add(new IntList(v, name));
@@ -275,7 +274,7 @@ class Variables{
                     }   
                     
                     break;
-                case FLOATLIST:
+                case "FLOATLIST":
                     if(value instanceof JavaishFloatList){
                         JavaishFloatList v = (JavaishFloatList)value;
                         floatLists.add(new FloatList(v, name));
@@ -283,7 +282,7 @@ class Variables{
                         Error.TypeMismatch("FloatList", value.typeString(), 0);
                     }
                     break;
-                case BOOLEANLIST:
+                case "BOOLEANLIST":
                         
                         if(value instanceof JavaishBooleanList){
                             JavaishBooleanList v = (JavaishBooleanList)value;
@@ -295,7 +294,7 @@ class Variables{
                   
                     break;
 
-                case STRINGLIST:
+                case "STRINGLIST":
                     if(value instanceof JavaishStringList){
                         JavaishStringList v = (JavaishStringList)value;
                         stringLists.add(new StringList(v, name));
@@ -312,8 +311,8 @@ class Variables{
 
    public void setListIndexValue(String name, int index, JavaishVal value){
         JavaishType t = allVariables.get(name);
-        switch (t) {
-             case INTLIST:
+        switch (t.toString()) {
+             case "INTLIST":
                for(IntList i : intLists){
                     if(i.name.equals(name)){
                          if(value.getType() == JavaishType.INT){
@@ -328,7 +327,7 @@ class Variables{
                     }
                }
                break;
-               case FLOATLIST:
+               case "FLOATLIST":
                 for(FloatList i : floatLists){
                      if(i.name.equals(name)){
                             if(value.getType() == JavaishType.FLOAT){
@@ -342,7 +341,7 @@ class Variables{
                      }
                 }
                 break;
-               case BOOLEANLIST:
+               case "BOOLEANLIST":
                 for(BoolList i : boolLists){
                      if(i.name.equals(name)){
                             if(value.getType() == JavaishType.BOOLEAN){
@@ -356,7 +355,7 @@ class Variables{
                      }
                 }
                 break;
-               case STRINGLIST:
+               case "STRINGLIST":
                 for(StringList i : stringLists){
                      if(i.name.equals(name)){
                             if(value.getType() == JavaishType.STRING){

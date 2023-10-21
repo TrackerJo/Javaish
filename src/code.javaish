@@ -1,5 +1,10 @@
 let String hi equal showInputDialog("hello").
 let String[] list = ["5", "3"].
+add "2" to list.
+removeAt list sub 2.
+remove "2" from list.
+add "3" to list.
+removeAll "3" from list.
 hi = toString(53).
 let int x = 5.
 if x == 2 {
