@@ -1,4 +1,5 @@
 
+
 # Javaish
 
 Programming language made to resemble java, javascript, and english. Made for beginners to get into coding and learn how to think like a programmer. Not meant for professional use.
@@ -10,11 +11,21 @@ Programming language made to resemble java, javascript, and english. Made for be
 - Floats (float)
 - Strings (String)
 - Booleans (bool)
+- Lists
+    - Integer Lists (int[])
+    - Float Lists (float[])
+    - String Lists (String[])
+    - Boolean Lists (bool[])
 
 ##### Usage
 - Declare - `let [type] [var] = [expression].`
 - Assign - `[var] = [expression].`
-- Mutate - `add [expression] to [var]` or `subtract [expression] from [var]` or `divide/multiply [var] by [expression]`
+- Mutate(lists can only do add mutations) - `add [expression] to [var]` or `subtract [expression] from [var]` or `divide/multiply [var] by [expression]`
+- List Only Usages
+    - RemoveAt = `removeAt [listVar] sub [index]`
+    - Remove = `remove [expression] from [listVar]`
+    - RemoveAll = `removeAll [expression] from [listVar]`
+
 
 #### Functions
 ##### Built-in Functions
@@ -43,3 +54,6 @@ Programming language made to resemble java, javascript, and english. Made for be
 - And - `&&` or `and`
 - Or - `||` or `or`
 
+####List Expressions
+- When using a list in an expression, the list can be the only element in the expression, you cant do any Operators to lists in Expressions
+- When creating a list, surround with brackets and enter each value followed by a comma and a space - ex. `[2, 2, 3, 3]`
