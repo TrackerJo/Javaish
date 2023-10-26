@@ -53,6 +53,8 @@ public class Parser {
             }
             //Check if line is a comment
             if(line.startsWith("//")){
+                CommentStmt commentStmt = new CommentStmt(lineNumber, line);
+                parents.get(parents.size() - 1).addStatement(commentStmt);
                 continue;
             }
             String[] words = line.split(" ");

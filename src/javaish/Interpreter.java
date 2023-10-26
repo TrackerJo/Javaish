@@ -91,6 +91,8 @@ public class Interpreter {
        // System.out.println("Interpreting Stmt Type: " + stmt.getType());
         lineNumber = stmt.getLine();
         switch (stmt.getType()) {
+            case COMMENT:
+                break;
             case ASSIGNMENT:
                 AssignmentStmt assignment = (AssignmentStmt) stmt;
                 evalAssignment(assignment, localVariables, isGlobal);

@@ -2,7 +2,7 @@ let int cookies = 0.
 let int inc = 1.
 let String t = showInputDialog("You have " + toString(cookies) + " cookies! Do you want to click the cookie (Enter 0) or Do you want to open the shop (Enter 1)").
 function displayCookie(){
-    
+    //Get choice
     let int choice = toInt(showInputDialog("You have " + toString(cookies) + " cookies! Do you want to click the cookie (Enter 0) or Do you want to open the shop (Enter 1)")).
     if choice == 0 {
         add inc to cookies.

@@ -10,7 +10,7 @@ import javaish.JavaishVal.JavaishType;
 
 public class Statements {
     enum StmtType {
-        FUNCTION, IF, WHILE, FOREACH, RETURN, CALL, ASSIGNMENT, DECLARATION, VARIABLE, MUTATION, END, ELSE, CLASS, ELSEIF, FORWHEN, PRINT, SHOWMSGBOX, REMOVEAT, REMOVEFROM, REMOVEALLFROM
+        FUNCTION, IF, WHILE, FOREACH, RETURN, CALL, ASSIGNMENT, DECLARATION, VARIABLE, MUTATION, END, ELSE, CLASS, ELSEIF, FORWHEN, PRINT, SHOWMSGBOX, REMOVEAT, REMOVEFROM, REMOVEALLFROM, COMMENT
     }
 
     enum MutationType {
@@ -453,4 +453,19 @@ class RemoveAllFromStmt extends Statements {
     }
 }
 
+class CommentStmt extends Statements {
+    String comment;
+    public CommentStmt(int line,String comment) {
+        this.line = line;
+        this.comment = comment;
+        this.type = StmtType.COMMENT;
+    }
 
+    public String getComment() {
+        return comment;
+    }
+
+     public int getLine() {
+        return line;
+    }
+}

@@ -6,6 +6,7 @@ public class Code {
 	public static ArrayList<String> list = new ArrayList<String>(Arrays.asList("5", "3"));
 	public static int x = 5;
 	public static void main(String[] args) {
+		//Create hi string
 	list.add("2");
 	list.remove(2);
 	list.remove("2");

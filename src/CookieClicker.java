@@ -7,6 +7,7 @@ public class CookieClicker {
 		displayCookie();
 	}
 	public static void displayCookie() {
+		//Get choice
 		int choice = Integer.parseInt(JOptionPane.showInputDialog("You have " + String.valueOf(cookies) + " cookies! Do you want to click the cookie (Enter 0) or Do you want to open the shop (Enter 1)"));
 		if(choice == 0){
 			cookies += inc;

@@ -191,6 +191,10 @@ public class Translator {
 
                 
                 break;
+            case COMMENT:
+                CommentStmt comment = (CommentStmt) stmt;
+                evalComment(comment, javaPrinter);
+                break;
             case CALL:
                 CallStmt call = (CallStmt) stmt;
                 evalCall(call, localVariables, isGlobal, javaPrinter);
@@ -1296,6 +1300,11 @@ public class Translator {
         return result;
     }
 
+    private void evalComment(CommentStmt comment, List<String> javaPrinter){
+        String line = addTabCount() + comment.getComment();
+        javaPrinter.add(line);
+    }
+
     private void evalAssignment(AssignmentStmt assignment, Variables localVariables, boolean isGlobal,List<String> javaPrinter){
         String line = "";
         String name = assignment.getName();
@@ -2141,46 +2150,4 @@ public class Translator {
     }
 
 
-}
-
-class Result {
-    boolean pastResult;
-
-    public Result(boolean pastResult) {
-        this.pastResult = pastResult;
-    }
-    
-    public boolean getResult(){
-        return pastResult;
-    }
-
-    public void setResult(boolean pastResult){
-        this.pastResult = pastResult;
-    }
-}
-
-class Return {
-    boolean hasReturn;
-    JavaishVal value;
-
-    public Return(boolean hasReturn, JavaishVal value) {
-        this.hasReturn = hasReturn;
-        this.value = value;
-    }
-
-    public boolean hasReturn(){
-        return hasReturn;
-    }
-
-    public JavaishVal getValue(){
-        return value;
-    }
-
-    public void setHasReturn(boolean hasReturn){
-        this.hasReturn = hasReturn;
-    }
-
-    public void setValue(JavaishVal value){
-        this.value = value;
-    }
 }
