@@ -54,6 +54,6 @@ Programming language made to resemble java, javascript, and english. Made for be
 - And - `&&` or `and`
 - Or - `||` or `or`
 
-####List Expressions
+#### List Expressions
 - When using a list in an expression, the list can be the only element in the expression, you cant do any Operators to lists in Expressions
 - When creating a list, surround with brackets and enter each value followed by a comma and a space - ex. `[2, 2, 3, 3]`
