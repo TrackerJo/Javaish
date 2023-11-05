@@ -63,22 +63,28 @@ public class Runner {
         Statements statements = parser.parse();
         System.out.println(statements.getBody());
         printStmts(statements.getBody(),0);
-        State state = new State(statements.getBody(), variables, variables, null, null, 0);
+        Result pastResult = new Result(false);  
+       
+        Return returnVal = new Return(false, null);
+        State state = new State(statements.getBody(), variables, variables, pastResult, returnVal, 0, true);
         Debugger debugger = new Debugger();
         state = debugLines(debugger, state, statements.getBody().size());
-        printVars(state.getGlobalVariables());
+       // printVars(state.getGlobalVariables());
         return state;
     }
 
     private static State debugLines(Debugger debugger, State state, int maxLines){
         int lineNumber = 0;
-        while(lineNumber < maxLines){
+        while(!state.isComplete){
             state = debugger.debugLine(lineNumber, state);
-            printVars(state.getGlobalVariables());
+            lineNumber = state.getCurrentLine();
+            //printVars(state.getGlobalVariables());
+            if(state.isComplete){
+                JOptionPane.showMessageDialog(null, "You've reached the end of the file");
+                return state;
+            }
             String input = JOptionPane.showInputDialog(null, "Do you want to continue?");
-            if(input.equals("y")){
-                lineNumber++;
-            } else {
+            if(!input.equals("y")){
                 return state;
             }
         }

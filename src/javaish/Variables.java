@@ -100,7 +100,7 @@ class Variables{
             Error.FunctionAlreadyExists(name, lineNumber);
         }
         else{
-            functions.put(name, new FunctionVar(name, body, args));
+            functions.put(name, new FunctionVar(name, body, args, lineNumber));
         }
    }
 
@@ -110,6 +110,10 @@ class Variables{
 
     public List<Statements> getFunctionBody(String name){
          return functions.get(name).getBody();
+    }
+
+    public int getFunctionLineNumber(String name){
+        return functions.get(name).getLineNumber();
     }
 
    public void setVariableValue(String name, JavaishVal value, int lineNumber){
@@ -428,18 +432,24 @@ class FunctionVar {
     String name;
     List<Statements> body;
     Argument[] args;
-    FunctionVar(String name, List<Statements> body, Argument[] args){
+    int lineNumber;
+    FunctionVar(String name, List<Statements> body, Argument[] args, int lineNumber){
         this.name = name;
         this.body = body;
         this.args = args;
+        this.lineNumber = lineNumber;
     }
     public Argument[] getArgs() {
         return args;
     }
     public List<Statements> getBody() {
         return body;
-    }public String getName() {
+    }
+    public String getName() {
         return name;
+    }
+    public int getLineNumber() {
+        return lineNumber;
     }
 }
 

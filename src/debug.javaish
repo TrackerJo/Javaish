@@ -1,8 +1,9 @@
-let int test = 5.
-let int done = 2.
-add 2 to done.
+print("ran line 1").
+print("ran line 2").
+print("ran line 3").
 function bill(){
-   print("hello").
+   print("ran line 5").
+    print("ran line 6").
 }
 
 bill().

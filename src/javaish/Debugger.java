@@ -25,24 +25,56 @@ public class Debugger {
     }
 
     public State debugLine(int line, State state){
-        lineNumber = line;
-        this.currentState = state;
+        
+        
+        if(state.getStates().size() > 0){
+            this.currentState = state.getLastState();
+            System.out.println("Getting LAST STATE");
+        } else {
+            this.currentState = state;
+            globalVariables = currentState.getGlobalVariables();
+        }
+        lineNumber = currentState.getCurrentLine();
         List<Statements> statements = currentState.getStatements();
-        globalVariables = currentState.getGlobalVariables();
+        
         Variables localVariables = currentState.getLocalVariables();
         Result pastResult = currentState.getPastResult();
         Return returnVal = currentState.getReturnVal();
         int currentLine = currentState.getCurrentLine();
-
-        boolean isGlobal = true;
+        boolean isGlobal = currentState.isGlobal();
+        
        
         if(lineNumber >= statements.size()){
-            return null;
+           currentState.setComplete(true);
+              return currentState;
         }
         Statements stmt = statements.get(lineNumber);
+        System.out.println("Interpreting: " + stmt + " " + lineNumber);
         interpretStmt(stmt, localVariables, isGlobal, pastResult, returnVal);
-        State newState = new State(statements, globalVariables, localVariables, pastResult, returnVal, lineNumber);
-        return newState;
+        currentState.incrementCurrentLine();
+        if(isGlobal){
+            if(currentState.getCurrentLine() >= statements.size() && currentState.getStates().size() == 0){
+                currentState.setComplete(true);
+                
+            }
+           //currentState.printState();
+
+            return currentState;
+        } else {
+            System.out.println("NOT GLOBAL");
+            if(currentState.getCurrentLine() >= statements.size()){
+               state.removeLastState();
+                if(state.getStates().size() == 0){
+                    state.setGlobal(true);
+                }
+               
+            }
+            return state;
+            
+            
+        }
+        // State newState = new State(statements, globalVariables, localVariables, pastResult, returnVal, lineNumber, isGlobal);
+        // return newState;
     }
 
     public JavaishVal interpretFunction(List<Statements> statements,  Argument[] args,  JavaishVal[] params, String name, boolean isGlobal){
@@ -1127,8 +1159,14 @@ public class Debugger {
             paramVals.add(evalExpression(param, localVariables, isGlobal));
         }
         JavaishVal[] paramValsArr = paramVals.toArray(new JavaishVal[paramVals.size()]);
-
-        interpretFunction(body, args, paramValsArr, name, false);
+        Result pastResult = new Result(false);  
+        int funcLineNumber = globalVariables.getFunctionLineNumber(name);
+        Return returnVal = new Return(false, null);
+        State funcState = new State(body, localVariables, localVariables, pastResult, returnVal, 0, false);
+        currentState.addState(funcState);
+        System.out.println("CALLING FUNCTION: " + name);
+        currentState.printState();
+        //interpretFunction(body, args, paramValsArr, name, false);
 
     }
 
