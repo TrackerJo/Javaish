@@ -12,7 +12,6 @@ import java.util.List;
 import javaish.JavaishVal.JavaishType;
 import javaish.Statements.StmtType;
 
-
 public class Runner {
 
     public static void runFile(String path) throws IOException {
@@ -54,6 +53,37 @@ public class Runner {
             javaFile += line + "\n";
         }
         Files.write(Paths.get("src/" + projName + ".java"), javaFile.getBytes());
+    }
+
+    public static State debugFile(String path) throws IOException {
+        byte[] bytes = Files.readAllBytes(Paths.get(path));
+        String file = new String(bytes, Charset.defaultCharset());
+        Variables variables = new Variables();
+        Parser parser = new Parser(file, variables);
+        Statements statements = parser.parse();
+        System.out.println(statements.getBody());
+        printStmts(statements.getBody(),0);
+        State state = new State(statements.getBody(), variables, variables, null, null, 0);
+        Debugger debugger = new Debugger();
+        state = debugLines(debugger, state, statements.getBody().size());
+        printVars(state.getGlobalVariables());
+        return state;
+    }
+
+    private static State debugLines(Debugger debugger, State state, int maxLines){
+        int lineNumber = 0;
+        while(lineNumber < maxLines){
+            state = debugger.debugLine(lineNumber, state);
+            printVars(state.getGlobalVariables());
+            String input = JOptionPane.showInputDialog(null, "Do you want to continue?");
+            if(input.equals("y")){
+                lineNumber++;
+            } else {
+                return state;
+            }
+        }
+        JOptionPane.showMessageDialog(null, "You've reached the end of the file");
+        return state;
     }
 
     private static void printJavaLines(List<String> lines) {

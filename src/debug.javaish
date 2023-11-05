@@ -1,0 +1,8 @@
+let int test = 5.
+let int done = 2.
+add 2 to done.
+function bill(){
+   print("hello").
+}
+
+bill().
