@@ -1,0 +1,6 @@
+let int[] intList = [1, 3, 43, 4].
+let int x = intList sub 2.
+print(x).
+
+let String name = "Michael Phelan".
+print("Hello " + name).

@@ -1,0 +1,41 @@
+Date : 2024-02-08 16:11:24
+Directory : /Users/nathanielkemmenash/Desktop/VS Code Projects/javaish-standalone/src/main/java/com/trackerjo/javaish
+Total : 17 files,  9669 codes, 213 comments, 1327 blanks, all 11209 lines
+
+Languages
++----------+------------+------------+------------+------------+------------+
+| language | files      | code       | comment    | blank      | total      |
++----------+------------+------------+------------+------------+------------+
+| Java     |         17 |      9,669 |        213 |      1,327 |     11,209 |
++----------+------------+------------+------------+------------+------------+
+
+Directories
++----------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                                       | files      | code       | comment    | blank      | total      |
++----------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                                          |         17 |      9,669 |        213 |      1,327 |     11,209 |
++----------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++----------------------------------------------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| filename                                                                                                                   | language | code       | comment    | blank      | total      |
++----------------------------------------------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/javaish-standalone/src/main/java/com/trackerjo/javaish/Argument.java    | Java     |         17 |          0 |          7 |         24 |
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/javaish-standalone/src/main/java/com/trackerjo/javaish/Debugger.java    | Java     |      1,593 |         26 |        169 |      1,788 |
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/javaish-standalone/src/main/java/com/trackerjo/javaish/Element.java     | Java     |        342 |          0 |        111 |        453 |
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/javaish-standalone/src/main/java/com/trackerjo/javaish/Error.java       | Java     |         75 |         24 |         33 |        132 |
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/javaish-standalone/src/main/java/com/trackerjo/javaish/Expression.java  | Java     |        478 |         20 |         75 |        573 |
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/javaish-standalone/src/main/java/com/trackerjo/javaish/Identifiers.java | Java     |         12 |          0 |         10 |         22 |
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/javaish-standalone/src/main/java/com/trackerjo/javaish/Interpreter.java | Java     |      1,536 |         20 |        158 |      1,714 |
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/javaish-standalone/src/main/java/com/trackerjo/javaish/JavaishList.java | Java     |        148 |          0 |         19 |        167 |
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/javaish-standalone/src/main/java/com/trackerjo/javaish/JavaishVal.java  | Java     |         99 |          0 |         13 |        112 |
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/javaish-standalone/src/main/java/com/trackerjo/javaish/Parser.java      | Java     |      1,051 |         16 |        146 |      1,213 |
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/javaish-standalone/src/main/java/com/trackerjo/javaish/Result.java      | Java     |         13 |          0 |          7 |         20 |
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/javaish-standalone/src/main/java/com/trackerjo/javaish/Return.java      | Java     |         21 |          0 |          6 |         27 |
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/javaish-standalone/src/main/java/com/trackerjo/javaish/Runner.java      | Java     |      1,354 |         60 |        140 |      1,554 |
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/javaish-standalone/src/main/java/com/trackerjo/javaish/State.java       | Java     |        200 |         14 |         46 |        260 |
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/javaish-standalone/src/main/java/com/trackerjo/javaish/Statements.java  | Java     |        371 |          0 |        100 |        471 |
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/javaish-standalone/src/main/java/com/trackerjo/javaish/Translator.java  | Java     |      1,889 |         30 |        234 |      2,153 |
+| /Users/nathanielkemmenash/Desktop/VS Code Projects/javaish-standalone/src/main/java/com/trackerjo/javaish/Variables.java   | Java     |        470 |          3 |         53 |        526 |
+| Total                                                                                                                      |          |      9,669 |        213 |      1,327 |     11,209 |
++----------------------------------------------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+

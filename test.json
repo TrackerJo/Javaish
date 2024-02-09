@@ -1,0 +1,179 @@
+{
+    "globalVariables": {
+        "test": {
+            "name": "test",
+            "type": "STRING",
+            "value": "test now"
+        },
+        "bill": {
+            "args": "STRING test",
+            "line": 5,
+            "name": "bill",
+            "type": "FUNCTION",
+            "body": [
+                {
+                    "printStmt": [
+                        {
+                            "elementType": "STRING",
+                            "element": "ran line 5"
+                        }
+                    ],
+                    "printStmtColumn": 6,
+                    "line": 6,
+                    "printStmtReturnType": "STRING",
+                    "type": "PRINT"
+                },
+                {
+                    "printStmt": [
+                        {
+                            "elementType": "STRING",
+                            "element": "ran line 6"
+                        }
+                    ],
+                    "printStmtColumn": 6,
+                    "line": 7,
+                    "printStmtReturnType": "STRING",
+                    "type": "PRINT"
+                }
+            ]
+        }
+    },
+    "returnVal": {
+        "hasReturn": false,
+        "value": "null"
+    },
+    "localVariables": {
+        "test": {
+            "name": "test",
+            "type": "STRING",
+            "value": "test now"
+        },
+        "bill": {
+            "args": "STRING test",
+            "line": 5,
+            "name": "bill",
+            "type": "FUNCTION",
+            "body": [
+                {
+                    "printStmt": [
+                        {
+                            "elementType": "STRING",
+                            "element": "ran line 5"
+                        }
+                    ],
+                    "printStmtColumn": 6,
+                    "line": 6,
+                    "printStmtReturnType": "STRING",
+                    "type": "PRINT"
+                },
+                {
+                    "printStmt": [
+                        {
+                            "elementType": "STRING",
+                            "element": "ran line 6"
+                        }
+                    ],
+                    "printStmtColumn": 6,
+                    "line": 7,
+                    "printStmtReturnType": "STRING",
+                    "type": "PRINT"
+                }
+            ]
+        }
+    },
+    "pastResult": false,
+    "isGlobal": true,
+    "isComplete": false,
+    "currentLine": 6,
+    "states": [
+        {
+            "globalVariables": {
+                "test": {
+                    "name": "test",
+                    "type": "STRING",
+                    "value": "test now"
+                },
+                "bill": {
+                    "args": "STRING test",
+                    "line": 5,
+                    "name": "bill",
+                    "type": "FUNCTION",
+                    "body": [
+                        {
+                            "printStmt": [
+                                {
+                                    "elementType": "STRING",
+                                    "element": "ran line 5"
+                                }
+                            ],
+                            "printStmtColumn": 6,
+                            "line": 6,
+                            "printStmtReturnType": "STRING",
+                            "type": "PRINT"
+                        },
+                        {
+                            "printStmt": [
+                                {
+                                    "elementType": "STRING",
+                                    "element": "ran line 6"
+                                }
+                            ],
+                            "printStmtColumn": 6,
+                            "line": 7,
+                            "printStmtReturnType": "STRING",
+                            "type": "PRINT"
+                        }
+                    ]
+                }
+            },
+            "returnVal": {
+                "hasReturn": false,
+                "value": "null"
+            },
+            "localVariables": {
+                "test": {
+                    "name": "test",
+                    "type": "STRING",
+                    "value": "test now"
+                },
+                "bill": {
+                    "args": "STRING test",
+                    "line": 5,
+                    "name": "bill",
+                    "type": "FUNCTION",
+                    "body": [
+                        {
+                            "printStmt": [
+                                {
+                                    "elementType": "STRING",
+                                    "element": "ran line 5"
+                                }
+                            ],
+                            "printStmtColumn": 6,
+                            "line": 6,
+                            "printStmtReturnType": "STRING",
+                            "type": "PRINT"
+                        },
+                        {
+                            "printStmt": [
+                                {
+                                    "elementType": "STRING",
+                                    "element": "ran line 6"
+                                }
+                            ],
+                            "printStmtColumn": 6,
+                            "line": 7,
+                            "printStmtReturnType": "STRING",
+                            "type": "PRINT"
+                        }
+                    ]
+                }
+            },
+            "pastResult": false,
+            "isGlobal": false,
+            "isComplete": false,
+            "currentLine": 0,
+            "states": []
+        }
+    ]
+}
