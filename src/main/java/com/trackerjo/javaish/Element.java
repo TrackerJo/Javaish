@@ -6,11 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.trackerjo.javaish.JavaishVal.JavaishType;
+import com.trackerjo.javaish.Statements.RobotType;
 
 
 public class Element {
     public enum ElementType {
-        PLUS, MINUS, DIVIDE, MULTIPLY, FLOAT, INTEGER, VARIABLE, FUNCTION, EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_EQUAL, GREATER_THAN_EQUAL, STRING, BOOL, AND, OR, NOT, EXPRESSION, CAST, SHOWINPUTBOX, LIST, LISTVAL, ARRAYLENGTH
+        PLUS, MINUS, DIVIDE, MULTIPLY, FLOAT, INTEGER, VARIABLE, FUNCTION, EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_EQUAL, GREATER_THAN_EQUAL, STRING, BOOL, AND, OR, NOT, EXPRESSION, CAST, SHOWINPUTBOX, LIST, LISTVAL, ARRAYLENGTH, RobotActionElmt
     }
 
     ElementType type;
@@ -449,5 +450,27 @@ class ArrayLengthElmt extends Element{
 
     public String toString(){
         return arrayName + ".length";
+    }
+}
+
+class RobotActionElmt extends Element{
+    RobotType action;
+    List<Expression> params = new ArrayList<Expression>();
+    public RobotActionElmt(RobotType action, List<Expression> params){
+        this.action = action;
+        this.type = ElementType.RobotActionElmt;
+        this.params = params;
+    }
+
+    public RobotType getAction(){
+        return action;
+    }
+
+    public String toString(){
+        return action + "(" + params.toString() + ")";
+    }
+
+    public List<Expression> getParams(){
+        return params;
     }
 }

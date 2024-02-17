@@ -8,6 +8,7 @@ import java.util.List;
 import com.trackerjo.javaish.Expression.ExpressionReturnType;
 import com.trackerjo.javaish.JavaishVal.JavaishType;
 import com.trackerjo.javaish.Statements.MutationType;
+import com.trackerjo.javaish.Statements.RobotType;
 
 
 
@@ -15,6 +16,7 @@ public class Parser {
     String source;
     Variables variables;
     int lineNumber = 0;
+    boolean importedRobot = false;
     ClassStmt classStmt = new ClassStmt(-1);
 
     List<String> variableNames = new ArrayList<>();
@@ -63,6 +65,15 @@ public class Parser {
                    
                     String[] declaration = parseDeclaration(line);
                     String varName = declaration[0];
+                    if(!validVarName(varName)){
+                        Error.InvalidVariableName(varName, lineNumber);
+                    }
+
+                    if(parents.get(parents.size() - 1).containsVariable(varName)){
+                        Error.VariableAlreadyExists(varName, lineNumber);
+                    } else {
+                        parents.get(parents.size() - 1).addVariableName(varName);
+                    }
                     JavaishType varType = getType(declaration[1]);
                     String varValue = declaration[2];
                     System.out.println("Expression: " + varValue);
@@ -244,6 +255,16 @@ public class Parser {
                 case "function":
                     String[] functionDeclaration = parseFunction(line);
                     String functionName = functionDeclaration[0];
+                    //Check if valid function name
+                    if(!validVarName(functionName)){
+                        Error.InvalidFunctionName(functionName, lineNumber);
+                    }
+                    System.out.println("FunctionName: " + functionName);
+                    if(parents.get(parents.size() - 1).containsVariable(functionName)){
+                        Error.VariableAlreadyExists(functionName, lineNumber);
+                    } else {
+                        parents.get(parents.size() - 1).addVariableName(functionName);
+                    }
                     String[] functionArgs = functionDeclaration[1].split(",");
                     if(functionArgs.length == 1 && functionArgs[0].equals("")){
                         functionArgs = new String[0];
@@ -297,11 +318,48 @@ public class Parser {
                     RemoveAtStmt removeAtStmt = new RemoveAtStmt(lineNumber, removeAtExpression, removeAtVarName);
                     parents.get(parents.size() - 1).addStatement(removeAtStmt);
                     break;
+                case "import":
+                    String[] importStmt = parseImport(line);
+                    String importName = importStmt[0];
+                    ImportStmt importStmt2 = new ImportStmt(lineNumber, importName);
+                    parents.get(parents.size() - 1).addStatement(importStmt2);
+                    importedRobot = true;
+                    break;
+                case "robot":
+                    if(!importedRobot){
+                        Error.RobotNotImported(lineNumber);
+                    }
+                    FunctionCall robotStmt = parseRobot(line);
+                    String robotAction = robotStmt.getFunctionName();
+                    ArrayList<String> robotActionArgs = robotStmt.getArgs();
+                    
+                    Expression[] robotActionArgExpressions = new Expression[robotActionArgs.size()];
+                    for(int i = 0; i < robotActionArgs.size(); i++){
+                        if(robotActionArgs.get(i).isEmpty()){
+                            continue;
+                        }
+                        String arg = robotActionArgs.get(i);
+                       
+                        ExpressionReturnType argType = ExpressionReturnType.STRING;
+                        int columnArg = line.indexOf(arg);
+                        
+                        robotActionArgExpressions[i] = new Expression(arg, argType, lineNumber, columnArg);
+                    }
+                    //Check if robotAction is a valid RobotType
+                    try {
+                        RobotType.valueOf(robotAction.toUpperCase());
+                    } catch (IllegalArgumentException e) {
+                        Error.InvalidRobotAction(robotAction, lineNumber);
+                    }
+                    RobotType robotType = RobotType.valueOf(robotAction.toUpperCase());
+                    
 
-
+                    RobotStmt robotStmt2 = new RobotStmt(lineNumber, robotType, robotActionArgExpressions);
+                    parents.get(parents.size() - 1).addStatement(robotStmt2);
+                    break;
                    
                 default:
-                    if(variableNames.contains(words[0]) && (nextWord(line, words[0].length() + 1).equals("equals") || nextWord(line, words[0].length() + 1).equals("="))){
+                    if(parents.get(parents.size() - 1).containsVariable(words[0]) && (nextWord(line, words[0].length() + 1).equals("equals") || nextWord(line, words[0].length() + 1).equals("="))){
                         String assignment = parseAssignment(line, words[0]);
                         
                         String varValueA = assignment;
@@ -310,18 +368,18 @@ public class Parser {
                         AssignmentStmt assignmentStmt = new AssignmentStmt(lineNumber, words[0], expressionA);
                         parents.get(parents.size() - 1).addStatement(assignmentStmt);
                         
-                    } else if(possibleFunctionName(words[0])){
-                    String[] functionCall = parseFunctionCall(line);
+                    } else if(possibleFunctionName(words[0], parents)){
+                    FunctionCall functionCall = parseFunctionCall(line);
                     ////System.out .println("FunctionCall: " + functionCall[0] + " " + functionCall[1]);
-                    String functionCallName = functionCall[0];
+                    String functionCallName = functionCall.getFunctionName();
                     //System.out .println("FunctionCallName: " + functionCallName);
-                    String[] functionCallArgs = functionCall[1].split(",");
-                    Expression[] functionArgExpressions = new Expression[functionCallArgs.length];
-                    for(int i = 0; i < functionCallArgs.length; i++){
-                        if(functionCallArgs[i].isEmpty()){
+                    ArrayList<String> functionCallArgs = functionCall.getArgs();
+                    Expression[] functionArgExpressions = new Expression[functionCallArgs.size()];
+                    for(int i = 0; i < functionCallArgs.size(); i++){
+                        if(functionCallArgs.get(i).isEmpty()){
                             continue;
                         }
-                        String arg = functionCallArgs[i];
+                        String arg = functionCallArgs.get(i);
                        
                         ExpressionReturnType argType = ExpressionReturnType.STRING;
                         int columnArg = line.indexOf(arg);
@@ -334,7 +392,7 @@ public class Parser {
                         if(functionArgExpressions.length != 1){
                            Error.ArgumentLengthMismatch("print", lineNumber, 1, functionArgExpressions.length );
                         }
-                        if(functionCall[1].equals("")){
+                        if(functionCall.getArgs().size() == 0){
                             Error.ArgumentLengthMismatch("print", lineNumber, 1, 0 );
                         }
                         PrintStmt printStmt = new PrintStmt(lineNumber, functionArgExpressions[0]);
@@ -344,7 +402,7 @@ public class Parser {
                         if(functionArgExpressions.length != 1){
                            Error.ArgumentLengthMismatch("showMessageDialog", lineNumber, 1, functionArgExpressions.length );
                         }
-                        if(functionCall[1].equals("")){
+                        if(functionCall.getArgs().size() == 0){
                             Error.ArgumentLengthMismatch("showMessageDialog", lineNumber, 1, 0 );
                         }
                         ShowMsgBoxStmt showMsgBoxStmt = new ShowMsgBoxStmt(lineNumber, functionArgExpressions[0]);
@@ -368,6 +426,72 @@ public class Parser {
         
 
         return parents.get(0);
+    }
+    private boolean validVarName(String str) {
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+            if(!Character.isLetter(c) && c != '_' ){
+                if(i>0){
+                    continue;
+                }
+                return false;
+            }
+        }
+        return true;
+    }
+    private FunctionCall parseRobot(String line){
+        //Remove robot from line
+        String robotLine = line.substring(6);
+        //Parse as a function call
+        FunctionCall robotStmt = parseFunctionCall(robotLine);
+        
+        return robotStmt;
+    }
+
+    private String[] parseImport(String line){
+        int i = 0;
+        boolean readingId = true;
+        boolean readingName = false;
+        boolean readingString = false;
+        boolean readPeriod = false;
+
+        String rString = "";
+        String importName = "";
+        while(i < line.length()){
+            char c = line.charAt(i);
+            if(c == '"'){
+                readingString = !readingString;
+                rString += c;
+            } else
+            if(c == ' ' && !readingString){
+                if(readingId && rString.equals("import")){
+                    readingId = false;
+                    readingName = true;
+                    rString = "";
+                } else if(readingName){
+                    importName = rString;
+                    rString = "";
+                } else {
+                    rString += c;
+                }
+            } else if(c == '.' && !readingString){
+                readPeriod = true;
+                if(readingName){
+                    importName = rString;
+                    rString = "";
+                }
+            } 
+            else {
+                rString += c;
+            }
+            i++;
+        }
+
+        if(!readPeriod){
+            Error.MissingPeriod(lineNumber);
+        }
+        System.out.println("ImportName: " + importName);
+        return new String[]{importName};
     }
 
     private String[] parseRemoveFrom(String line, String type){
@@ -483,13 +607,13 @@ public class Parser {
     }
 
 
-    private boolean possibleFunctionName(String name){
+    private boolean possibleFunctionName(String name, List<Statements> parents){
        //Check if contains parenthesis
          if(name.contains("(")){
             String[] splitName = name.split("\\(");
             //System.out .println("SplitName: " + splitName[0]);
             String functionName = splitName[0];
-            if(variableNames.contains(functionName) || functionName.contains(" ") || functionName.length() == 0){
+            if(parents.get(parents.size() - 1).containsVariable(functionName) || functionName.contains(" ") || functionName.length() == 0){
                 return false;
             }
             return true;
@@ -732,7 +856,7 @@ public class Parser {
 
     }
 
-    private String[] parseFunctionCall(String line){
+    private FunctionCall parseFunctionCall(String line){
        int i = 0;
         
         boolean readingName = true;
@@ -743,7 +867,7 @@ public class Parser {
 
         String rString = "";
         String functionName = "";
-        String args = "";
+        ArrayList<String> args = new ArrayList<>();
         String argName = "";
 
         int functionDepth = 0;
@@ -776,9 +900,9 @@ public class Parser {
                 rString += c;
                 
             }
-            else if(c == ','){
+            else if(c == ',' && !readingString){
                 argName = rString;
-                args += argName + ",";
+                args.add(argName);
                 argName = "";
                 
                
@@ -787,11 +911,11 @@ public class Parser {
             } else if(c == ')'){
                 functionDepth--;
                 if(functionDepth == 0){
-                argName = rString;
-                args += argName;
-               
-                readingArgName = false;
-                rString = "";
+                    argName = rString;
+                    args.add(argName);
+                
+                    readingArgName = false;
+                    rString = "";
                 } else {
                     rString += c;
                 }
@@ -810,12 +934,17 @@ public class Parser {
             }
             i++;
         }
+        if(functionDepth != 0){
+            Error.MissingClosingParenthesis(lineNumber);
+        }
 
-         if(!readPeriod){
+        if(!readPeriod){
             Error.MissingPeriod(lineNumber);
         }
 
-        String[] functionCall = {functionName, args};
+        System.out.println("FunctionName: " + args);
+
+        FunctionCall functionCall = new FunctionCall(functionName, args);
         return functionCall;
     }
 
@@ -1208,5 +1337,23 @@ public class Parser {
             default:
                 return null;
         }
+    }
+}
+
+class FunctionCall {
+    String functionName;
+    ArrayList<String> args;
+
+    public FunctionCall(String functionName, ArrayList<String> args) {
+        this.functionName = functionName;
+        this.args = args;
+    }
+
+    public String getFunctionName() {
+        return functionName;
+    }
+
+    public ArrayList<String> getArgs() {
+        return args;
     }
 }

@@ -1,6 +1,9 @@
 
 package com.trackerjo.javaish;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -43,24 +46,69 @@ public class Runner {
         
     }
 
-    public static void convertFile(String path, String projName) throws IOException {
-          byte[] bytes = Files.readAllBytes(Paths.get(path));
+    public static void convertFile(String path, String projName, String translateTo) throws IOException {
+        byte[] bytes = Files.readAllBytes(Paths.get(path));
         String file = new String(bytes, Charset.defaultCharset());
         Variables variables = new Variables();
         Parser parser = new Parser(file, variables);
         Statements statements = parser.parse();
         System.out.println(statements.getBody());
        // printStmts(statements.getBody(),0);
-        Translator translator = new Translator(variables, projName);
-        translator.interpretFunction(statements.getBody(), null, null, "$main", true, true);
-        List<String> lines = translator.getJavaLines();
+       List<String> lines = new ArrayList<>();
+        if(translateTo.equals("java")){
+           
+       
+            JavaTranslator translator = new JavaTranslator(variables, projName);
+            translator.interpretFunction(statements.getBody(), null, null, "$main", true, true);
+
+            lines = translator.getJavaLines();
+        } else if(translateTo.equals("python")){
+            PythonTranslator translator = new PythonTranslator(variables, projName);
+            translator.interpretFunction(statements.getBody(), null, null, "$main", true, true);
+            lines = translator.getPythonLines();
+        }
         printJavaLines(lines);
         //Create java file
         String javaFile = "";
         for (String line : lines) {
             javaFile += line + "\n";
         }
-        Files.write(Paths.get("src/" + projName + ".java"), javaFile.getBytes());
+        System.out.println(javaFile);
+        
+        Files.write(Paths.get("src/" + projName + (translateTo.equals("java") ? ".java" : ".py")), javaFile.getBytes());
+    }
+
+    public static void runRobotFile(String path, String projName, String robotIP) throws IOException{
+        byte[] bytes = Files.readAllBytes(Paths.get(path));
+        String file = new String(bytes, Charset.defaultCharset());
+        Variables variables = new Variables();
+        Parser parser = new Parser(file, variables);
+        Statements statements = parser.parse();
+        System.out.println(statements.getBody());
+     
+        PythonTranslator translator = new PythonTranslator(variables, projName, robotIP);
+        translator.interpretFunction(statements.getBody(), null, null, "$main", true, true);
+        List<String> lines = translator.getPythonLines();
+
+        printJavaLines(lines);
+        //Create java file
+        String pythonFile = "";
+        for (String line : lines) {
+            pythonFile += line + "\n";
+        }
+        System.out.println(pythonFile);
+        String encodedFile = URLEncoder.encode(pythonFile, "UTF-8");
+        //Make a request to the HTTP server
+        String urlS = "http://192.168.1.16:8080/run_string/" + encodedFile;
+        System.out.println(urlS);
+        URL url = new URL(urlS);
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("GET");
+        int status = con.getResponseCode();
+        System.out.println(status);
+
+
+        
     }
 
     public static State debugFile(String path, State oldState) throws IOException {
@@ -85,6 +133,15 @@ public class Runner {
         // State newState = debugLines(debugger, oldState, statements.getBody().size());
        // printVars(state.getGlobalVariables());
         return newState;
+    }
+
+    public static void parseString(String string){
+        Variables variables = new Variables();
+        Parser parser = new Parser(string, variables);
+        Statements statements = parser.parse();
+        // System.out.println(statements.getBody());
+        // printStmts(statements.getBody(),0);
+        // printVars(variables);
     }
 
     public static State debugString(String string){

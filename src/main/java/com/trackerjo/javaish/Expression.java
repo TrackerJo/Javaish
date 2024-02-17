@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.trackerjo.javaish.JavaishVal.JavaishType;
+import com.trackerjo.javaish.Statements.RobotType;
 
 public class Expression {
     enum ExpressionReturnType {
@@ -50,9 +51,9 @@ public class Expression {
     }
 
     private Element[] parseExpression(String expression, int column) {
-        if(goal){
-            System.out.println("EXPRESSION: " + expression);
-        }
+        
+        System.out.println("EXPRESSION: " + expression);
+        
         int iter = 0;
         //TODO: Parse Expression
         int i = 0;
@@ -68,6 +69,7 @@ public class Expression {
         boolean readingArrayElmtArgs = false;
         boolean readingArrayArgExpression = false;
         boolean readingGetArrayLength = false;
+        boolean readingRobotAction = false;
         boolean readingNot = false;
         JavaishType castType = null;
         ExpressionReturnType castReturnType = ExpressionReturnType.NUMBER;
@@ -123,8 +125,13 @@ public class Expression {
                     if(currentExpressionDepth==0){
                         
                         readingExpression = false;
-                        elements.add(new ExpressionElmt(new Expression(parseExpression(currentElement, column + i), ExpressionReturnType.NUMBER, line)));
-                        currentElement = "";
+                        System.out.println("EXPRESSIONSSSS: " + readingArray);
+                        if(!readingArray){
+                            elements.add(new ExpressionElmt(new Expression(parseExpression(currentElement, column + i), ExpressionReturnType.NUMBER, line)));
+                            currentElement = "";
+
+                        } 
+                        
                     } else {
                         currentElement += c;
                     }
@@ -145,6 +152,7 @@ public class Expression {
                         readingArrayElmtArgs = false;
                         readingArrayArgExpression = false;
                         currentElement += c;
+                        System.out.println("ARRAY ARG EXPR: ");
                         System.out.println("ARRAY ARG EXPR: " + currentElement);
                         Expression index = new Expression(parseExpression(currentElement, column + i), ExpressionReturnType.NUMBER, line);
                         elements.add(new ListValElmt(currentArrayName, index));
@@ -190,6 +198,10 @@ public class Expression {
                 if(readingString || readingExpression || readingCast || readingFunctionArgs || readingArrayArgExpression){
                     currentElement += c;
                 } 
+                else if(currentElement.equals("robot") && !readingString && !readingFunctionArgs){
+                    readingRobotAction = true;
+                    currentElement = "";
+                }
                 else if(currentElement.equals("call") && !readingFunction){
                     //System.out .println("READING FUNCTION");
                     readingFunction = true;
@@ -292,7 +304,17 @@ public class Expression {
                     currentElement = "";
                     readingFunctionArgs = false;
                     readingFunction = false;
-                    if(currentFunctionName.equals("toString") ) {
+
+                    if(readingRobotAction){
+                        System.out.println("ADDING ROBOT ACTION:" + currentFunctionName);
+                        try {
+                            RobotType.valueOf(currentFunctionName.toUpperCase());
+                        } catch (IllegalArgumentException e) {
+                            Error.InvalidRobotAction(currentFunctionName, getLine());
+                        }
+                        elements.add(new RobotActionElmt(RobotType.valueOf(currentFunctionName.toUpperCase()), functionArgs));
+                        readingRobotAction = false;
+                    } else if(currentFunctionName.equals("toString") ) {
                         if(functionArgs.size()!=1){
                             Error.ArgumentLengthMismatch(currentFunctionName,  getLine(), 1,functionArgs.size());
                         }
@@ -332,6 +354,7 @@ public class Expression {
                             
                             elements.add(new ShowInputBoxElmt(functionArgs.get(0)));
                         }
+                    
                     else {
                         //Loop through function args and check if they are valid
                         List<Expression> newFunctionArgs = new ArrayList<Expression>();
@@ -466,9 +489,9 @@ public class Expression {
             return new AndElmt();
         } else if(element.equals("or") || element.equals("||")){
             return new OrElmt();
-        } else if(element.equals("add") || element.equals("+")){
+        } else if(element.equals("plus") || element.equals("+")){
             return new PlusElmt();
-        } else if(element.equals("subtract") || element.equals("-")){
+        } else if(element.equals("minus") || element.equals("-")){
             return new MinusElmt();
         } else if(element.equals("times") || element.equals("*")){
             return new MultiplyElmt();
@@ -506,7 +529,10 @@ public class Expression {
     private boolean isVariable(String str) {
         for (int i = 0; i < str.length(); i++) {
             char c = str.charAt(i);
-            if(!Character.isLetter(c)){
+            if(!Character.isLetter(c) && c != '_' ){
+                if(i>0){
+                    continue;
+                }
                 return false;
             }
         }

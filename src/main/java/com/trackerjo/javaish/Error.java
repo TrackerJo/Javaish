@@ -11,7 +11,7 @@ public class Error {
 
     public static void UnexpectedElmt(String token, int lineNumber, int columnNumber) {
         System.err.println("Error: Unknown element at line " + lineNumber + " column " + columnNumber + ": " +  token);
-        //System.exit(0);
+        System.exit(0);
     }
 
     public static void TypeMismatch(String expected, String got, int lineNumber) {
@@ -29,10 +29,17 @@ public class Error {
         //System.exit(0);
     }
 
-    public static void VariableAlreadyExists(String name) {
-        System.err.println("Error: Variable " + name + " already exists!");
+    public static void InvalidVariableName(String name, int lineNumber) {
+        System.err.println("Error: Invalid variable name at line " + lineNumber + ": " + name);
         //System.exit(0);
     }
+
+    public static void InvalidFunctionName(String name, int lineNumber) {
+        System.err.println("Error: Invalid function name at line " + lineNumber + ": " + name);
+        //System.exit(0);
+    }
+
+   
 
     public static void UnableToParse(String type, int lineNumber, String goal) {
         System.err.println("Error: Unable to parse " + type + " to " + goal + " at line " + lineNumber);
@@ -40,7 +47,7 @@ public class Error {
     }
 
     public static void VariableNotDeclared(String name, int lineNumber) {
-        System.err.println("Error: Variable " + name + " not declared at line " + lineNumber);
+        System.err.println("Error: Variable \"" + name + "\" not declared at line " + lineNumber);
         //System.exit(0);
     }
 
@@ -65,7 +72,7 @@ public class Error {
     }
 
     public static void FunctionAlreadyExists(String name) {
-        System.err.println("Error: Function " + name + " already exists!");
+        System.err.println("Error: Variable or Function " + name + " already exists!");
         //System.exit(0);
     }
 
@@ -121,9 +128,39 @@ public class Error {
     }
 
 
-     public static void VariableAlreadyExists(String name, int lineNumber) {
+    public static void VariableAlreadyExists(String name, int lineNumber) {
         
         throw new RuntimeException("Variable " + name + " already exists!");
+        //System.exit(0);
+    }
+
+    public static void PythonForWhenTranslator(String msg, int lineNumber) {
+        
+        throw new RuntimeException("Unable to translate to Python: " + msg + " at line " + lineNumber);
+        //System.exit(0);
+    }
+
+    public static void RobotNotImported(int lineNumber) {
+        
+        throw new RuntimeException("Robot not imported at line " + lineNumber);
+        //System.exit(0);
+    }
+
+    public static void MissingClosingParenthesis(int lineNumber) {
+        
+        throw new RuntimeException("Missing closing parenthesis at line " + lineNumber);
+        //System.exit(0);
+    }
+
+    public static void InvalidRobotAction(String type, int lineNumber) {
+        
+        throw new RuntimeException("Invalid robot action " + type + " at line " + lineNumber);
+        //System.exit(0);
+    }
+
+    public static void FunctionHasNoReturn(String name, int lineNumber) {
+        
+        throw new RuntimeException("Function \"" + name + "\" has no return at line " + lineNumber);
         //System.exit(0);
     }
 

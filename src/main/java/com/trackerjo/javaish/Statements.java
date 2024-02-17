@@ -10,17 +10,22 @@ import com.trackerjo.javaish.JavaishVal.JavaishType;
 
 public class Statements {
     enum StmtType {
-        FUNCTION, IF, WHILE, FOREACH, RETURN, CALL, ASSIGNMENT, DECLARATION, VARIABLE, MUTATION, END, ELSE, CLASS, ELSEIF, FORWHEN, PRINT, SHOWMSGBOX, REMOVEAT, REMOVEFROM, REMOVEALLFROM, COMMENT
+        FUNCTION, IF, WHILE, FOREACH, RETURN, CALL, ASSIGNMENT, DECLARATION, VARIABLE, MUTATION, END, ELSE, CLASS, ELSEIF, FORWHEN, PRINT, SHOWMSGBOX, REMOVEAT, REMOVEFROM, REMOVEALLFROM, COMMENT, IMPORT, ROBOT
     }
 
     enum MutationType {
         ADD, SUBTRACT, MULTIPLY, DIVIDE
     }
 
+    enum RobotType {
+        MOVE, SPEAK, STAND, SIT
+    }
+
     StmtType type;
     int line;
     boolean isBlock = false;
     List<Statements> body = new ArrayList<>();
+    List<String> variableNames = new ArrayList<>();
 
     public List<Statements> getBody() {
         return body;
@@ -40,6 +45,14 @@ public class Statements {
 
     public void addStatement(Statements stmt) {
         body.add(stmt);
+    }
+
+    public void addVariableName(String name) {
+        variableNames.add(name);
+    }
+
+    public boolean containsVariable(String name) {
+        return variableNames.contains(name);
     }
 }
 
@@ -463,6 +476,46 @@ class CommentStmt extends Statements {
 
     public String getComment() {
         return comment;
+    }
+
+     public int getLine() {
+        return line;
+    }
+}
+
+class ImportStmt extends Statements {
+    String importName;
+    public ImportStmt(int line,String importName) {
+        this.line = line;
+        this.importName = importName;
+        this.type = StmtType.IMPORT;
+    }
+
+    public String getImportName() {
+        return importName;
+    }
+
+     public int getLine() {
+        return line;
+    }
+}
+
+class RobotStmt extends Statements {
+    RobotType robotType;
+    Expression[] value;
+    public RobotStmt(int line,RobotType robotType, Expression[] value) {
+        this.line = line;
+        this.robotType = robotType;
+        this.value = value;
+        this.type = StmtType.ROBOT;
+    }
+
+    public RobotType getRobotType() {
+        return robotType;
+    }
+
+    public Expression[] getValue() {
+        return value;
     }
 
      public int getLine() {

@@ -4,6 +4,7 @@ package com.trackerjo.javaish;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JOptionPane;
 
@@ -13,7 +14,7 @@ import com.trackerjo.javaish.Statements.MutationType;
 
 
 
-public class Translator {
+public class JavaTranslator {
    int lineNumber = 0;
    int tabCount = 2;
    List<String> javaLines = new ArrayList<String>();
@@ -28,7 +29,7 @@ public class Translator {
     enum Operator {
         PLUS, MINUS, DIVIDE, MULTIPLY, EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_EQUAL, GREATER_THAN_EQUAL, REMOVEALLFROM, REMOVEAT, REMOVEFROM
     }
-    public Translator( Variables variables, String projName){
+    public JavaTranslator( Variables variables, String projName){
         
         this.globalVariables = variables;
         this.projName = projName;
@@ -83,6 +84,7 @@ public class Translator {
         //System.out .println("Interpreting Function: " + name);
         int funcJavaLine = javaLines.size();
         if(!name.equals("$main") && doTranslate){
+            System.out.println("Adding function: " + name);
             javaPrinter = javaLines;
             tabCount--;
            
@@ -97,6 +99,9 @@ public class Translator {
             funcLine += ") {";
             javaPrinter.add(funcLine);
             tabCount++;
+        } else if(doTranslate) {
+            System.out.println("Adding main function");
+            // tabCount++;
         }
         
         
@@ -1162,9 +1167,12 @@ public class Translator {
                     
                     ListElmt list = (ListElmt) elmt;
                     
-                    String type = typeToString(list.getListType());
+                    String ltype = typeToString(list.getListType());
+
+                    //Capitalize first letter
+                    ltype = ltype.substring(0, 1).toUpperCase() + ltype.substring(1);
                     List<Expression> listExpressions = list.getList();
-                    String listExpr = "new ArrayList<" + type + ">(Arrays.asList(";
+                    String listExpr = "new ArrayList<" + ltype + ">(Arrays.asList(";
                     if(!usedList){
                         javaImports.add("import java.util.ArrayList;");
                         javaImports.add("import java.util.Arrays;");
@@ -1353,7 +1361,10 @@ public class Translator {
                 JavaishListVal listVal = (JavaishListVal)value;
                 JavaishList list = listVal.getValue();
                 if(list.getType() == type){
-                    typeS = "ArrayList<" + typeToString(list.getType()) + ">";
+                    String lType = typeToString(list.getType());
+                    //Capitalize first letter
+                    lType = lType.substring(0, 1).toUpperCase() + lType.substring(1);
+                    typeS = "ArrayList<" + lType + ">";
                     line += typeS + " " + declaration.getName() + " = " + expr + ";";
                     javaPrinter.add(line);
                     if(isGlobal){
@@ -1361,6 +1372,7 @@ public class Translator {
                     } else {
                         localVariables.addList(declaration.getName(), type, list, lineNumber);
                     }
+                    tabCount = prevTabCount;
                     return;
                 }
             }
@@ -1371,7 +1383,10 @@ public class Translator {
         if(type == JavaishType.LIST){
             JavaishListVal listVal = (JavaishListVal)value.getValue();
             JavaishList list = listVal.getValue();
-            typeS = "ArrayList<" + typeToString(list.getType()) + ">";
+            String lType = typeToString(list.getType());
+            //Capitalize first letter
+            lType = lType.substring(0, 1).toUpperCase() + lType.substring(1);
+            typeS = "ArrayList<" + lType + ">";
             line += typeS + " " + declaration.getName() + " = " + expr + ";";
             javaPrinter.add(line);
         } else {
@@ -1398,6 +1413,7 @@ public class Translator {
              }
         }
         tabCount = prevTabCount;
+
         //System.out.println("Declaration: Type:" + declaration.getVarType()+ " Name: "+ declaration.getName() + " Value:" + value.getValue());
     }
 
@@ -1622,15 +1638,20 @@ public class Translator {
     private void evalForWhen(ForWhenStmt forwhenStmt, Variables localVariables, boolean isGlobal, List<String> javaPrinter){
         String incVarName = forwhenStmt.getIncVar();
         boolean newVar = false;
-        if(!localVariables.isVariable(incVarName)){
+
+        //Print Variables to see if incVarName is in there
+       
+        if(!localVariables.isVariable(incVarName) && !globalVariables.isVariable(incVarName)){
             newVar = true;
             localVariables.addVariable(incVarName, JavaishType.INT, new JavaishInt(0), lineNumber);
         }
+
+
         Expression condition = forwhenStmt.getCondition();
         
         String condString = translateExpression(condition, localVariables, isGlobal, javaPrinter);
         String incExpr = translateExpression(forwhenStmt.getIncrement(), localVariables, isGlobal, javaPrinter);
-        String line = addTabCount() + "for(" + (!newVar ? "int " + incVarName + " = 0;" : "; ") + condString + "; " + incVarName + " += " + incExpr + "){";
+        String line = addTabCount() + "for(" + (newVar ? "int " + incVarName + " = 0;" : "; ") + condString + "; " + incVarName + " += " + incExpr + "){";
         javaPrinter.add(line);
         
         

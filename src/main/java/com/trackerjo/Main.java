@@ -10,14 +10,16 @@ import com.trackerjo.javaish.State;
 public class Main {
     public static void main(String[] args) throws IOException  {
         String oldStateString = "{\"globalVariables\":{\"intList\":{\"name\":\"intList\",\"type\":\"INTLIST\",\"value\":{\"innerType\":\"INT\",\"length\":4,\"type\":\"INTLIST\",\"value\":[1,3,43,4]}},\"x\":{\"name\":\"x\",\"type\":\"INT\",\"value\":\"43\"}},\"returnVal\":{\"hasReturn\":false,\"value\":\"null\"},\"localVariables\":{\"intList\":{\"name\":\"intList\",\"type\":\"INTLIST\",\"value\":{\"innerType\":\"INT\",\"length\":4,\"type\":\"INTLIST\",\"value\":[1,3,43,4]}}},\"pastResult\":false,\"isGlobal\":true,\"body\":[],\"isComplete\":false,\"currentLine\":2,\"states\":[]}";
-        JSONObject oldStateJSON = new JSONObject(oldStateString);
-        State oldState = Runner.convertJSONToState(oldStateJSON);
-        System.out.println(oldState.isGlobal() + " - Is Global");
-        System.out.println(oldState.getCurrentLine());
-        State newState = Runner.debugFile("src/main/java/com/trackerjo/debug.javaish", oldState);
-        System.out.println(newState.getStates().size());
-        System.out.println(newState.isComplete());
-       System.out.println(Runner.convertStateToJSON(newState, false));
+        // JSONObject oldStateJSON = new JSONObject(oldStateString);
+        // State oldState = Runner.convertJSONToState(oldStateJSON);
+        // System.out.println(oldState.isGlobal() + " - Is Global");
+        // System.out.println(oldState.getCurrentLine());
+        // Runner.convertFile("src/main/java/com/trackerjo/debug.javaish", "debug", "python");
+        Runner.runFile("src/main/java/com/trackerjo/debug.javaish");
+        // State newState = Runner.debugFile("src/main/java/com/trackerjo/debug.javaish", oldState);
+    //     System.out.println(newState.getStates().size());
+    //     System.out.println(newState.isComplete());
+    //    System.out.println(Runner.convertStateToJSON(newState, false));
     }
 }
 
