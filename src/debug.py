@@ -1,15 +1,7 @@
-from naoqi import ALProxy
-tts = ALProxy("ALTextToSpeech", "null", 9559)
-tts.say(""Hello World, This is running from Javaish"")
-motion = ALProxy("ALMotion", "null", 9559)
-motion.setStiffnesses("Body", 1.0)
-motion.moveInit()
-motion.moveTo(2,0,0)
-postureService = ALProxy("ALRobotPosture", "null", 9559)
-result = postureService.goToPosture("Stand", .8)
-postureService.goToPosture("Sit", .8)
-print("tst")
-def local():
-	name = "Nathaniel"
-	print(name)
-print("Hello")
+names = ["Nathaniel", "Dever", "Sarah", "Sydney", "Fred", "Kathleen"]
+ages = [17, 21, 13, 25, 57, 57]
+x = len(names)
+while x > 0:
+	print(names[x - 1] + " is " + str(ages[x - 1]) + " years old")
+	x -= 1
+	print(x)

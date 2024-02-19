@@ -26,6 +26,11 @@ public class PythonTranslator {
     boolean usedRMove = false;
     boolean usedRSpeak = false;
     boolean usedRPosture = false;
+    boolean usedRLED = false;
+    boolean usedRMemory = false;
+    boolean usedRAudio = false;
+    boolean usedRPhoto = false;
+    boolean usedRSocket = false;
 
     String robotIP;
     String projName;
@@ -253,44 +258,183 @@ public class PythonTranslator {
     private void evalRobot(RobotStmt robotStmt, Variables localVariables, boolean isGlobal, List<String> javaPrinter){
         RobotType type = robotStmt.getRobotType();
         Expression[] expression = robotStmt.getValue();
+        //Remove null expressions
+        Expression[] newExpression = new Expression[expression.length];
+        int count = 0;
+        for (Expression expression2 : expression) {
+            if(expression2 != null){
+                newExpression[count] = expression2;
+                count++;
+            }
+        }
+        expression = Arrays.copyOf(newExpression, count);
        
         switch (type) {
             case MOVE:
+                if(expression.length == 0){
+                    Error.InvalidFunctionCall("robot speak", lineNumber, "1 argument", "no arguments");
+                }
                 String valM = translateExpression(expression[0], localVariables, isGlobal, javaPrinter);
 
                 if(!usedRMove){
-                    javaLines.add("motion = ALProxy(\"ALMotion\", \"" + robotIP + "\", 9559)");
-                    javaLines.add("motion.setStiffnesses(\"Body\", 1.0)");
+                    javaPrinter.add("motion = ALProxy(\"ALMotion\", \"" + robotIP + "\", 9559)");
+                    javaPrinter.add("motion.setStiffnesses(\"Body\", 1.0)");
                     usedRMove = true;
                 }
-                javaLines.add("motion.moveInit()");
-                javaLines.add("motion.moveTo(" + valM + ",0,0)");
+                javaPrinter.add("motion.moveInit()");
+                javaPrinter.add("motion.moveTo(" + valM + ",0,0)");
                 
                 break;
             case SPEAK:
+                if(expression.length == 0){
+                    Error.InvalidFunctionCall("robot speak", lineNumber, "1 argument", "no arguments");
+                }
                 String valS = translateExpression(expression[0], localVariables, isGlobal, javaPrinter);
 
                 if(!usedRSpeak){
-                    javaLines.add("tts = ALProxy(\"ALTextToSpeech\", \"" + robotIP + "\", 9559)");
+                    javaPrinter.add("tts = ALProxy(\"ALTextToSpeech\", \"" + robotIP + "\", 9559)");
                     usedRSpeak = true;
                 }
-                javaLines.add("tts.say(" + valS + ")");
+                javaPrinter.add("tts.say(" + valS + ")");
                 break;
             case SIT:
                 if(!usedRPosture){
-                    javaLines.add("postureService = ALProxy(\"ALRobotPosture\", \"" + robotIP + "\", 9559)");
+                    javaPrinter.add("postureService = ALProxy(\"ALRobotPosture\", \"" + robotIP + "\", 9559)");
                     usedRPosture = true;
                 }
 
-                javaLines.add("postureService.goToPosture(\"Sit\", .8)");
+                javaPrinter.add("postureService.goToPosture(\"Sit\", .8)");
                 break;
             case STAND:
                 if(!usedRPosture){
-                    javaLines.add("postureService = ALProxy(\"ALRobotPosture\", \"" + robotIP + "\", 9559)");
+                    javaPrinter.add("postureService = ALProxy(\"ALRobotPosture\", \"" + robotIP + "\", 9559)");
                     usedRPosture = true;
                 }
-                javaLines.add("postureService.goToPosture(\"Stand\", .8)");
+                javaPrinter.add("postureService.goToPosture(\"Stand\", .8)");
                 break;
+            case BLINK:
+                if(!usedRLED){
+                    javaImports.add("import time");
+                    javaPrinter.add("leds = ALProxy(\"ALLeds\", \"" + robotIP + "\", 9559)");
+                    usedRLED = true;
+                }
+                String blinkDuration = "0.05";
+                if(expression.length > 0){
+                    System.out.println("Blink Duration: " + expression[0]);
+                    blinkDuration = translateExpression(expression[0], localVariables, isGlobal, javaPrinter);
+                }
+                javaPrinter.add("rDuration = " + blinkDuration);
+                javaPrinter.add("leds.fadeRGB( \"FaceLed0\", 0x000000, rDuration, _async=True )");
+                javaPrinter.add("leds.fadeRGB( \"FaceLed1\", 0x000000, rDuration, _async=True )");
+                javaPrinter.add("leds.fadeRGB( \"FaceLed2\", 0xffffff, rDuration, _async=True )");
+                javaPrinter.add("leds.fadeRGB( \"FaceLed3\", 0x000000, rDuration, _async=True )");
+                javaPrinter.add("leds.fadeRGB( \"FaceLed4\", 0x000000, rDuration, _async=True )");
+                javaPrinter.add("leds.fadeRGB( \"FaceLed5\", 0x000000, rDuration, _async=True )");
+                javaPrinter.add("leds.fadeRGB( \"FaceLed6\", 0xffffff, rDuration, _async=True )");
+                javaPrinter.add("leds.fadeRGB( \"FaceLed7\", 0x000000, rDuration, _async=True )");
+                javaPrinter.add("time.sleep( 0.1 )");
+                javaPrinter.add("leds.fadeRGB( \"FaceLeds\", 0xffffff, rDuration )");
+                break;
+            case TWINKLE:
+                if(!usedRLED){
+                    javaImports.add("import time");
+                    javaPrinter.add("leds = ALProxy(\"ALLeds\", \"" + robotIP + "\", 9559)");
+                    usedRLED = true;
+                }
+                String twinkleDuration = "5";
+                String twinkleOnDuration = "0.05";
+                String twinkleOffDuration = "0.05";
+                if(expression.length > 0){
+                    twinkleDuration = translateExpression(expression[0], localVariables, isGlobal, javaPrinter);
+                }
+                if(expression.length > 1){
+                    twinkleOnDuration = translateExpression(expression[1], localVariables, isGlobal, javaPrinter);
+                }
+                if(expression.length > 2){
+                    twinkleOffDuration = translateExpression(expression[2], localVariables, isGlobal, javaPrinter);
+                }
+                javaPrinter.add("rDuration = " + twinkleDuration);
+
+
+                //while rDuration > 0:
+                //leds.fade("FaceLeds", 1, rOnDuration)
+                //time.sleep(rOnDuration)
+                //leds.fade("FaceLeds", 0, rOffDuration)
+                //time.sleep(rOffDuration)
+                //rDuration -= rOnDuration + rOffDuration
+                javaPrinter.add("while rDuration > 0:");
+                javaPrinter.add("\tleds.fade(\"FaceLeds\", 1, " + twinkleOnDuration + ")");
+                javaPrinter.add("\ttime.sleep(" + twinkleOnDuration + ")");
+                javaPrinter.add("\tleds.fade(\"FaceLeds\", 0, " + twinkleOffDuration + ")");
+                javaPrinter.add("\ttime.sleep(" + twinkleOffDuration + ")");
+                javaPrinter.add("\trDuration -= " + twinkleOnDuration + " + " + twinkleOffDuration);
+                javaPrinter.add("leds.fade(\"FaceLeds\", 1, 0.1)");
+                break;
+            case RANDOMEYES:
+                if(!usedRLED){
+                    javaImports.add("import time");
+                    javaImports.add("import random");
+                    javaPrinter.add("leds = ALProxy(\"ALLeds\", \"" + robotIP + "\", 9559)");
+                    usedRLED = true;
+                }
+                String randomEyesDuration = "5";
+                if(expression.length > 0){
+                    randomEyesDuration = translateExpression(expression[0], localVariables, isGlobal, javaPrinter);
+                }
+
+                //rRandTime = random.uniform(0.0,2.0)
+                //leds.fadeRGB("FaceLeds", 256*random.randint(0,255) + 256*256*random.randint(0,255) + random.randint(0,255), rRandTime)
+                // time.sleep(random.uniform(0.0,3.0))
+                javaPrinter.add("rDuration = " + randomEyesDuration);
+                javaPrinter.add("while rDuration > 0:");
+                javaPrinter.add("\trRandTime = random.uniform(0.0,2.0)");
+                javaPrinter.add("\tleds.fadeRGB(\"FaceLeds\", 256*random.randint(0,255) + 256*256*random.randint(0,255) + random.randint(0,255), rRandTime)");
+                javaPrinter.add("\ttime.sleep(random.uniform(0.0,3.0))");
+                javaPrinter.add("\trDuration -= rRandTime");
+                break;
+            case CROUCH:
+                if(!usedRPosture){
+                    javaPrinter.add("postureService = ALProxy(\"ALRobotPosture\", \"" + robotIP + "\", 9559)");
+                    usedRPosture = true;
+                }
+                javaPrinter.add("postureService.goToPosture(\"Crouch\", .8)");
+                break;
+            case LYINGBACK:
+                if(!usedRPosture){
+                    javaPrinter.add("postureService = ALProxy(\"ALRobotPosture\", \"" + robotIP + "\", 9559)");
+                    usedRPosture = true;
+                }
+                javaPrinter.add("postureService.goToPosture(\"LyingBack\", .8)");
+                break;
+            case LYINGBELLY:
+                if(!usedRPosture){
+                    javaPrinter.add("postureService = ALProxy(\"ALRobotPosture\", \"" + robotIP + "\", 9559)");
+                    usedRPosture = true;
+                }
+                javaPrinter.add("postureService.goToPosture(\"LyingBelly\", .8)");
+                break;
+            case PICTURE:
+                String picturePath = "\"/home/nao/recordings/cameras\"";
+                if(expression.length > 0){
+                    picturePath = translateExpression(expression[0], localVariables, isGlobal, javaPrinter);
+                }
+                String pictureName = "\"image\"";
+                if(expression.length > 1){
+                    pictureName = translateExpression(expression[1], localVariables, isGlobal, javaPrinter);
+                }
+                
+                if(!usedRPhoto){
+                    javaPrinter.add("photo = ALProxy(\"ALPhotoCapture\", \"" + robotIP + "\", 9559)");
+                    usedRPhoto = true;
+                }
+                javaPrinter.add("photo.setResolution(2)");
+                javaPrinter.add("photo.setCameraID(0)");
+                javaPrinter.add("photo.setPictureFormat(\"jpg\")");
+                javaPrinter.add("photo.takePicture(" + picturePath + ", " + pictureName + ")");
+                break;
+            
+
+
             default:
                 break;
         }
@@ -311,7 +455,7 @@ public class PythonTranslator {
                 break;
             case SIT:
                 if(!usedRPosture){
-                    javaLines.add("postureService = ALProxy(\"ALRobotPosture\", \"" + robotIP + "\", 9559)");
+                    javaPrinter.add("postureService = ALProxy(\"ALRobotPosture\", \"" + robotIP + "\", 9559)");
                     usedRPosture = true;
                 }
 
@@ -319,11 +463,28 @@ public class PythonTranslator {
 
             case STAND:
                 if(!usedRPosture){
-                    javaLines.add("postureService = ALProxy(\"ALRobotPosture\", \"" + robotIP + "\", 9559)");
+                    javaPrinter.add("postureService = ALProxy(\"ALRobotPosture\", \"" + robotIP + "\", 9559)");
                     usedRPosture = true;
                 }
                 return "postureService.goToPosture(\"Stand\", .8)";
-
+            case BATTERY:
+                if(!usedRMemory){
+                    javaPrinter.add("memory = ALProxy(\"ALMemory\", \"" + robotIP + "\", 9559)");
+                    usedRMemory = true;
+                }
+                return "memory.getData(\"BatteryChargeChanged\")";
+            case VOLUME:
+                if(!usedRAudio){
+                    javaPrinter.add("audio = ALProxy(\"ALAudioDevice\", \"" + robotIP + "\", 9559)");
+                    usedRAudio = true;
+                }
+                return "audio.getOutputVolume()";
+            case NAME:
+                if(!usedRSocket){
+                    javaImports.add("import socket");
+                    usedRMemory = true;
+                }
+                return "socket.gethostname()";
             default:
 
                 break;
@@ -808,12 +969,43 @@ public class PythonTranslator {
                     }
                     break;
                 case RobotActionElmt:
+                    RobotActionElmt robotAction = (RobotActionElmt) elmt;
+                    RobotType rtype = robotAction.getAction();
+                    switch (rtype) {
+                        case SIT:
+                            if(isComp){
+                                compVal = new JavaishBoolean(true);
+                            } else {
+                                total = new JavaishBoolean(true);
+                            }
+                            
+                            break;
+                        case STAND:
+                            if(isComp){
+                                compVal = new JavaishBoolean(true);
+                            } else {
+                                total = new JavaishBoolean(true);
+                            }
+                            break;
+                        case BATTERY:
+                            if(isComp){
+                                compVal = new JavaishInt(100);
+                            } else {
+                                total = new JavaishInt(100);
+                            }
+                            break;
+                        case VOLUME:
+                            if(isComp){
+                                compVal = new JavaishInt(100);
+                            } else {
+                                total = new JavaishInt(100);
+                            }
+                            break;
                     
-                    if(isComp){
-                        compVal = new JavaishBoolean(true);
-                    } else {
-                        total = new JavaishBoolean(true);
+                        default:
+                            break;
                     }
+                    
                     break;
                 default:
                     break;
@@ -1626,7 +1818,7 @@ public class PythonTranslator {
         interpretBody(whileStmt.getBody(), localVariables, false, javaPrinter);
         tabCount--;
 
-        javaPrinter.add(line);
+
             
         
 
@@ -1664,7 +1856,7 @@ public class PythonTranslator {
             tabCount++;
             interpretBody(foreachStmt.getBody(), localVariables, false, javaPrinter);
             tabCount--;
-            javaPrinter.add(line);
+
 
 
         } else if(list.getType() == JavaishType.BOOLEANLIST){
@@ -1679,7 +1871,7 @@ public class PythonTranslator {
             interpretBody(foreachStmt.getBody(), localVariables, false, javaPrinter);
             tabCount--;
 
-            javaPrinter.add(line);
+
         } else if(list.getType() == JavaishType.INTLIST){
            if(isGlobal){
                 globalVariables.addVariable(tempVarName, JavaishType.INT, new JavaishInt(0), lineNumber);
@@ -1692,7 +1884,7 @@ public class PythonTranslator {
             interpretBody(foreachStmt.getBody(), localVariables, false, javaPrinter);
             tabCount--;
 
-            javaPrinter.add(line);
+
         } else if(list.getType() == JavaishType.FLOATLIST){
              if(isGlobal){
                 globalVariables.addVariable(tempVarName, JavaishType.FLOAT, new JavaishFloat(0), lineNumber);
@@ -1705,7 +1897,7 @@ public class PythonTranslator {
             interpretBody(foreachStmt.getBody(), localVariables, false, javaPrinter);
             tabCount--;
 
-            javaPrinter.add(line);
+
         } else {
             Error.TypeMismatch("List", listVal.typeString(), lineNumber);
             return;
@@ -1714,7 +1906,33 @@ public class PythonTranslator {
     }
 
     private void evalForWhen(ForWhenStmt forwhenStmt, Variables localVariables, boolean isGlobal, List<String> javaPrinter){
-        Error.PythonForWhenTranslator("Can't convert for when loop to python, must use: for x in [...]", lineNumber);
+        String incVarName = forwhenStmt.getIncVar();
+        boolean newVar = false;
+
+        //Print Variables to see if incVarName is in there
+       
+        if(!localVariables.isVariable(incVarName) && !globalVariables.isVariable(incVarName)){
+            newVar = true;
+            localVariables.addVariable(incVarName, JavaishType.INT, new JavaishInt(0), lineNumber);
+        }
+
+
+        Expression condition = forwhenStmt.getCondition();
+        
+        String condString = translateExpression(condition, localVariables, isGlobal, javaPrinter);
+        String incExpr = translateExpression(forwhenStmt.getIncrement(), localVariables, isGlobal, javaPrinter);
+        if (newVar) {
+            javaPrinter.add(addTabCount() + incVarName + " = 0");
+        }
+        javaPrinter.add(addTabCount() + "while " + condString + ":");
+
+        
+        
+        tabCount++;
+        interpretBody(forwhenStmt.getBody(), localVariables, false, javaPrinter);
+        javaPrinter.add(addTabCount() + incVarName + " += " + incExpr);
+        tabCount--;
+
         
         
     }
@@ -1832,20 +2050,16 @@ public class PythonTranslator {
         
         switch (type) {
             case ADD:
-                if(exprJustOne){
-                    line += name + "++";
-                } else {
+                
                     line += name + " += " + translateExpression(expression, localVariables, isGlobal, javaPrinter);
-                }
+                
                 
                 break;
 
             case SUBTRACT:
-                if(exprJustOne){
-                    line += name + "--";
-                } else {
+                
                     line += name + " -= " + translateExpression(expression, localVariables, isGlobal, javaPrinter);
-                }
+                
                 break;
 
             case MULTIPLY:

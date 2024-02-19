@@ -69,7 +69,7 @@ public class Interpreter {
 
     private JavaishVal interpretBody(List<Statements> statements,Variables funcVariables, boolean isGlobal){
         Result pastResult = new Result(false);  
-        Variables localVariables = new Variables(funcVariables);
+        Variables localVariables = funcVariables.clone();
         Return returnVal = new Return(false, null);
         
 
@@ -1287,8 +1287,14 @@ public class Interpreter {
 
     private void evalForWhen(ForWhenStmt forwhenStmt, Variables localVariables, boolean isGlobal){
         String incVarName = forwhenStmt.getIncVar();
-        if(!localVariables.isVariable(incVarName)){
-            localVariables.addVariable(incVarName, JavaishType.INT, new JavaishInt(0), lineNumber);
+        if(isGlobal){
+            if(!globalVariables.isVariable(incVarName)){
+                globalVariables.addVariable(incVarName, JavaishType.INT, new JavaishInt(0), lineNumber);
+            }
+        } else {
+            if(!localVariables.isVariable(incVarName)){
+                localVariables.addVariable(incVarName, JavaishType.INT, new JavaishInt(0), lineNumber);
+            }
         }
         Expression condition = forwhenStmt.getCondition();
         JavaishVal result = evalExpression(condition, localVariables, isGlobal);
@@ -1297,7 +1303,12 @@ public class Interpreter {
         }
         while(((JavaishBoolean) result).getValue() == true){
             interpretBody(forwhenStmt.getBody(), localVariables, false);
-            JavaishVal incVal = localVariables.getVariableValue(incVarName);
+            JavaishVal incVal = null;
+            if(isGlobal){
+                incVal = globalVariables.getVariableValue(incVarName);
+            } else {
+                incVal = localVariables.getVariableValue(incVarName);
+            }
             if(incVal == null){
                 return;
             }
@@ -1310,7 +1321,11 @@ public class Interpreter {
                 return;
             }
             JavaishInt incInt = (JavaishInt) incResult;
-            localVariables.setVariableValue(incVarName, incInt, lineNumber);
+            if(isGlobal){
+                globalVariables.setVariableValue(incVarName, incInt, lineNumber);
+            } else {
+                localVariables.setVariableValue(incVarName, incInt, lineNumber);
+            }
             result = evalExpression(condition, localVariables, isGlobal);
             if(result == null){
                 return;

@@ -13,11 +13,15 @@ public class State {
     Return returnVal;
     int currentLine;
     int currentRuntimeLine = 0;
+    int loopStartLine;
     boolean isGlobal;
+    boolean isLoop;
     boolean isComplete;
     List<State> states = new ArrayList<>();
+    boolean inForWhenLoop;
+    int forIndex;
 
-    public State(List<Statements> statements, Variables globalVariables, Variables localVariables, Result pastResult, Return returnVal, int currentLine, boolean isGlobal, boolean isComplete, int currentRuntimeLine) {
+    public State(List<Statements> statements, Variables globalVariables, Variables localVariables, Result pastResult, Return returnVal, int currentLine, boolean isGlobal, boolean isComplete, int currentRuntimeLine, boolean isLoop, int loopStartLine, int forIndex, boolean inForWhenLoop) {
         this.statements = statements;
         this.globalVariables = globalVariables;
         this.localVariables = localVariables;
@@ -27,9 +31,13 @@ public class State {
         this.isGlobal = isGlobal;
         this.isComplete = isComplete;
         this.currentRuntimeLine = currentRuntimeLine;
+        this.loopStartLine = loopStartLine;
+        this.isLoop = isLoop;
+        this.inForWhenLoop = inForWhenLoop;
+        this.forIndex = forIndex;
     }
 
-    public State(List<Statements> statements, Variables globalVariables, Variables localVariables, Result pastResult, Return returnVal, int currentLine, boolean isGlobal, boolean isComplete, List<State> states, int currentRuntimeLine) {
+    public State(List<Statements> statements, Variables globalVariables, Variables localVariables, Result pastResult, Return returnVal, int currentLine, boolean isGlobal, boolean isComplete, List<State> states, int currentRuntimeLine, boolean isLoop, int loopStartLine, int forIndex, boolean inForWhenLoop) {
         this.statements = statements;
         this.globalVariables = globalVariables;
         this.localVariables = localVariables;
@@ -40,6 +48,26 @@ public class State {
         this.isComplete = isComplete;
         this.states = states;
         this.currentRuntimeLine = currentRuntimeLine;
+        this.loopStartLine = loopStartLine;
+        this.isLoop = isLoop;
+        this.inForWhenLoop = inForWhenLoop;
+        this.forIndex = forIndex;
+    }
+
+    public int getForIndex() {
+        return forIndex;
+    }
+
+    public void setForIndex(int forIndex) {
+        this.forIndex = forIndex;
+    }
+
+    public boolean isInForWhenLoop() {
+        return inForWhenLoop;
+    }
+
+    public void setInForWhenLoop(boolean inForWhenLoop) {
+        this.inForWhenLoop = inForWhenLoop;
     }
 
     public int getCurrentRuntimeLine() {
@@ -127,6 +155,9 @@ public class State {
     }
 
     public State getLastState() {
+        if(states.isEmpty()){
+            return this;
+        }
         return states.get(states.size() - 1);
     }
 
@@ -139,6 +170,14 @@ public class State {
         if (complete) {
             states.clear();
         }
+    }
+
+    public int getLoopStartLine() {
+        return loopStartLine;
+    }
+
+    public boolean isLoop() {
+        return isLoop;
     }
 
     public void printState(){

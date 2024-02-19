@@ -15,6 +15,8 @@ public class Debugger {
    int lineNumber = 0;
    State currentState;
    Variables globalVariables;
+   boolean inForWhenLoop = false;
+   int forIndex = 0;
     enum Operator {
         PLUS, MINUS, DIVIDE, MULTIPLY, EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_EQUAL, GREATER_THAN_EQUAL, REMOVEALLFROM, REMOVEAT, REMOVEFROM
     }
@@ -29,12 +31,57 @@ public class Debugger {
         
         if(state.getStates().size() > 0){
             this.currentState = state.getLastState();
+            List<Statements> statements = currentState.getStatements();
+            globalVariables = currentState.getGlobalVariables();
+            if(currentState.isLoop()){
+                //Get Prevois state
+                if(state.getStates().size() > 1){
+                    //Get Prevois state
+                    State prevState = state.getStates().get(state.getStates().size() - 2);
+                    forIndex = prevState.getForIndex();
+                    inForWhenLoop = prevState.isInForWhenLoop();
+                } else {
+                    forIndex = state.getForIndex();
+                    inForWhenLoop = state.isInForWhenLoop();
+                }
+            }
+             // System.out.println("NOT GLOBAL");
+             if(currentState.getCurrentLine() >= statements.size()){
+                if(currentState.isLoop()){
+                    System.out.println("LOOPING");
+                    int loopStart = currentState.getLoopStartLine();
+                    state.removeLastState();
+                    if(state.getStates().size() == 0){
+                        this.currentState = state;
+                    } else {
+                        this.currentState = state.getLastState();
+                    }
+                    
+                    currentState.setCurrentLine(loopStart);
+                    
+                     
+                } else {
+                    System.out.println("NOT LOOPING");
+                    state.removeLastState();
+                    this.currentState = state.getLastState();
+                }
+                 if(state.getStates().size() == 0){
+                     state.setGlobal(true);
+                 }
+                
+                currentState.setGlobalVariables(globalVariables);
+                
+                
+             }
+             
             // System.out.println("Getting LAST STATE");
         } else {
             this.currentState = state;
             globalVariables = currentState.getGlobalVariables();
         }
         lineNumber = currentState.getCurrentLine();
+        System.out.println("Current Line: " + lineNumber);
+        System.out.println("States Size: " + currentState.getStatements().size());
         List<Statements> statements = currentState.getStatements();
         
         Variables localVariables = currentState.getLocalVariables();
@@ -45,17 +92,17 @@ public class Debugger {
         
        
         if(lineNumber >= statements.size()){
-           currentState.setComplete(true);
-              return currentState;
+            currentState.setComplete(true);
+            return currentState;
         }
         Statements stmt = statements.get(lineNumber);
         System.out.println("Interpreting: " + stmt + " " + lineNumber);
-        
         interpretStmt(stmt, localVariables, isGlobal, pastResult, returnVal);
         currentState.setCurrentRuntimeLine(stmt.getLine());
         currentState.incrementCurrentLine();
         System.out.println("Current Line: " + currentState.getCurrentLine());
         System.out.println("States Size: " + currentState.getStates().size());
+        System.out.println("Statement Size: " + statements.size());
         if(isGlobal){
             if(currentState.getCurrentLine() >= statements.size() && currentState.getStates().size() == 0){
                 currentState.setComplete(true);
@@ -65,14 +112,7 @@ public class Debugger {
            System.out.println("States Size: " + currentState.getStates().size());
             return currentState;
         } else {
-            // System.out.println("NOT GLOBAL");
-            if(currentState.getCurrentLine() >= statements.size()){
-               state.removeLastState();
-                if(state.getStates().size() == 0){
-                    state.setGlobal(true);
-                }
-               
-            }
+           
             return state;
             
             
@@ -1167,7 +1207,7 @@ public class Debugger {
         Result pastResult = new Result(false);  
         int funcLineNumber = globalVariables.getFunctionLineNumber(name);
         Return returnVal = new Return(false, null);
-        State funcState = new State(body, localVariables, localVariables, pastResult, returnVal, 0, false, false, funcLineNumber);
+        State funcState = new State(body, globalVariables, localVariables, pastResult, returnVal, 0, false, false, funcLineNumber, false, 0, 0, false );
         currentState.addState(funcState);
         System.out.println("CALLING FUNCTION: " + name);
         System.out.println(currentState.getStates().size());
@@ -1185,7 +1225,7 @@ public class Debugger {
             Result newPastResult = new Result(false);  
 
             Return newReturnVal = new Return(false, null);
-            State funcState = new State(body, localVariables, localVariables, newPastResult, newReturnVal, 0, false, false, ifStmt.getLine());
+            State funcState = new State(body, globalVariables, localVariables, newPastResult, newReturnVal, 0, false, false, ifStmt.getLine(), false, 0, 0, false);
             currentState.addState(funcState);
            
         } else {
@@ -1202,7 +1242,7 @@ public class Debugger {
         Result newPastResult = new Result(false);  
 
         Return newReturnVal = new Return(false, null);
-        State funcState = new State(body, localVariables, localVariables, newPastResult, newReturnVal, 0, false, false, elseStmt.getLine());
+        State funcState = new State(body, globalVariables, localVariables, newPastResult, newReturnVal, 0, false, false, elseStmt.getLine(), false, 0, 0, false);
         currentState.addState(funcState);
 
     }
@@ -1221,7 +1261,7 @@ public class Debugger {
             Result newPastResult = new Result(false);  
 
             Return newReturnVal = new Return(false, null);
-            State funcState = new State(body, localVariables, localVariables, newPastResult, newReturnVal, 0, false, false, elseifStmt.getLine());
+            State funcState = new State(body, globalVariables, localVariables, newPastResult, newReturnVal, 0, false, false, elseifStmt.getLine(), false, 0, 0, false);
             currentState.addState(funcState);
         }
 
@@ -1243,13 +1283,13 @@ public class Debugger {
         if(result == null){
             return;
         }
-        while(((JavaishBoolean) result).getValue() == true){
-            interpretBody(whileStmt.getBody(), localVariables, false);
-            result = evalExpression(condition, localVariables, isGlobal);
-            if(result == null){
-                return;
-            }
-        }
+        if(((JavaishBoolean) result).getValue() == true){
+            Result pastResult = new Result(false);  
+            int whileLineNumber = whileStmt.getLine();
+            Return returnVal = new Return(false, null);
+            State funcState = new State(whileStmt.getBody(), globalVariables, localVariables, pastResult, returnVal, 0, false, false, whileLineNumber, true,currentState.getCurrentLine(), 0, false);
+            currentState.addState(funcState);
+        } 
 
     }
 
@@ -1280,19 +1320,38 @@ public class Debugger {
                 return;
             }
             //Create temp variable
-            if(isGlobal){
-                globalVariables.addVariable(tempVarName, JavaishType.STRING, new JavaishString(""), lineNumber);
-            } else {
-                localVariables.addVariable(tempVarName, JavaishType.STRING, new JavaishString(""), lineNumber);
-            }
-            for (JavaishString listValI : listVals) {
-                if(localVariables.isVariable(tempVarName)){
-                    localVariables.setVariableValue(tempVarName, listValI, lineNumber);
+            if(forIndex == 0){
+               
+            
+                if(isGlobal){
+                    globalVariables.addVariable(tempVarName, JavaishType.STRING, new JavaishString(""), lineNumber);
                 } else {
-                    globalVariables.setVariableValue(tempVarName, listValI, lineNumber);
+                    localVariables.addVariable(tempVarName, JavaishType.STRING, new JavaishString(""), lineNumber);
                 }
-                interpretBody(foreachStmt.getBody(), localVariables, false);
             }
+            if(forIndex >= listVals.size()){
+                currentState.setForIndex(0);
+                //Remove temp variable
+                if(isGlobal){
+                    globalVariables.removeVariable(tempVarName,JavaishType.STRING);
+                } else {
+                    localVariables.removeVariable(tempVarName, JavaishType.STRING);
+                }
+                return;
+            }
+            
+            if(localVariables.isVariable(tempVarName)){
+                localVariables.setVariableValue(tempVarName, listVals.get(forIndex), lineNumber);
+            } else {
+                globalVariables.setVariableValue(tempVarName, listVals.get(forIndex), lineNumber);
+            }
+            currentState.setForIndex(forIndex + 1);
+            Result pastResult = new Result(false);  
+            int forLineNumber = foreachStmt.getLine();
+            Return returnVal = new Return(false, null);
+            State funcState = new State(foreachStmt.getBody(), globalVariables, localVariables, pastResult, returnVal, 0, false, false, forLineNumber, true,currentState.getCurrentLine(), 0, false);
+            currentState.addState(funcState);
+            
 
         } else if(list.getType() == JavaishType.BOOLEANLIST){
             JavaishBooleanList booleanList = (JavaishBooleanList) list;
@@ -1301,19 +1360,36 @@ public class Debugger {
                 Error.ListEmpty(lineNumber, listName);
                 return;
             }
-            if(isGlobal){
-                globalVariables.addVariable(tempVarName, JavaishType.BOOLEAN, new JavaishBoolean(false), lineNumber);
-            } else {
-                localVariables.addVariable(tempVarName, JavaishType.BOOLEAN, new JavaishBoolean(false), lineNumber);
-            }
-            for (JavaishBoolean listValI : listVals) {
-                if(localVariables.isVariable(tempVarName)){
-                    localVariables.setVariableValue(tempVarName, listValI, lineNumber);
+            if(forIndex == 0){
+                if(isGlobal){
+                    globalVariables.addVariable(tempVarName, JavaishType.BOOLEAN, new JavaishBoolean(false), lineNumber);
                 } else {
-                    globalVariables.setVariableValue(tempVarName, listValI, lineNumber);
+                    localVariables.addVariable(tempVarName, JavaishType.BOOLEAN, new JavaishBoolean(false), lineNumber);
                 }
-                interpretBody(foreachStmt.getBody(), localVariables, false);
             }
+            if(forIndex >= listVals.size()){
+                currentState.setForIndex(0);
+                //Remove temp variable
+                if(isGlobal){
+                    globalVariables.removeVariable(tempVarName,JavaishType.BOOLEAN);
+                } else {
+                    localVariables.removeVariable(tempVarName, JavaishType.BOOLEAN);
+                }
+                return;
+            }
+
+            if(localVariables.isVariable(tempVarName)){
+                localVariables.setVariableValue(tempVarName, listVals.get(forIndex), lineNumber);
+            } else {
+                globalVariables.setVariableValue(tempVarName, listVals.get(forIndex), lineNumber);
+            }
+            currentState.setForIndex(forIndex + 1);
+            Result pastResult = new Result(false);  
+            int forLineNumber = foreachStmt.getLine();
+            Return returnVal = new Return(false, null);
+            State funcState = new State(foreachStmt.getBody(), globalVariables, localVariables, pastResult, returnVal, 0, false, false, forLineNumber, true,currentState.getCurrentLine(), 0, false);
+            currentState.addState(funcState);
+              
         } else if(list.getType() == JavaishType.INTLIST){
             JavaishIntList intList = (JavaishIntList) list;
             List<JavaishInt> listVals = intList.getList();
@@ -1321,19 +1397,35 @@ public class Debugger {
                 Error.ListEmpty(lineNumber, listName);
                 return;
             }
-            if(isGlobal){
-                globalVariables.addVariable(tempVarName, JavaishType.INT, new JavaishInt(0), lineNumber);
-            } else {
-                localVariables.addVariable(tempVarName, JavaishType.INT, new JavaishInt(0), lineNumber);
-            }
-            for (JavaishInt listValI : listVals) {
-                if(localVariables.isVariable(tempVarName)){
-                    localVariables.setVariableValue(tempVarName, listValI, lineNumber);
+            if(forIndex == 0){
+                if(isGlobal){
+                    globalVariables.addVariable(tempVarName, JavaishType.INT, new JavaishInt(0), lineNumber);
                 } else {
-                    globalVariables.setVariableValue(tempVarName, listValI, lineNumber);
+                    localVariables.addVariable(tempVarName, JavaishType.INT, new JavaishInt(0), lineNumber);
                 }
-                interpretBody(foreachStmt.getBody(), localVariables, false);
             }
+            if(forIndex >= listVals.size()){
+                currentState.setForIndex(0);
+                //Remove temp variable
+                if(isGlobal){
+                    globalVariables.removeVariable(tempVarName,JavaishType.INT);
+                } else {
+                    localVariables.removeVariable(tempVarName, JavaishType.INT);
+                }
+                return;
+            }
+
+            if(localVariables.isVariable(tempVarName)){
+                localVariables.setVariableValue(tempVarName, listVals.get(forIndex), lineNumber);
+            } else {
+                globalVariables.setVariableValue(tempVarName, listVals.get(forIndex), lineNumber);
+            }
+            currentState.setForIndex(forIndex + 1);
+            Result pastResult = new Result(false);  
+            int forLineNumber = foreachStmt.getLine();
+            Return returnVal = new Return(false, null);
+            State funcState = new State(foreachStmt.getBody(), globalVariables, localVariables, pastResult, returnVal, 0, false, false, forLineNumber, true,currentState.getCurrentLine(), 0, false);
+            currentState.addState(funcState);
         } else if(list.getType() == JavaishType.FLOATLIST){
             JavaishFloatList floatList = (JavaishFloatList) list;
             List<JavaishFloat> listVals = floatList.getList();
@@ -1341,19 +1433,36 @@ public class Debugger {
                 Error.ListEmpty(lineNumber, listName);
                 return;
             }
-            if(isGlobal){
-                globalVariables.addVariable(tempVarName, JavaishType.FLOAT, new JavaishFloat(0), lineNumber);
-            } else {
-                localVariables.addVariable(tempVarName, JavaishType.FLOAT, new JavaishFloat(0), lineNumber);
-            }
-            for (JavaishFloat listValI : listVals) {
-                if(localVariables.isVariable(tempVarName)){
-                    localVariables.setVariableValue(tempVarName, listValI, lineNumber);
+            if(forIndex >= listVals.size()){
+                currentState.setForIndex(0);
+                //Remove temp variable
+                if(isGlobal){
+                    globalVariables.removeVariable(tempVarName,JavaishType.FLOAT);
                 } else {
-                    globalVariables.setVariableValue(tempVarName, listValI, lineNumber);
+                    localVariables.removeVariable(tempVarName, JavaishType.FLOAT);
                 }
-                interpretBody(foreachStmt.getBody(), localVariables, false);
+                return;
             }
+
+            if(forIndex == 0){
+                if(isGlobal){
+                    globalVariables.addVariable(tempVarName, JavaishType.FLOAT, new JavaishFloat(0), lineNumber);
+                } else {
+                    localVariables.addVariable(tempVarName, JavaishType.FLOAT, new JavaishFloat(0), lineNumber);
+                }
+            }
+
+            if(localVariables.isVariable(tempVarName)){
+                localVariables.setVariableValue(tempVarName, listVals.get(forIndex), lineNumber);
+            } else {
+                globalVariables.setVariableValue(tempVarName, listVals.get(forIndex), lineNumber);
+            }
+            currentState.setForIndex(forIndex + 1);
+            Result pastResult = new Result(false);  
+            int forLineNumber = foreachStmt.getLine();
+            Return returnVal = new Return(false, null);
+            State funcState = new State(foreachStmt.getBody(), globalVariables, localVariables, pastResult, returnVal, 0, false, false, forLineNumber, true,currentState.getCurrentLine(), 0, false);
+            currentState.addState(funcState);
         } else {
             Error.TypeMismatch("List", listVal.typeString(), lineNumber);
             return;
@@ -1363,17 +1472,29 @@ public class Debugger {
 
     private void evalForWhen(ForWhenStmt forwhenStmt, Variables localVariables, boolean isGlobal){
         String incVarName = forwhenStmt.getIncVar();
-        if(!localVariables.isVariable(incVarName)){
-            localVariables.addVariable(incVarName, JavaishType.INT, new JavaishInt(0), lineNumber);
-        }
         Expression condition = forwhenStmt.getCondition();
         JavaishVal result = evalExpression(condition, localVariables, isGlobal);
-        if(result == null){
-            return;
-        }
-        while(((JavaishBoolean) result).getValue() == true){
-            interpretBody(forwhenStmt.getBody(), localVariables, false);
-            JavaishVal incVal = localVariables.getVariableValue(incVarName);
+        if(!inForWhenLoop){
+            inForWhenLoop = true;
+            currentState.setInForWhenLoop(true);
+            if(isGlobal){
+                if(!globalVariables.isVariable(incVarName)){
+                    globalVariables.addVariable(incVarName, JavaishType.INT, new JavaishInt(0), lineNumber);
+                }
+            } else {
+                if(!localVariables.isVariable(incVarName)){
+                    localVariables.addVariable(incVarName, JavaishType.INT, new JavaishInt(0), lineNumber);
+                }
+
+            }
+        } else {
+            JavaishVal incVal = null;
+            if(isGlobal){
+                incVal = globalVariables.getVariableValue(incVarName);
+            } else {
+                incVal = localVariables.getVariableValue(incVarName);
+            }
+
             if(incVal == null){
                 return;
             }
@@ -1386,11 +1507,32 @@ public class Debugger {
                 return;
             }
             JavaishInt incInt = (JavaishInt) incResult;
-            localVariables.setVariableValue(incVarName, incInt, lineNumber);
+            if(isGlobal){
+                globalVariables.setVariableValue(incVarName, incInt, lineNumber);
+            } else {
+                localVariables.setVariableValue(incVarName, incInt, lineNumber);
+            }
             result = evalExpression(condition, localVariables, isGlobal);
             if(result == null){
                 return;
             }
+        }
+       
+        
+        if(result == null){
+            return;
+        }
+        if(((JavaishBoolean) result).getValue() == true){
+            Result pastResult = new Result(false);  
+            int forLineNumber = forwhenStmt.getLine();
+            Return returnVal = new Return(false, null);
+            State funcState = new State(forwhenStmt.getBody(), globalVariables, localVariables, pastResult, returnVal, 0, false, false, forLineNumber, true,currentState.getCurrentLine(), 0, false);
+            currentState.addState(funcState);
+            
+        } else {
+            inForWhenLoop = false;
+            currentState.setInForWhenLoop(false);
+            
         }
     }
 
@@ -1429,7 +1571,8 @@ public class Debugger {
     private void evalMutation(MutationStmt mutationStmt, Variables localVariables, boolean isGlobal){
         MutationType type = mutationStmt.getMutationType();
         String name = mutationStmt.getVarName();
-        JavaishType varType = globalVariables.getVariableType(name);
+        System.out.println("MUTATION: " + name);
+        JavaishType varType = localVariables.getVariableType(name);
         JavaishVal value = evalExpression(mutationStmt.getValue(), localVariables, isGlobal);
         if(varType == JavaishType.STRINGLIST || varType == JavaishType.BOOLEANLIST || varType == JavaishType.INTLIST || varType == JavaishType.FLOATLIST){
             

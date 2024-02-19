@@ -18,7 +18,7 @@ public class Statements {
     }
 
     enum RobotType {
-        MOVE, SPEAK, STAND, SIT
+        MOVE, SPEAK, STAND, SIT, BLINK, TWINKLE, RANDOMEYES, BATTERY, VOLUME, CROUCH, LYINGBACK, NAME, PICTURE, LYINGBELLY
     }
 
     StmtType type;

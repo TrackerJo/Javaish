@@ -19,6 +19,8 @@ public class Parser {
     boolean importedRobot = false;
     ClassStmt classStmt = new ClassStmt(-1);
 
+    
+
     List<String> variableNames = new ArrayList<>();
     public Parser(String source, Variables variables) {
         this.source = source;
@@ -67,6 +69,10 @@ public class Parser {
                     String varName = declaration[0];
                     if(!validVarName(varName)){
                         Error.InvalidVariableName(varName, lineNumber);
+                    }
+
+                    if(ReservedNames.isReserved(varName)){
+                        Error.ReservedName(varName, lineNumber);
                     }
 
                     if(parents.get(parents.size() - 1).containsVariable(varName)){
@@ -259,6 +265,9 @@ public class Parser {
                     if(!validVarName(functionName)){
                         Error.InvalidFunctionName(functionName, lineNumber);
                     }
+                    if(ReservedNames.isReserved(functionName)){
+                        Error.ReservedName(functionName, lineNumber);
+                    }
                     System.out.println("FunctionName: " + functionName);
                     if(parents.get(parents.size() - 1).containsVariable(functionName)){
                         Error.VariableAlreadyExists(functionName, lineNumber);
@@ -346,12 +355,8 @@ public class Parser {
                         robotActionArgExpressions[i] = new Expression(arg, argType, lineNumber, columnArg);
                     }
                     //Check if robotAction is a valid RobotType
-                    try {
-                        RobotType.valueOf(robotAction.toUpperCase());
-                    } catch (IllegalArgumentException e) {
-                        Error.InvalidRobotAction(robotAction, lineNumber);
-                    }
-                    RobotType robotType = RobotType.valueOf(robotAction.toUpperCase());
+                    RobotType robotType = getRobotType(robotAction);
+                    
                     
 
                     RobotStmt robotStmt2 = new RobotStmt(lineNumber, robotType, robotActionArgExpressions);
@@ -359,7 +364,7 @@ public class Parser {
                     break;
                    
                 default:
-                    if(parents.get(parents.size() - 1).containsVariable(words[0]) && (nextWord(line, words[0].length() + 1).equals("equals") || nextWord(line, words[0].length() + 1).equals("="))){
+                    if((nextWord(line, words[0].length() + 1).equals("equals") || nextWord(line, words[0].length() + 1).equals("="))){
                         String assignment = parseAssignment(line, words[0]);
                         
                         String varValueA = assignment;
@@ -369,48 +374,48 @@ public class Parser {
                         parents.get(parents.size() - 1).addStatement(assignmentStmt);
                         
                     } else if(possibleFunctionName(words[0], parents)){
-                    FunctionCall functionCall = parseFunctionCall(line);
-                    ////System.out .println("FunctionCall: " + functionCall[0] + " " + functionCall[1]);
-                    String functionCallName = functionCall.getFunctionName();
-                    //System.out .println("FunctionCallName: " + functionCallName);
-                    ArrayList<String> functionCallArgs = functionCall.getArgs();
-                    Expression[] functionArgExpressions = new Expression[functionCallArgs.size()];
-                    for(int i = 0; i < functionCallArgs.size(); i++){
-                        if(functionCallArgs.get(i).isEmpty()){
-                            continue;
-                        }
-                        String arg = functionCallArgs.get(i);
-                       
-                        ExpressionReturnType argType = ExpressionReturnType.STRING;
-                        int columnArg = line.indexOf(arg);
-                        
-                        functionArgExpressions[i] = new Expression(arg, argType, lineNumber, columnArg);
-                    }
-                    if(functionCallName.equals("print")){
-                        ////System.out .println("ADDING PRINT STMt");
+                        FunctionCall functionCall = parseFunctionCall(line);
                         ////System.out .println("FunctionCall: " + functionCall[0] + " " + functionCall[1]);
-                        if(functionArgExpressions.length != 1){
-                           Error.ArgumentLengthMismatch("print", lineNumber, 1, functionArgExpressions.length );
+                        String functionCallName = functionCall.getFunctionName();
+                        //System.out .println("FunctionCallName: " + functionCallName);
+                        ArrayList<String> functionCallArgs = functionCall.getArgs();
+                        Expression[] functionArgExpressions = new Expression[functionCallArgs.size()];
+                        for(int i = 0; i < functionCallArgs.size(); i++){
+                            if(functionCallArgs.get(i).isEmpty()){
+                                continue;
+                            }
+                            String arg = functionCallArgs.get(i);
+                        
+                            ExpressionReturnType argType = ExpressionReturnType.STRING;
+                            int columnArg = line.indexOf(arg);
+                            
+                            functionArgExpressions[i] = new Expression(arg, argType, lineNumber, columnArg);
                         }
-                        if(functionCall.getArgs().size() == 0){
-                            Error.ArgumentLengthMismatch("print", lineNumber, 1, 0 );
-                        }
-                        PrintStmt printStmt = new PrintStmt(lineNumber, functionArgExpressions[0]);
-                        parents.get(parents.size() - 1).addStatement(printStmt);
-                        break;
-                    } else if(functionCallName.equals("showMessageDialog")){
-                        if(functionArgExpressions.length != 1){
-                           Error.ArgumentLengthMismatch("showMessageDialog", lineNumber, 1, functionArgExpressions.length );
-                        }
-                        if(functionCall.getArgs().size() == 0){
-                            Error.ArgumentLengthMismatch("showMessageDialog", lineNumber, 1, 0 );
-                        }
-                        ShowMsgBoxStmt showMsgBoxStmt = new ShowMsgBoxStmt(lineNumber, functionArgExpressions[0]);
-                        parents.get(parents.size() - 1).addStatement(showMsgBoxStmt);
-                        break;
-                    } 
-                    CallStmt functionCallStmt = new CallStmt(lineNumber, functionCallName, functionArgExpressions);
-                    parents.get(parents.size() - 1).addStatement(functionCallStmt);
+                        if(functionCallName.equals("print")){
+                            ////System.out .println("ADDING PRINT STMt");
+                            ////System.out .println("FunctionCall: " + functionCall[0] + " " + functionCall[1]);
+                            if(functionArgExpressions.length != 1){
+                            Error.ArgumentLengthMismatch("print", lineNumber, 1, functionArgExpressions.length );
+                            }
+                            if(functionCall.getArgs().size() == 0){
+                                Error.ArgumentLengthMismatch("print", lineNumber, 1, 0 );
+                            }
+                            PrintStmt printStmt = new PrintStmt(lineNumber, functionArgExpressions[0]);
+                            parents.get(parents.size() - 1).addStatement(printStmt);
+                            break;
+                        } else if(functionCallName.equals("dialog")){
+                            if(functionArgExpressions.length != 1){
+                            Error.ArgumentLengthMismatch("dialog", lineNumber, 1, functionArgExpressions.length );
+                            }
+                            if(functionCall.getArgs().size() == 0){
+                                Error.ArgumentLengthMismatch("dialog", lineNumber, 1, 0 );
+                            }
+                            ShowMsgBoxStmt showMsgBoxStmt = new ShowMsgBoxStmt(lineNumber, functionArgExpressions[0]);
+                            parents.get(parents.size() - 1).addStatement(showMsgBoxStmt);
+                            break;
+                        } 
+                        CallStmt functionCallStmt = new CallStmt(lineNumber, functionCallName, functionArgExpressions);
+                        parents.get(parents.size() - 1).addStatement(functionCallStmt);
                     }
                     else {
                         
@@ -426,6 +431,22 @@ public class Parser {
         
 
         return parents.get(0);
+    }
+
+    private RobotType getRobotType(String robotType){
+        try {
+            return RobotType.valueOf(robotType.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            if(robotType.equals("random_eyes")){
+                return RobotType.RANDOMEYES;
+            } else if(robotType.equals("lying_back")){
+                return RobotType.LYINGBACK;
+            } else if(robotType.equals("lying_belly")){
+                return RobotType.LYINGBELLY;
+            }
+            Error.InvalidRobotAction(robotType, lineNumber);
+        }
+        return null;
     }
     private boolean validVarName(String str) {
         for (int i = 0; i < str.length(); i++) {
@@ -608,12 +629,17 @@ public class Parser {
 
 
     private boolean possibleFunctionName(String name, List<Statements> parents){
+        System.out.println("Name: " + name);
        //Check if contains parenthesis
          if(name.contains("(")){
             String[] splitName = name.split("\\(");
             //System.out .println("SplitName: " + splitName[0]);
             String functionName = splitName[0];
-            if(parents.get(parents.size() - 1).containsVariable(functionName) || functionName.contains(" ") || functionName.length() == 0){
+            if(functionName.equals("print") || functionName.equals("dialog") || functionName.equals("input") || functionName.equals("toString") || functionName.equals("toInt") || functionName.equals("toBool") || functionName.equals("toFloat")){
+                return true;
+            }
+            System.out.println("FunctionName: " + functionName + " " + parents.get(parents.size() - 1).containsVariable(functionName) + " " + functionName.contains(" ") + " " + functionName.length());
+            if(functionName.contains(" ") || functionName.length() == 0){
                 return false;
             }
             return true;

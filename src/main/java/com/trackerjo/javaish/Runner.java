@@ -115,6 +115,7 @@ public class Runner {
         byte[] bytes = Files.readAllBytes(Paths.get(path));
         String file = new String(bytes, Charset.defaultCharset());
         Variables variables = new Variables();
+        Variables variables1 = new Variables();
         Parser parser = new Parser(file, variables);
         Statements statements = parser.parse();
         // System.out.println(statements.getBody());
@@ -123,7 +124,7 @@ public class Runner {
        
         Return returnVal = new Return(false, null);
         if(oldState == null){
-            oldState = new State(statements.getBody(), variables, variables, pastResult, returnVal, 0, true, false, 0);
+            oldState = new State(statements.getBody(), variables, variables1, pastResult, returnVal, 0, true, false, 0, false, 0, 0, false);
         } else {
             oldState.setStatements(statements.getBody());
         }
@@ -146,6 +147,7 @@ public class Runner {
 
     public static State debugString(String string){
         Variables variables = new Variables();
+        Variables variables1 = new Variables();
         Parser parser = new Parser(string, variables);
         Statements statements = parser.parse();
         System.out.println(statements.getBody());
@@ -153,7 +155,7 @@ public class Runner {
         Result pastResult = new Result(false);  
        
         Return returnVal = new Return(false, null);
-        State state = new State(statements.getBody(), variables, variables, pastResult, returnVal, 0, true, false, 0);
+        State state = new State(statements.getBody(), variables, variables1, pastResult, returnVal, 0, true, false, 0, false, 0, 0, false);
         Debugger debugger = new Debugger();
         state = debugLines(debugger, state, statements.getBody().size());
        // printVars(state.getGlobalVariables());
@@ -448,11 +450,17 @@ public class Runner {
         stateJSON.put("isComplete", state.isComplete());
         stateJSON.put("currentRuntimeLine", state.getCurrentRuntimeLine());
         stateJSON.put("isGlobal", state.isGlobal());
+        stateJSON.put("isLoop", state.isLoop());
         stateJSON.put("currentLine", state.getCurrentLine());
         stateJSON.put("returnVal", convertReturnToJSON(state.getReturnVal()));
         stateJSON.put("pastResult", state.getPastResult().getResult());
+        stateJSON.put("loopStartLine", state.getLoopStartLine());
+        stateJSON.put("inForWhenLoop", state.isInForWhenLoop());
+        stateJSON.put("forIndex", state.getForIndex());
         stateJSON.put("globalVariables", convertVariablesToJSON(state.getGlobalVariables()));
         stateJSON.put("localVariables", convertVariablesToJSON(state.getLocalVariables()));
+
+
         List<State> states = state.getStates();
         List<JSONObject> statesJSON = new ArrayList<>();
         for (State state2 : states) {
@@ -647,6 +655,8 @@ public class Runner {
 
                 ExpressionReturnType mutationReturnType = mutationExpr.getReturnType();
                 statementJSON.put("mutationExpr", mutationElementsJSONArray);
+                statementJSON.put("mutationType", mutationStmt.getMutationType().toString());
+                statementJSON.put("mutationVar", mutationStmt.getVarName());
 
                 statementJSON.put("mutationReturnType", mutationReturnType.toString());
                 break;
@@ -948,6 +958,24 @@ public class Runner {
                
                 elementJSON.put("element", arrayLengthElmt.getArrayName());
                 break;
+            case VARIABLE:
+                VariableElmt variableElmt = (VariableElmt) element;
+                elementJSON.put("element", variableElmt.getName());
+                break;
+            case LISTVAL:
+                ListValElmt listValElmt = (ListValElmt) element;
+                elementJSON.put("elementListName", listValElmt.getListName());
+                Expression listVal = listValElmt.getIndex();
+                JSONArray listValJSONArray = new JSONArray();
+                Element[] elementsCall = listVal.getElements();
+
+                for (Element element2 : elementsCall) {
+                    if(element2 == null){continue;}
+                    JSONObject elementJSON2 = convertElementToJSON(element2);
+                    listValJSONArray.put(elementJSON2);
+                }
+                elementJSON.put("element", listValJSONArray);
+                break;
                 
         
             default:
@@ -965,6 +993,10 @@ public class Runner {
         System.out.println(jsonObject.getBoolean("isGlobal") + " - isGlobal - " + isGlobal);
         int currentLine = jsonObject.getInt("currentLine");
         int currentRuntimeLine = jsonObject.getInt("currentRuntimeLine");
+        int loopStartLine = jsonObject.getInt("loopStartLine");
+        boolean isLoop = jsonObject.getBoolean("isLoop");
+        boolean inForWhenLoop = jsonObject.getBoolean("inForWhenLoop");
+        int forIndex = jsonObject.getInt("forIndex");
         Result pastResult = new Result(jsonObject.getBoolean("pastResult"));
         Return returnVal = convertJSONToReturn(jsonObject.getJSONObject("returnVal"));
         Variables globalVariables = convertJSONToVariables(jsonObject.getJSONObject("globalVariables"));
@@ -991,11 +1023,11 @@ public class Runner {
             for (JSONObject jsonObject2 : bodyJSON) {
                 body.add(convertJSONToStatement(jsonObject2));
             }
-            State state = new State(body, globalVariables, localVariables, pastResult, returnVal, currentLine, isGlobal, isComplete, currentRuntimeLine);
+            State state = new State(body, globalVariables, localVariables, pastResult, returnVal, currentLine, isGlobal, isComplete, currentRuntimeLine, isLoop, loopStartLine,forIndex, inForWhenLoop);
             state.setStates(states);
             return state;
         }
-        State state = new State(null, globalVariables, localVariables, pastResult, returnVal, currentLine, isGlobal, isComplete, currentRuntimeLine);
+        State state = new State(null, globalVariables, localVariables, pastResult, returnVal, currentLine, isGlobal, isComplete, currentRuntimeLine, isLoop, loopStartLine,forIndex, inForWhenLoop);
         state.setStates(states);
         return state;
     }
@@ -1235,7 +1267,7 @@ public class Runner {
                 }
                 Expression mutationExpr = new Expression(mutationElements, ExpressionReturnType.valueOf(jsonObject.getString("mutationReturnType")), line);
                 String mutationType = jsonObject.getString("mutationType");
-                String mutationName = jsonObject.getString("mutationName");
+                String mutationName = jsonObject.getString("mutationVar");
                 return new MutationStmt(line,mutationName, mutationExpr, MutationType.valueOf(mutationType));
             case FUNCTION:
                 String fname = jsonObject.getString("name");
@@ -1533,6 +1565,17 @@ public class Runner {
                     Expression castExpr = new Expression(castElements, ExpressionReturnType.valueOf(jsonObject.getString("elementReturnType")), line);
                     JavaishType castType = JavaishType.valueOf(jsonObject.getString("castType"));
                     element = new CastElmt( castType,castExpr);
+                    break;
+                case LISTVAL:
+                    JSONArray listValStmtElementsJSONArray = jsonObject.getJSONArray("element");
+                    Element[] listValStmtElements = new Element[listValStmtElementsJSONArray.length()];
+                    for (int i = 0; i < listValStmtElementsJSONArray.length(); i++) {
+                        JSONObject listValElmt = listValStmtElementsJSONArray.getJSONObject(i);
+                        listValStmtElements[i] = convertJSONToElement(listValElmt, line);
+                    }
+                    Expression listValExpr = new Expression(listValStmtElements, ExpressionReturnType.valueOf(jsonObject.getString("elementReturnType")), line);
+                    String listValName = jsonObject.getString("elementListName");
+                    element = new ListValElmt(listValName, listValExpr);
                     break;
                 default:
                     break;

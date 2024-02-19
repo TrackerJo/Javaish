@@ -41,6 +41,149 @@ public class Variables{
         
     }
 
+    public void removeVariable(String varName, JavaishType varType){
+        allVariables.remove(varName);
+        switch (varType.toString()) {
+            case "INT":
+                for (Iterator<IntVar> iterator = intVariables.iterator(); iterator.hasNext(); ) {
+                    IntVar value = iterator.next();
+                    if (value.name.equals(varName)) {
+                        iterator.remove();
+                    }
+                }
+                break;
+            case "FLOAT":
+                for (Iterator<FloatVar> iterator = floatVariables.iterator(); iterator.hasNext(); ) {
+                    FloatVar value = iterator.next();
+                    if (value.name.equals(varName)) {
+                        iterator.remove();
+                    }
+                }
+                break;
+            case "BOOLEAN":
+                for (Iterator<BoolVar> iterator = boolVariables.iterator(); iterator.hasNext(); ) {
+                    BoolVar value = iterator.next();
+                    if (value.name.equals(varName)) {
+                        iterator.remove();
+                    }
+                }
+                break;
+            case "STRING":
+                for (Iterator<StringVar> iterator = stringVariables.iterator(); iterator.hasNext(); ) {
+                    StringVar value = iterator.next();
+                    if (value.name.equals(varName)) {
+                        iterator.remove();
+                    }
+                }
+                break;
+            case "INTLIST":
+                for (Iterator<IntList> iterator = intLists.iterator(); iterator.hasNext(); ) {
+                    IntList value = iterator.next();
+                    if (value.name.equals(varName)) {
+                        iterator.remove();
+                    }
+                }
+                break;
+            case "FLOATLIST":
+                for (Iterator<FloatList> iterator = floatLists.iterator(); iterator.hasNext(); ) {
+                    FloatList value = iterator.next();
+                    if (value.name.equals(varName)) {
+                        iterator.remove();
+                    }
+                }
+                break;
+            case "BOOLEANLIST":
+                for (Iterator<BoolList> iterator = boolLists.iterator(); iterator.hasNext(); ) {
+                    BoolList value = iterator.next();
+                    if (value.name.equals(varName)) {
+                        iterator.remove();
+                    }
+                }
+                break;
+            case "STRINGLIST":
+                for (Iterator<StringList> iterator = stringLists.iterator(); iterator.hasNext(); ) {
+                    StringList value = iterator.next();
+                    if (value.name.equals(varName)) {
+                        iterator.remove();
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+
+        
+    }
+
+    public Variables clone(){
+        Map<String, JavaishType> allVariables = new HashMap<String, JavaishType>();
+        ArrayList<IntVar> intVariables = new ArrayList<IntVar>();
+        ArrayList<FloatVar> floatVariables = new ArrayList<FloatVar>();
+        ArrayList<BoolVar> boolVariables = new ArrayList<BoolVar>();
+        ArrayList<StringVar> stringVariables = new ArrayList<StringVar>();
+        ArrayList<IntList> intLists = new ArrayList<IntList>();
+        ArrayList<FloatList> floatLists = new ArrayList<FloatList>();
+        ArrayList<BoolList> boolLists = new ArrayList<BoolList>();
+        ArrayList<StringList> stringLists = new ArrayList<StringList>();
+
+        Map<String, FunctionVar> functions = new HashMap<String, FunctionVar>();
+
+        for (Map.Entry<String, JavaishType> entry : this.allVariables.entrySet()) {
+            allVariables.put(entry.getKey(), entry.getValue());
+        }
+
+        for (IntVar intVar : this.intVariables) {
+            intVariables.add(intVar);
+        }
+
+        for (FloatVar floatVar : this.floatVariables) {
+            floatVariables.add(floatVar);
+        }
+
+        for (BoolVar boolVar : this.boolVariables) {
+            boolVariables.add(boolVar);
+        }
+
+        for (StringVar stringVar : this.stringVariables) {
+            stringVariables.add(stringVar);
+        }
+
+        for (IntList intList : this.intLists) {
+            intLists.add(intList);
+        }
+
+        for (FloatList floatList : this.floatLists) {
+            floatLists.add(floatList);
+        }
+
+        for (BoolList boolList : this.boolLists) {
+            boolLists.add(boolList);
+        }
+
+        for (StringList stringList : this.stringLists) {
+            stringLists.add(stringList);
+        }
+
+        for (Map.Entry<String, FunctionVar> entry : this.functions.entrySet()) {
+            functions.put(entry.getKey(), entry.getValue());
+        }
+
+        Variables newVariables = new Variables();
+        newVariables.allVariables = allVariables;
+        newVariables.intVariables = intVariables;
+        newVariables.floatVariables = floatVariables;
+        newVariables.boolVariables = boolVariables;
+        newVariables.stringVariables = stringVariables;
+        newVariables.intLists = intLists;
+        newVariables.floatLists = floatLists;
+        newVariables.boolLists = boolLists;
+        newVariables.stringLists = stringLists;
+        newVariables.functions = functions;
+
+        return newVariables;
+
+    }
+
     private JavaishType getType(String type){
         switch (type) {
             case "int":

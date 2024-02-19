@@ -1,6 +1,10 @@
-let int x3 equal 2 plus 2.
-print(x3).
+let String[] names equal ["Nathaniel", "Dever", "Sarah", "Sydney", "Fred", "Kathleen"].
+let int[] ages equal [17, 21, 13, 25, 57, 57].
+let int x equal length of names.
 
-function x3(){
-
+for each name in names {
+  print(1 + 1).
+  let int test = 3.
 }
+
+print("de").

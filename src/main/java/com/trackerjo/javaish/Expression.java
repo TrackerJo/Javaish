@@ -213,7 +213,11 @@ public class Expression {
                     i+=5;
                     currentElement = "";
                    
-                } else if(currentElement.equals("greater") && nextWord(expression, i+1).equals("than")){
+                } else if (currentElement.equals("not")){
+                    readingNot = true;
+                    currentElement = "";
+                }
+                else if(currentElement.equals("greater") && nextWord(expression, i+1).equals("than")){
                     if(nextWord(expression, i+6).equals("or")){
                         elements.add(new GreaterThanEqualElmt());
                         i+=16;
@@ -294,7 +298,7 @@ public class Expression {
                 currentFunctionDepth--;
                 if(currentFunctionDepth == 0){
                     iter++;
-                    if(currentFunctionName.equals("showInputDialog")){
+                    if(currentFunctionName.equals("input")){
                         goal = true;
                     }
                     System.out.println("ORIGINAL EXPR: "+expression);
@@ -346,9 +350,9 @@ public class Expression {
                         }
                         //elements.add(new CastElmt(JavaishType.BOOLEAN, functionArgs.get(0)));
                     
-                    } else if(currentFunctionName.equals("showInputDialog")){
+                    } else if(currentFunctionName.equals("input")){
                             if(functionArgs.size()!=1){
-                                Error.ArgumentLengthMismatch("showInputDialog", getLine(), 1, functionArgs.size()); 
+                                Error.ArgumentLengthMismatch("input", getLine(), 1, functionArgs.size()); 
                             }
                             //System.out .println("SHOW INPUT DIALOG ARG: " + functionArgs.get(0).toString());
                             

@@ -37,6 +37,7 @@ public class Error {
     public static void InvalidFunctionName(String name, int lineNumber) {
         System.err.println("Error: Invalid function name at line " + lineNumber + ": " + name);
         //System.exit(0);
+
     }
 
    
@@ -161,6 +162,12 @@ public class Error {
     public static void FunctionHasNoReturn(String name, int lineNumber) {
         
         throw new RuntimeException("Function \"" + name + "\" has no return at line " + lineNumber);
+        //System.exit(0);
+    }
+
+    public static void ReservedName(String name, int lineNumber) {
+        
+        throw new RuntimeException("Reserved name \"" + name + "\" at line " + lineNumber);
         //System.exit(0);
     }
 
