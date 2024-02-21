@@ -11,7 +11,7 @@ public class Main {
     public static void main(String[] args) throws IOException  {
         String oldStateString = "{\"globalVariables\":{\"x\":{\"name\":\"x\",\"index\":0,\"type\":\"INT\",\"value\":\"5\"}},\"returnVal\":{\"hasReturn\":false,\"value\":\"null\"},\"localVariables\":{\"x\":{\"name\":\"x\",\"index\":0,\"type\":\"INT\",\"value\":\"5\"}},\"pastResult\":false,\"currentRuntimeLine\":2,\"isGlobal\":true,\"isLoop\":false,\"body\":[],\"loopStartLine\":0,\"isComplete\":false,\"currentLine\":2,\"states\":[{\"globalVariables\":{\"x\":{\"name\":\"x\",\"index\":0,\"type\":\"INT\",\"value\":\"5\"}},\"returnVal\":{\"hasReturn\":false,\"value\":\"null\"},\"localVariables\":{\"x\":{\"name\":\"x\",\"index\":0,\"type\":\"INT\",\"value\":\"4\"}},\"pastResult\":false,\"currentRuntimeLine\":4,\"isGlobal\":false,\"isLoop\":true,\"body\":[{\"printStmt\":[{\"elementType\":\"STRING\",\"element\":\"HEEE\"}],\"line\":3,\"printStmtReturnType\":\"STRING\",\"type\":\"PRINT\"},{\"mutationExpr\":[{\"elementType\":\"INTEGER\",\"element\":\"1\"}],\"line\":4,\"mutationType\":\"SUBTRACT\",\"mutationReturnType\":\"NUMBER\",\"mutationVar\":\"x\",\"type\":\"MUTATION\"},{\"printStmt\":[{\"elementType\":\"VARIABLE\",\"element\":\"x\"}],\"line\":5,\"printStmtReturnType\":\"STRING\",\"type\":\"PRINT\"}],\"loopStartLine\":2,\"isComplete\":false,\"currentLine\":2,\"states\":[]}]}";
         JSONObject oldStateJSON = new JSONObject(oldStateString);
-        State oldState = Runner.convertJSONToState(oldStateJSON);
+        // State oldState = Runner.convertJSONToState(oldStateJSON);
         // System.out.println(oldState.isGlobal() + " - Is Global");
         // System.out.println(oldState.getCurrentLine());
         Runner.runFile("src/main/java/com/trackerjo/debug.javaish");

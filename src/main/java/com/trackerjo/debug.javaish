@@ -1,10 +1,19 @@
+function printInfo(int x, String[] names, int[] ages){
+  print("Printing Info").
+  for when x greater than 0 increment x by -1 {
+    print(names sub (x - 1) plus " is " plus toString(ages sub (x - 1)) plus " years old").
+  }
+}
+
 let String[] names equal ["Nathaniel", "Dever", "Sarah", "Sydney", "Fred", "Kathleen"].
 let int[] ages equal [17, 21, 13, 25, 57, 57].
 let int x equal length of names.
 
-for each name in names {
-  print(1 + 1).
-  let int test = 3.
-}
+printInfo(length of names, names, ages).
 
-print("de").
+let String usersName equal input("What is your name?").
+add usersName to names.
+let int usersAge equal toInt(input("How old are you?")).
+add usersAge to ages.
+
+printInfo(length of names, names, ages).

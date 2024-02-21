@@ -5,37 +5,48 @@ package com.trackerjo.javaish;
 public class Error {
     
     public static void UnexpectedStmt(String stmt, int lineNumber) {
-        System.err.println("Error: Unknown statement at line " + lineNumber + ":" + stmt);
+        throw new RuntimeException("Error: Unknown statement at line " + lineNumber + ":" + stmt);
         //System.exit(0);
     }
 
     public static void UnexpectedElmt(String token, int lineNumber, int columnNumber) {
-        System.err.println("Error: Unknown element at line " + lineNumber + " column " + columnNumber + ": " +  token);
-        System.exit(0);
+        throw new RuntimeException("Error: Unknown element at line " + lineNumber + " column " + columnNumber + ": " +  token);
+
+    }
+
+    public static void ReturnTypeMismatch(String functionName, String expected, String got, int lineNumber) {
+        throw new RuntimeException("Error: Return type mismatch at line " + lineNumber + ": Function " + functionName + ": Expected " + expected + ", got " + got);
+        //System.exit(0);
+    }
+
+    public static void InvalidForLoop(int lineNumber) {
+       
+        throw new RuntimeException("Invalid for loop at line " + lineNumber);
+       // System.exit(0);
     }
 
     public static void TypeMismatch(String expected, String got, int lineNumber) {
-        System.err.println("Error: Type mismatch at line " + lineNumber + ": Expected " + expected + ", got " + got);
+        throw new RuntimeException("Error: Type mismatch at line " + lineNumber + ": Expected " + expected + ", got " + got);
         //System.exit(0);
     }
 
     public static void InvalidType(String type, int lineNumber) {
-        System.err.println("Error: Invalid type at line " + lineNumber + ": " + type);
+        throw new RuntimeException("Error: Invalid type at line " + lineNumber + ": " + type);
         //System.exit(0);
     }
 
     public static void UnclosedString(int lineNumber) {
-        System.err.println("Error: Unclosed string at line " + lineNumber);
+        throw new RuntimeException("Error: Unclosed string at line " + lineNumber);
         //System.exit(0);
     }
 
     public static void InvalidVariableName(String name, int lineNumber) {
-        System.err.println("Error: Invalid variable name at line " + lineNumber + ": " + name);
+        throw new RuntimeException("Error: Invalid variable name at line " + lineNumber + ": " + name);
         //System.exit(0);
     }
 
     public static void InvalidFunctionName(String name, int lineNumber) {
-        System.err.println("Error: Invalid function name at line " + lineNumber + ": " + name);
+        throw new RuntimeException("Error: Invalid function name at line " + lineNumber + ": " + name);
         //System.exit(0);
 
     }
@@ -43,82 +54,82 @@ public class Error {
    
 
     public static void UnableToParse(String type, int lineNumber, String goal) {
-        System.err.println("Error: Unable to parse " + type + " to " + goal + " at line " + lineNumber);
+        throw new RuntimeException("Error: Unable to parse " + type + " to " + goal + " at line " + lineNumber);
         //System.exit(0);
     }
 
     public static void VariableNotDeclared(String name, int lineNumber) {
-        System.err.println("Error: Variable \"" + name + "\" not declared at line " + lineNumber);
+        throw new RuntimeException("Error: Variable \"" + name + "\" not declared at line " + lineNumber);
         //System.exit(0);
     }
 
     public static void FunctionNotDeclared(String name, int lineNumber) {
-        System.err.println("Error: Function " + name + " not declared at line " + lineNumber);
+        throw new RuntimeException("Error: Function " + name + " not declared at line " + lineNumber);
         //System.exit(0);
     }
 
     public static void InvalidFunctionCall(String name, int lineNumber) {
-        System.err.println("Error: Invalid function call at line " + lineNumber + ": " + name);
+        throw new RuntimeException("Error: Invalid function call at line " + lineNumber + ": " + name);
         //System.exit(0);
     }
 
     public static void InvalidFunctionCall(String name, int lineNumber, String expected, String got) {
-        System.err.println("Error: Invalid function call at line " + lineNumber + ": " + name + ": Expected " + expected + ", got " + got);
+        throw new RuntimeException("Error: Invalid function call at line " + lineNumber + ": " + name + ": Expected " + expected + ", got " + got);
         //System.exit(0);
     }
 
     public static void CantPerformMutation(String type, int lineNumber) {
-        System.err.println("Error: Can't perform mutation on " + type + " at line " + lineNumber);
+        throw new RuntimeException("Error: Can't perform mutation on " + type + " at line " + lineNumber);
         //System.exit(0);
     }
 
     public static void FunctionAlreadyExists(String name) {
-        System.err.println("Error: Variable or Function " + name + " already exists!");
+        throw new RuntimeException("Error: Variable or Function " + name + " already exists!");
         //System.exit(0);
     }
 
     public static void ArgumentLengthMismatch(String name, int lineNumber, int expected, int got) {
-        System.err.println("Error: Argument length mismatch at line " + lineNumber + ": " + name + ": Expected " + expected + ", got " + got);
+        throw new RuntimeException("Error: Argument length mismatch at line " + lineNumber + ": " + name + ": Expected " + expected + ", got " + got);
         //System.exit(0);
     }
 
     public static void ArgumentTypeMismatch(String name, int lineNumber, String expected, String got) {
-        System.err.println("Error: Argument type mismatch at line " + lineNumber + ": " + name + ": Expected " + expected + ", got " + got);
+        throw new RuntimeException("Error: Argument type mismatch at line " + lineNumber + ": " + name + ": Expected " + expected + ", got " + got);
         //System.exit(0);
     }
 
     public static void FunctionNotGlobal(String name, int lineNumber) {
-        System.err.println("Error: Function " + name + " not global at line " + lineNumber);
+        throw new RuntimeException("Error: Function " + name + " not global at line " + lineNumber);
         //System.exit(0);
     }
 
     public static void CantPerformOperation(String operation, String type, int lineNumber) {
-        System.err.println("Error: Can't perform operation " + operation + " on " + type + " at line " + lineNumber);
+        throw new RuntimeException("Error: Can't perform operation " + operation + " on " + type + " at line " + lineNumber);
         //System.exit(0);
     }
 
     public static void IndexOutOfBounds(int index, int lineNumber, int arrayLength) {
-        System.err.println("Error: Index bigger than array length at line " + lineNumber + ": Got:" + index + ", Max: " + (arrayLength - 1));
+        throw new RuntimeException("Error: Index bigger than array length at line " + lineNumber + ": Got:" + index + ", Max: " + (arrayLength - 1));
        // System.exit(0);
     }
 
     public static void UnclosedParenthesis(int lineNumber, int columnNumber) {
-        System.err.println("Error: Unclosed parenthesis at line " + lineNumber + " column " + columnNumber);
+        throw new RuntimeException("Error: Unclosed parenthesis at line " + lineNumber + " column " + columnNumber);
        // System.exit(0);
     }
 
     public static void MissingPeriod(int lineNumber) {
-        System.err.println("Error: Missing period at end of statement at line " + lineNumber);
+        throw new RuntimeException("Error: Missing period at end of statement at line " + lineNumber);
       //  System.exit(0);
     }
 
     public static void UnclosedBracket(int lineNumber, int columnNumber) {
-        System.err.println("Error: Unclosed bracket at line " + lineNumber + " column " + columnNumber);
+        throw new RuntimeException("Error: Unclosed bracket at line " + lineNumber + " column " + columnNumber);
        // System.exit(0);
     }
 
     public static void ListEmpty(int lineNumber, String listName) {
-        System.err.println("Error: List " + listName + " empty at line " + lineNumber);
+        throw new RuntimeException("Error: List " + listName + " empty at line " + lineNumber);
        // System.exit(0);
     }
 

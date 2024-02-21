@@ -18,6 +18,8 @@ public class Parser {
     int lineNumber = 0;
     boolean importedRobot = false;
     ClassStmt classStmt = new ClassStmt(-1);
+    List<Function> functions = new ArrayList<>();
+    List<Variable> variablesList = new ArrayList<>();
 
     
 
@@ -119,6 +121,12 @@ public class Parser {
                     }
                     int columnVar = line.indexOf(varValue);
                     Expression expression = new Expression(varValue, expressionType, lineNumber, columnVar);
+                    JavaishType exprReturnType = expression.typeExpression(expression, lineNumber, variablesList, functions);
+
+                    if(exprReturnType != varType){
+                        Error.TypeMismatch(varType.toString(), exprReturnType.toString(), lineNumber);
+                    }
+                    variablesList.add(new Variable(varName, varType));
                     DeclarationStmt dec = new DeclarationStmt(lineNumber,varName, varType, expression);
                     parents.get(parents.size() - 1).addStatement(dec);
                    
@@ -154,6 +162,11 @@ public class Parser {
                     String condition = parseLoop(line, "if");
                     int columnC = line.indexOf(condition);
                     Expression boolExpression = new Expression(condition, ExpressionReturnType.BOOL, lineNumber, columnC);
+                    JavaishType ifReturnType = boolExpression.typeExpression(boolExpression, lineNumber, variablesList, functions);
+
+                    if(ifReturnType != JavaishType.BOOLEAN){
+                        Error.TypeMismatch("BOOLEAN", ifReturnType.toString(), lineNumber);
+                    }
                     IfStmt ifStmt = new IfStmt(lineNumber, boolExpression);
                     parents.add(ifStmt);
                     break;
@@ -185,6 +198,16 @@ public class Parser {
                         int columnFIV = line.indexOf(forIncrementVal);
                         Expression forConditionExpression = new Expression(forCondition, ExpressionReturnType.STRING, lineNumber, columnFC);
                         Expression forIncrementExpression = new Expression(forIncrementVal, ExpressionReturnType.NUMBER, lineNumber, columnFIV);
+                        JavaishType forConReturnType = forConditionExpression.typeExpression(forConditionExpression, lineNumber, variablesList, functions);
+
+                        if(forConReturnType != JavaishType.BOOLEAN){
+                            Error.TypeMismatch("BOOLEAN", forConReturnType.toString(), lineNumber);
+                        }
+
+                        JavaishType forIncReturnType = forIncrementExpression.typeExpression(forIncrementExpression, lineNumber, variablesList, functions);
+                        if(forIncReturnType != JavaishType.INT && forIncReturnType != JavaishType.FLOAT){
+                            Error.TypeMismatch("INT or FLOAT", forIncReturnType.toString(), lineNumber);
+                        }
                         ForWhenStmt forStmt = new ForWhenStmt(lineNumber, forConditionExpression, forIncrementExpression, forIncrementVar);
                         parents.add(forStmt); 
                     } else if(words[1].equals("each")){
@@ -197,8 +220,7 @@ public class Parser {
                         parents.add(forStmt);
                             
                     } else {
-                        //System.out .println("Error: Invalid for loop declaration at line " + lineNumber + ":" + line);
-                        //System.exit(0);
+                        Error.InvalidForLoop(lineNumber);
                     }
                       
                     break;
@@ -206,6 +228,11 @@ public class Parser {
                     String whileCondition = parseLoop(line, "while");
                     int columnW = line.indexOf(whileCondition);
                     Expression whileBoolExpression = new Expression(whileCondition, ExpressionReturnType.BOOL, lineNumber, columnW);
+                    JavaishType whileReturnType = whileBoolExpression.typeExpression(whileBoolExpression, lineNumber, variablesList, functions);
+
+                    if(whileReturnType != JavaishType.BOOLEAN){
+                        Error.TypeMismatch("BOOLEAN", whileReturnType.toString(), lineNumber);
+                    }
                     WhileStmt whileStmt = new WhileStmt(lineNumber, whileBoolExpression);
                     parents.add(whileStmt);
                     break;
@@ -215,6 +242,25 @@ public class Parser {
                     int columnRe = line.indexOf(returnVal);
 
                     Expression returnExpression = new Expression(returnVal, ExpressionReturnType.STRING, lineNumber, columnRe);
+                    JavaishType returnType = returnExpression.typeExpression(returnExpression, lineNumber, variablesList, functions);
+                    FunctionStmt currentFunction = getParentFunction(parents);
+                    String functionNameR = currentFunction.getName();
+                    //Check if function has a return type
+                    JavaishType functionReturnType = JavaishType.VOID;
+                    for (Function function : functions) {
+                        if(function.getFunctionName().equals(functionNameR)){
+                            functionReturnType = function.getReturnType();
+                        }
+                    }
+                    if(functionReturnType != JavaishType.VOID && hasReturn){
+                        Error.ReturnTypeMismatch(functionNameR, functionReturnType.toString(), returnType.toString(), lineNumber);
+                    }
+                    //Set function return type
+                    for (Function function : functions) {
+                        if(function.getFunctionName().equals(functionNameR)){
+                            function.setReturnType(returnType);
+                        }
+                    }
                     ReturnStmt returnStmt = new ReturnStmt(lineNumber, returnExpression, hasReturn);
                     parents.get(parents.size() - 1).addStatement(returnStmt);
                     break;
@@ -228,6 +274,23 @@ public class Parser {
                     String addChange = addMutation[1];
                     int columnA = line.indexOf(addChange);
                     Expression addExpression = new Expression(addChange, ExpressionReturnType.NUMBER, lineNumber, columnA);
+                    JavaishType addReturnType = addExpression.typeExpression(addExpression, lineNumber, variablesList, functions);
+                    JavaishType addVarType = null;
+                    for (Variable variable : variablesList) {
+                        if(variable.getName().equals(addVarName)){
+                            addVarType = variable.getType();
+                        }
+                    }
+                    if(addReturnType != addVarType){
+                        if(addVarType == JavaishType.INTLIST || addVarType == JavaishType.FLOATLIST || addVarType == JavaishType.STRINGLIST || addVarType == JavaishType.BOOLEANLIST){
+                            if(addReturnType != JavaishType.INT && addReturnType != JavaishType.FLOAT && addReturnType != JavaishType.STRING && addReturnType != JavaishType.BOOLEAN){
+                                Error.TypeMismatch(addVarType.toString(), addReturnType.toString(), lineNumber);
+                            }
+                        } else {
+                            Error.TypeMismatch(addVarType.toString(), addReturnType.toString(), lineNumber);
+                        }
+
+                    }
                     MutationStmt addStmt = new MutationStmt(lineNumber, addVarName, addExpression,MutationType.ADD);
                     parents.get(parents.size() - 1).addStatement(addStmt);
                     break;
@@ -237,6 +300,16 @@ public class Parser {
                     String subtractChange = subtractMutation[1];
                     int columnS = line.indexOf(subtractChange);
                     Expression subtractExpression = new Expression(subtractChange, ExpressionReturnType.NUMBER, lineNumber, columnS);
+                    JavaishType subtractReturnType = subtractExpression.typeExpression(subtractExpression, lineNumber, variablesList, functions);
+                    JavaishType subtractVarType = null;
+                    for (Variable variable : variablesList) {
+                        if(variable.getName().equals(subtractVarName)){
+                            subtractVarType = variable.getType();
+                        }
+                    }
+                    if(subtractReturnType != subtractVarType){
+                        Error.TypeMismatch(subtractVarType.toString(), subtractReturnType.toString(), lineNumber);
+                    }
                     MutationStmt subtractStmt = new MutationStmt(lineNumber, subtractVarName, subtractExpression,MutationType.SUBTRACT);
                     parents.get(parents.size() - 1).addStatement(subtractStmt);
                     break;
@@ -246,6 +319,16 @@ public class Parser {
                     String multiplyChange = multiplyMutation[0];
                     int columnM = line.indexOf(multiplyChange); 
                     Expression multiplyExpression = new Expression(multiplyChange, ExpressionReturnType.NUMBER, lineNumber, columnM);
+                    JavaishType multiplyReturnType = multiplyExpression.typeExpression(multiplyExpression, lineNumber, variablesList, functions);
+                    JavaishType multiplyVarType = null;
+                    for (Variable variable : variablesList) {
+                        if(variable.getName().equals(multiplyVarName)){
+                            multiplyVarType = variable.getType();
+                        }
+                    }
+                    if(multiplyReturnType != multiplyVarType){
+                        Error.TypeMismatch(multiplyVarType.toString(), multiplyReturnType.toString(), lineNumber);
+                    }
                     MutationStmt multiplyStmt = new MutationStmt(lineNumber, multiplyVarName, multiplyExpression,MutationType.MULTIPLY);
                     parents.get(parents.size() - 1).addStatement(multiplyStmt);
                     break;
@@ -256,6 +339,16 @@ public class Parser {
                     int columnD = line.indexOf(divideChange);
                     Expression divideExpression = new Expression(divideChange, ExpressionReturnType.NUMBER, lineNumber, columnD);
                     MutationStmt divideStmt = new MutationStmt(lineNumber, divideVarName, divideExpression,MutationType.DIVIDE);
+                    JavaishType divideReturnType = divideExpression.typeExpression(divideExpression, lineNumber, variablesList, functions);
+                    JavaishType divideVarType = null;
+                    for (Variable variable : variablesList) {
+                        if(variable.getName().equals(divideVarName)){
+                            divideVarType = variable.getType();
+                        }
+                    }
+                    if(divideReturnType != divideVarType){
+                        Error.TypeMismatch(divideVarType.toString(), divideReturnType.toString(), lineNumber);
+                    }
                     parents.get(parents.size() - 1).addStatement(divideStmt);
                     break;
                 case "function":
@@ -265,9 +358,11 @@ public class Parser {
                     if(!validVarName(functionName)){
                         Error.InvalidFunctionName(functionName, lineNumber);
                     }
+                    
                     if(ReservedNames.isReserved(functionName)){
                         Error.ReservedName(functionName, lineNumber);
                     }
+
                     System.out.println("FunctionName: " + functionName);
                     if(parents.get(parents.size() - 1).containsVariable(functionName)){
                         Error.VariableAlreadyExists(functionName, lineNumber);
@@ -297,6 +392,7 @@ public class Parser {
                     Argument[] argumentsArr = arguments.toArray(new Argument[arguments.size()]);
                     
                     FunctionStmt functionStmt = new FunctionStmt(lineNumber, functionName, argumentsArr);
+                    functions.add(new Function(functionName));
                     parents.add(functionStmt);
                     break;
                 case "removeAll":
@@ -305,6 +401,22 @@ public class Parser {
                     String removeAllValue = removeAll[1];
                     int columnRAll = line.indexOf(removeAllValue);
                     Expression removeAllExpression = new Expression(removeAllValue, ExpressionReturnType.STRING, lineNumber, columnRAll);
+                    JavaishType removeAllReturnType = removeAllExpression.typeExpression(removeAllExpression, lineNumber, variablesList, functions);
+                    JavaishType removeAllVarType = null;
+                    for (Variable variable : variablesList) {
+                        if(variable.getName().equals(removeAllVarName)){
+                            removeAllVarType = variable.getType();
+                        }
+                    }
+                    if(removeAllVarType == JavaishType.INTLIST && removeAllReturnType != JavaishType.INT){
+                        Error.TypeMismatch("INT", removeAllReturnType.toString(), lineNumber);
+                    } else if(removeAllVarType == JavaishType.FLOATLIST && removeAllReturnType != JavaishType.FLOAT){
+                        Error.TypeMismatch("FLOAT", removeAllReturnType.toString(), lineNumber);
+                    } else if(removeAllVarType == JavaishType.STRINGLIST && removeAllReturnType != JavaishType.STRING){
+                        Error.TypeMismatch("STRING", removeAllReturnType.toString(), lineNumber);
+                    } else if(removeAllVarType == JavaishType.BOOLEANLIST && removeAllReturnType != JavaishType.BOOLEAN){
+                        Error.TypeMismatch("BOOLEAN", removeAllReturnType.toString(), lineNumber);
+                    }
                     RemoveAllFromStmt removeAllStmt = new RemoveAllFromStmt(lineNumber, removeAllVarName, removeAllExpression);
                     parents.get(parents.size() - 1).addStatement(removeAllStmt);
                     break;
@@ -314,6 +426,22 @@ public class Parser {
                     String removeValue = remove[1];
                     int columnR = line.indexOf(removeValue);
                     Expression removeValExpression = new Expression(removeValue, ExpressionReturnType.STRING, lineNumber, columnR);
+                    JavaishType removeReturnType = removeValExpression.typeExpression(removeValExpression, lineNumber, variablesList, functions);
+                    JavaishType removeVarType = null;
+                    for (Variable variable : variablesList) {
+                        if(variable.getName().equals(removeVarName)){
+                            removeVarType = variable.getType();
+                        }
+                    }
+                    if(removeVarType == JavaishType.INTLIST && removeReturnType != JavaishType.INT){
+                        Error.TypeMismatch("INT", removeReturnType.toString(), lineNumber);
+                    } else if(removeVarType == JavaishType.FLOATLIST && removeReturnType != JavaishType.FLOAT){
+                        Error.TypeMismatch("FLOAT", removeReturnType.toString(), lineNumber);
+                    } else if(removeVarType == JavaishType.STRINGLIST && removeReturnType != JavaishType.STRING){
+                        Error.TypeMismatch("STRING", removeReturnType.toString(), lineNumber);
+                    } else if(removeVarType == JavaishType.BOOLEANLIST && removeReturnType != JavaishType.BOOLEAN){
+                        Error.TypeMismatch("BOOLEAN", removeReturnType.toString(), lineNumber);
+                    }
                     RemoveFromStmt removeStmt = new RemoveFromStmt(lineNumber, removeValExpression, removeVarName);
                     parents.get(parents.size() - 1).addStatement(removeStmt);
                     break;
@@ -324,6 +452,10 @@ public class Parser {
                     String removeAtLocation = removeAt[1];
                     int columnRA = line.indexOf(removeAtLocation);
                     Expression removeAtExpression = new Expression(removeAtLocation, ExpressionReturnType.NUMBER, lineNumber, columnRA);
+                    JavaishType removeAtReturnType = removeAtExpression.typeExpression(removeAtExpression, lineNumber, variablesList, functions);
+                    if(removeAtReturnType != JavaishType.INT){
+                        Error.TypeMismatch("INT", removeAtReturnType.toString(), lineNumber);
+                    }
                     RemoveAtStmt removeAtStmt = new RemoveAtStmt(lineNumber, removeAtExpression, removeAtVarName);
                     parents.get(parents.size() - 1).addStatement(removeAtStmt);
                     break;
@@ -355,8 +487,8 @@ public class Parser {
                         robotActionArgExpressions[i] = new Expression(arg, argType, lineNumber, columnArg);
                     }
                     //Check if robotAction is a valid RobotType
-                    RobotType robotType = getRobotType(robotAction);
                     
+                    RobotType robotType = getRobotType(robotAction);
                     
 
                     RobotStmt robotStmt2 = new RobotStmt(lineNumber, robotType, robotActionArgExpressions);
@@ -370,6 +502,16 @@ public class Parser {
                         String varValueA = assignment;
                         int columnVarA = line.indexOf(varValueA);
                         Expression expressionA = new Expression(varValueA, ExpressionReturnType.STRING, lineNumber, columnVarA);
+                        JavaishType exprReturnTypeA = expressionA.typeExpression(expressionA, lineNumber, variablesList, functions);
+                        JavaishType varTypeA = null;
+                        for (Variable variable : variablesList) {
+                            if(variable.getName().equals(words[0])){
+                                varTypeA = variable.getType();
+                            }
+                        }
+                        if(exprReturnTypeA != varTypeA){
+                            Error.TypeMismatch(varTypeA.toString(), exprReturnTypeA.toString(), lineNumber);
+                        }
                         AssignmentStmt assignmentStmt = new AssignmentStmt(lineNumber, words[0], expressionA);
                         parents.get(parents.size() - 1).addStatement(assignmentStmt);
                         
@@ -390,6 +532,7 @@ public class Parser {
                             int columnArg = line.indexOf(arg);
                             
                             functionArgExpressions[i] = new Expression(arg, argType, lineNumber, columnArg);
+                            
                         }
                         if(functionCallName.equals("print")){
                             ////System.out .println("ADDING PRINT STMt");
@@ -1364,6 +1507,16 @@ public class Parser {
                 return null;
         }
     }
+
+    private FunctionStmt getParentFunction(List<Statements> parents){
+        for(int i = parents.size() - 1; i >= 0; i--){
+            if(parents.get(i) instanceof FunctionStmt){
+                return (FunctionStmt) parents.get(i);
+            }
+        }
+        return null;
+    
+    }
 }
 
 class FunctionCall {
@@ -1381,5 +1534,52 @@ class FunctionCall {
 
     public ArrayList<String> getArgs() {
         return args;
+    }
+}
+
+class Function {
+    String functionName;
+    JavaishType returnType;
+
+    public Function(String functionName, JavaishType returnType) {
+        this.functionName = functionName;
+        this.returnType = returnType;
+    }
+
+    public Function(String functionName) {
+        this.functionName = functionName;
+        this.returnType = JavaishType.VOID;
+    }
+
+    public String getFunctionName() {
+        return functionName;
+    }
+
+    public JavaishType getReturnType() {
+        return returnType;
+    }
+
+    public void setReturnType(JavaishType returnType) {
+        this.returnType = returnType;
+    }
+
+
+}
+
+class Variable{
+    String name;
+    JavaishType type;
+
+    public Variable(String name, JavaishType type){
+        this.name = name;
+        this.type = type;
+    }
+
+    public String getName(){
+        return name;
+    }
+
+    public JavaishType getType(){
+        return type;
     }
 }

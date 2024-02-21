@@ -16,7 +16,8 @@ public interface JavaishVal {
         STRINGLIST,
         BOOLEANLIST,
         LIST,
-        INPUT
+        INPUT,
+        VOID
  
 
     }

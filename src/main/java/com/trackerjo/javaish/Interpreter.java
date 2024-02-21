@@ -49,6 +49,20 @@ public class Interpreter {
                 
                 Argument arg = args[i];
                 if(arg.getType() != val.getType()){
+                    if(val.getType() == JavaishType.LIST ){
+                        //Check if list type is correct and if so add list to local variables using localVariables.addList
+                        if( val instanceof JavaishListVal){
+                            JavaishListVal listVal = (JavaishListVal) val;
+                            JavaishList list = listVal.getValue();
+                            if(listVal.getValue().getType() != arg.getType()){
+                                Error.ArgumentTypeMismatch(name, lineNumber, arg.getType().toString(), val.typeString());
+                                return null;
+                            }
+                            localVariables.addList(arg.getName(), list.getType(),list, lineNumber);
+                            continue;
+                        }
+
+                    }
                     Error.ArgumentTypeMismatch(name, lineNumber, arg.getType().toString(), val.typeString());
                     return null;
                 }

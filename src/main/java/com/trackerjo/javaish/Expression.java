@@ -5,6 +5,7 @@ package com.trackerjo.javaish;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.trackerjo.javaish.Interpreter.Operator;
 import com.trackerjo.javaish.JavaishVal.JavaishType;
 import com.trackerjo.javaish.Statements.RobotType;
 
@@ -508,6 +509,531 @@ public class Expression {
         return null;
     }
  
+    public JavaishType typeExpression(Expression expression, int lineNumber, List<Variable> variables, List<Function> functions){
+        JavaishType total = null;
+        Operator operation = null;
+        Operator comparison = null;
+        JavaishType compVal = null;
+        boolean isComp = false;
+        
+        
+        for(Element elmt : expression.getElements()){
+            switch (elmt.getType()) {
+                case AND:
+                    AndElmt and = (AndElmt) elmt;
+                    JavaishType result = performComparision(comparison, total, compVal, lineNumber);
+                    if(result == null){
+                        return null;
+                    }
+                    return JavaishType.BOOLEAN;
+                    
+                case NOT:
+                    NotElmt not = (NotElmt) elmt;
+                    JavaishType valNot = typeExpression(not.getExpression(), lineNumber, variables, functions);
+                    if(valNot == JavaishType.BOOLEAN){
+                        
+                        if(isComp){
+                            compVal = performOperation(operation, compVal, JavaishType.BOOLEAN, lineNumber);
+                        } else {
+                            total = performOperation(operation, total, JavaishType.BOOLEAN, lineNumber);
+                        }
+                    } else {
+                        Error.TypeMismatch("Boolean", valNot.toString(), lineNumber);
+                        
+                    }
+                    break;
+                case BOOL:
+                    BoolElmt bool = (BoolElmt) elmt;
+                    
+                    if(isComp){
+                        compVal = performOperation(operation, compVal, JavaishType.BOOLEAN, lineNumber);
+                    } else {
+                        total = performOperation(operation, total, JavaishType.BOOLEAN, lineNumber);
+                    }
+                    
+
+                    break;
+                case CAST:
+                    CastElmt cast = (CastElmt) elmt;
+                    JavaishType val = typeExpression(cast.getExpression(), lineNumber, variables, functions);
+                    //System.out .println("Cast: " + cast.castType + " " + val.typeString());
+                    switch (cast.castType) {
+                        case FLOAT:
+                            if(val != JavaishType.FLOAT){
+                                val = JavaishType.FLOAT;
+                            }
+                            break;
+                        case INT:
+                            if(val != JavaishType.INT){
+                                val = JavaishType.INT;
+                            }
+                            break;
+                        case STRING:
+                            if(val != JavaishType.STRING){
+                                val = JavaishType.STRING;
+                            }
+                            break;
+                        case BOOLEAN:
+                            if(val != JavaishType.BOOLEAN){
+                                val = JavaishType.BOOLEAN;
+                            }
+                            break;
+                        default:
+                            break;
+                        
+                    }
+                    //System.out .println("NEW CAST: " + val.typeString());
+                    if(isComp){
+                        compVal = performOperation(operation, compVal, val, lineNumber);
+                    } else {
+                        total = performOperation(operation, total, val, lineNumber);
+                    }
+                    break;
+                case DIVIDE:
+                    DivideElmt divide = (DivideElmt) elmt;
+                    operation = Operator.DIVIDE;
+                    break;
+                case EQUAL:
+                    EqualElmt equal = (EqualElmt) elmt;
+                    comparison = Operator.EQUAL;
+                    isComp = true;
+                    break;
+                case EXPRESSION:
+                    ExpressionElmt expressionElmt = (ExpressionElmt) elmt;
+                    JavaishType newVal = typeExpression(expressionElmt.expression, lineNumber, variables, functions);
+                    if(isComp){
+                        compVal = performOperation(operation, compVal, newVal, lineNumber);
+                    } else {
+                        total = performOperation(operation, total, newVal, lineNumber);
+                    }
+                    break;
+                case FLOAT:
+                    FloatElmt floatElmt = (FloatElmt) elmt;
+                    JavaishType valF = JavaishType.FLOAT;
+                    if(isComp){
+                        compVal = performOperation(operation, compVal, valF, lineNumber);
+                    } else {
+                        total = performOperation(operation, total, valF, lineNumber);
+                    }
+                    
+                    break;
+                case GREATER_THAN:
+                    GreaterThanElmt greaterThan = (GreaterThanElmt) elmt;
+                    comparison = Operator.GREATER_THAN;
+                    isComp = true;
+                    break;
+                case GREATER_THAN_EQUAL:
+                    GreaterThanEqualElmt greaterThanEqual = (GreaterThanEqualElmt) elmt;
+                    comparison = Operator.GREATER_THAN_EQUAL;
+                    isComp = true;
+                    break;
+                case INTEGER:
+                    IntElmt integer = (IntElmt) elmt;
+                    JavaishType valI = JavaishType.INT;
+                    if(isComp){
+                        compVal = performOperation(operation, compVal, valI, lineNumber);
+                    } else {
+                        total = performOperation(operation, total, valI, lineNumber);
+                    }
+                    break;
+                case LESS_THAN:
+                    LessThanElmt lessThan = (LessThanElmt) elmt;
+                    comparison = Operator.LESS_THAN;
+                    isComp = true;
+                    break;
+                case LESS_THAN_EQUAL:
+                    LessThanEqualElmt lessThanEqual = (LessThanEqualElmt) elmt;
+                    comparison = Operator.LESS_THAN_EQUAL;
+                    isComp = true;
+                    break;
+                case MINUS:
+                    MinusElmt minus = (MinusElmt) elmt;
+                    operation = Operator.MINUS;
+                    break;
+                case MULTIPLY:
+                    MultiplyElmt multiply = (MultiplyElmt) elmt;
+                    operation = Operator.MULTIPLY;
+                    break;
+               
+                case NOT_EQUAL:
+                    NotEqualElmt notEqual = (NotEqualElmt) elmt;
+                    comparison = Operator.NOT_EQUAL;
+                    isComp = true;
+                    break;
+                case OR:
+                    OrElmt or = (OrElmt) elmt;
+                    JavaishType resultO = performComparision(comparison, total, compVal, lineNumber);
+                    if(resultO == null){
+                        return null;
+                    }
+                    return JavaishType.BOOLEAN;
+                   
+
+                case PLUS:
+                    PlusElmt plus = (PlusElmt) elmt;
+                    operation = Operator.PLUS;
+                    break;
+                case STRING:
+                    StringElmt string = (StringElmt) elmt;
+                    
+                    JavaishType valS = JavaishType.STRING;
+                    if(isComp){
+                        
+                        compVal = performOperation(operation, compVal, valS, lineNumber);
+                    } else {
+                        total = performOperation(operation, total, valS, lineNumber);
+                    }
+
+                    
+                    
+                    break;
+                
+                case VARIABLE:
+                    VariableElmt variable = (VariableElmt) elmt;
+                    JavaishType valV = null;
+                    for (Variable var : variables) {
+                        if(var.getName().equals(variable.getName())){
+                            valV = var.getType();
+                        }
+                    }
+                    if(isComp){
+                        compVal = performOperation(operation, compVal, valV, lineNumber);
+                    } else {
+                        total = performOperation(operation, total, valV, lineNumber);
+                    }
+                    break;
+                case FUNCTION:
+                    FunctionElmt function = (FunctionElmt) elmt;
+                    String functionName = function.getName();
+                    JavaishType valFunc = null;
+                    for (Function func : functions) {
+                        if(func.getFunctionName().equals(functionName)){
+                            valFunc = func.getReturnType();
+                        }
+                    }
+                    if(isComp){
+                        compVal = performOperation(operation, compVal, valFunc, lineNumber);
+                    } else {
+                        total = performOperation(operation, total, valFunc, lineNumber);
+                    }
+                    break;
+                case SHOWINPUTBOX:
+                    ShowInputBoxElmt showInputBox = (ShowInputBoxElmt) elmt;
+                    JavaishType input = JavaishType.STRING;
+                    if(isComp){
+                        compVal = performOperation(operation, compVal, input, lineNumber);
+                    } else {
+                        total = performOperation(operation, total, input, lineNumber);
+                    }
+                    break;
+                case LISTVAL:
+                    
+                    ListValElmt listVal = (ListValElmt) elmt;
+                    String listName = listVal.getListName();
+                    JavaishType listValVal = null;
+                    for (Variable var : variables) {
+                        if(var.getName().equals(listName)){
+                            listValVal = var.getType();
+                        }
+                    }
+                    //Convert list type to type
+                    if(listValVal == JavaishType.INTLIST){
+                        listValVal = JavaishType.INT;
+                    } else if(listValVal == JavaishType.FLOATLIST){
+                        listValVal = JavaishType.FLOAT;
+                    } else if(listValVal == JavaishType.STRINGLIST){
+                        listValVal = JavaishType.STRING;
+                    } else if(listValVal == JavaishType.BOOLEANLIST){
+                        listValVal = JavaishType.BOOLEAN;
+                    }
+                    if(isComp){
+                        compVal = performOperation(operation, compVal, listValVal, lineNumber);
+                    } else {
+                        total = performOperation(operation, total, listValVal, lineNumber);
+                    }
+                    break;
+
+                    
+                case LIST:
+                    
+                    ListElmt list = (ListElmt) elmt;
+                    JavaishType type = list.getListType();
+                    if(isComp){
+                        if(operation != null){
+                            Error.CantPerformOperation(operation.toString(), type.toString(), lineNumber);
+
+                        }
+                        compVal = performOperation(operation, compVal, type, lineNumber);
+                    } else {
+                        if(operation != null){
+                            Error.CantPerformOperation(operation.toString(), type.toString(), lineNumber);
+                        }
+                        total = performOperation(operation, total, type, lineNumber);
+                    }
+
+               
+                    break;
+                case ARRAYLENGTH:
+                    ArrayLengthElmt arrayLength = (ArrayLengthElmt) elmt;
+                    JavaishType length = JavaishType.INT;
+                    
+                    if(isComp){
+                        compVal = performOperation(operation, compVal, length, lineNumber);
+                    } else {
+                        total = performOperation(operation, total, length, lineNumber);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        if(isComp){
+            return performComparision(comparison, total, compVal, lineNumber);
+        }
+
+        return total;
+    }
+
+    private JavaishType performOperation(Operator operation, JavaishType total, JavaishType val2, int lineNumber){
+        JavaishType result = null;
+        if(val2 == JavaishType.BOOLEAN || total == JavaishType.BOOLEAN){
+            Error.TypeMismatch("Number", "Boolean", lineNumber);
+        }
+        if(operation == null){
+            //System.out.println(val2.getValue() + " SINGLE VAL");
+            return val2;
+        }
+        switch (operation) {
+            case PLUS:
+                if(total == JavaishType.STRING){
+                    if(val2 != JavaishType.STRING){
+                         Error.TypeMismatch("String", val2.toString(), lineNumber);
+                        return null;
+                    }
+                    result = JavaishType.STRING;
+                } else if(val2 == JavaishType.STRING){
+                    if(total != JavaishType.STRING){
+                        Error.TypeMismatch("String", total.toString(), lineNumber);
+
+                        return null;
+                    } else {
+                    result = JavaishType.STRING;
+                    }
+                } else if(total == JavaishType.FLOAT){
+                    
+                    result = JavaishType.FLOAT;
+                    
+                } else if(val2 == JavaishType.FLOAT){
+                    
+                    result = JavaishType.FLOAT;
+                    
+                } else {
+                    result = JavaishType.INT;
+                }
+                
+                
+                break;
+            case MULTIPLY:
+                if(total == JavaishType.STRING || val2 == JavaishType.STRING){
+                     Error.TypeMismatch("Number", "String", lineNumber);
+                    return null;
+                }
+                if(total == JavaishType.FLOAT){
+                    result = JavaishType.FLOAT;
+                } else if(val2 == JavaishType.FLOAT){
+                    result = JavaishType.FLOAT;
+                } else {
+                    result = JavaishType.INT;
+                }
+                break;
+            case DIVIDE:
+                if(total == JavaishType.STRING || val2 == JavaishType.STRING){
+                     Error.TypeMismatch("Number", "String", lineNumber);
+                    return null;
+                }
+                if(total == JavaishType.FLOAT){
+                    result = JavaishType.FLOAT;
+                } else if(val2 == JavaishType.FLOAT){
+                    result = JavaishType.FLOAT;
+                } else {
+                    result = JavaishType.INT;
+                }
+                break;
+            case MINUS:
+                if(total == JavaishType.STRING || val2 == JavaishType.STRING){
+                     Error.TypeMismatch("Number", "String", lineNumber);
+                    return null;
+                }
+                else if(total == JavaishType.FLOAT){
+                    result = JavaishType.FLOAT;
+                } else if(val2 == JavaishType.FLOAT){
+                    result = JavaishType.FLOAT;
+                } else {
+                    result = JavaishType.INT;
+                }
+                break;
+            default:
+                break;
+        }
+        return result;
+    }
+
+    private JavaishType performComparision(Operator comparison, JavaishType left, JavaishType right, int lineNumber){
+        JavaishType result = null;
+        switch (comparison) {
+            case EQUAL:
+                if(left == JavaishType.STRING && right == JavaishType.STRING){
+                    result = JavaishType.BOOLEAN;
+                } else if(left == JavaishType.STRING || right == JavaishType.STRING){
+                   if(left == JavaishType.BOOLEAN || right == JavaishType.BOOLEAN){
+                        Error.TypeMismatch("String", "Bool", lineNumber);
+                    } else {
+                        Error.TypeMismatch("String", "Number", lineNumber);
+                    }
+                    return null;
+                }
+                else if(left == JavaishType.BOOLEAN && right == JavaishType.BOOLEAN){
+                   result = JavaishType.BOOLEAN;
+                } else if(left == JavaishType.BOOLEAN || right == JavaishType.BOOLEAN){
+                   if(left == JavaishType.STRING || right == JavaishType.STRING){
+                        Error.TypeMismatch("Boolean", "String", lineNumber);
+                    } else {
+                        Error.TypeMismatch("Boolean", "Number", lineNumber);
+                    }
+                    return null;
+                }
+                else if(left == JavaishType.INT && right == JavaishType.INT){
+                    result = JavaishType.BOOLEAN;
+                } else if(left == JavaishType.INT && right == JavaishType.FLOAT){
+                    result = JavaishType.BOOLEAN;
+                } else if(left == JavaishType.FLOAT && right == JavaishType.INT){
+                    result = JavaishType.BOOLEAN;
+                } else {
+                    result = JavaishType.BOOLEAN;
+                }
+                
+                break;
+            case NOT_EQUAL:
+                if(left == JavaishType.STRING && right == JavaishType.STRING){
+                    result = JavaishType.BOOLEAN;
+                } else if(left == JavaishType.STRING || right == JavaishType.STRING){
+                     if(left == JavaishType.BOOLEAN || right == JavaishType.BOOLEAN){
+                            Error.TypeMismatch("String", "Bool", lineNumber);
+                      } else {
+                            Error.TypeMismatch("String", "Number", lineNumber);
+                      }
+                      return null;
+                }
+                else if(left == JavaishType.BOOLEAN && right == JavaishType.BOOLEAN){
+                    result = JavaishType.BOOLEAN;
+                } else if(left == JavaishType.BOOLEAN || right == JavaishType.BOOLEAN){
+                    if(left == JavaishType.STRING || right == JavaishType.STRING){
+                        Error.TypeMismatch("Boolean", "String", lineNumber);
+                    } else {
+                        Error.TypeMismatch("Boolean", "Number", lineNumber);
+                    }
+                    return null;
+                }
+                else if(left == JavaishType.INT && right == JavaishType.INT){
+                    result = JavaishType.BOOLEAN;
+                } else if(left == JavaishType.INT && right == JavaishType.FLOAT){
+                    result = JavaishType.BOOLEAN;
+                } else if(left == JavaishType.FLOAT && right == JavaishType.INT){
+                    result = JavaishType.BOOLEAN;
+                } else {
+                    result = JavaishType.BOOLEAN;
+                } 
+                
+                break;
+            case LESS_THAN:
+                if(left == JavaishType.STRING || right == JavaishType.STRING){
+                    Error.TypeMismatch("Number", "String", lineNumber);
+                    return null;
+                } 
+                if(left == JavaishType.BOOLEAN || right == JavaishType.BOOLEAN){
+                    Error.TypeMismatch("Number", "Boolean", lineNumber);
+                    return null;
+                }
+                //Make both numbers float
+                if(left == JavaishType.INT && right == JavaishType.INT){
+                    result = JavaishType.BOOLEAN;
+                } else if(left == JavaishType.INT && right == JavaishType.FLOAT){
+                    result = JavaishType.BOOLEAN;
+                } else if(left == JavaishType.FLOAT && right == JavaishType.INT){
+                    result = JavaishType.BOOLEAN;
+                } else {
+                    result = JavaishType.BOOLEAN;
+                }
+                break;
+            case GREATER_THAN:
+                if(left == JavaishType.STRING || right == JavaishType.STRING){
+                    Error.TypeMismatch("Number", "String", lineNumber);
+                    return null;
+                }
+                if(left == JavaishType.BOOLEAN || right == JavaishType.BOOLEAN){
+                    Error.TypeMismatch("Number", "Boolean", lineNumber);
+                    return null;
+                }
+                //Make both numbers float
+                if(left == JavaishType.INT && right == JavaishType.INT){
+                    result = JavaishType.BOOLEAN;
+                } else if(left == JavaishType.INT && right == JavaishType.FLOAT){
+                    result = JavaishType.BOOLEAN;
+                } else if(left == JavaishType.FLOAT && right == JavaishType.INT){
+                    result = JavaishType.BOOLEAN;
+                } else {
+                    result = JavaishType.BOOLEAN;
+                } 
+                break;
+
+            case LESS_THAN_EQUAL:
+                if(left == JavaishType.STRING || right == JavaishType.STRING){
+                    Error.TypeMismatch("Number", "String", lineNumber);
+                    return null;
+                }
+                if(left == JavaishType.BOOLEAN || right == JavaishType.BOOLEAN){
+                    Error.TypeMismatch("Number", "Boolean", lineNumber);
+                    return null;
+                }
+                //Make both numbers float
+                if(left == JavaishType.INT && right == JavaishType.INT){
+                    result = JavaishType.BOOLEAN;
+                } else if(left == JavaishType.INT && right == JavaishType.FLOAT){
+                    result = JavaishType.BOOLEAN;
+                } else if(left == JavaishType.FLOAT && right == JavaishType.INT){
+                    result = JavaishType.BOOLEAN;
+                } else {
+                    result = JavaishType.BOOLEAN;
+                } 
+                break;
+            case GREATER_THAN_EQUAL:
+                if(left == JavaishType.STRING || right == JavaishType.STRING){
+                    Error.TypeMismatch("Number", "String", lineNumber);
+                    return null;
+                }
+                if(left == JavaishType.BOOLEAN || right == JavaishType.BOOLEAN){
+                    Error.TypeMismatch("Number", "Boolean", lineNumber);
+                    return null;
+                }
+                //Make both numbers float
+                if(left == JavaishType.INT && right == JavaishType.INT){
+                    result = JavaishType.BOOLEAN;
+                } else if(left == JavaishType.INT && right == JavaishType.FLOAT){
+                    result = JavaishType.BOOLEAN;
+                } else if(left == JavaishType.FLOAT && right == JavaishType.INT){
+                    result = JavaishType.BOOLEAN;
+                } else {
+                    result = JavaishType.BOOLEAN;
+                } 
+                break;
+
+        
+            default:
+                break;
+        }
+
+        return result;
+    }
 
     private boolean isInteger(String str) {
         try {
