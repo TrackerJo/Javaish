@@ -1,19 +1,112 @@
-function printInfo(int x, String[] names, int[] ages){
-  print("Printing Info").
-  for when x greater than 0 increment x by -1 {
-    print(names sub (x - 1) plus " is " plus toString(ages sub (x - 1)) plus " years old").
+let String[] board = ["0", "1", "2", "3", "4", "5", "6", "7", "8"].
+function isMovesLeft(){
+  for each cell in board {
+
+    if cell equals "_" {
+      return true.
+    }
   }
+  return false.
 }
 
-let String[] names equal ["Nathaniel", "Dever", "Sarah", "Sydney", "Fred", "Kathleen"].
-let int[] ages equal [17, 21, 13, 25, 57, 57].
-let int x equal length of names.
+function evaluate() {
 
-printInfo(length of names, names, ages).
+  //Check for Horizontal Then Vertical Then Diagonal Wins
+  if board sub 0 == board sub 1 and board sub 1 == board sub 2 and board sub 0 not equals "_" {
+    if board sub 3 equals "X" {
+      return 10.
+    } else {
+      return -10.
+    }
+  } else if board sub 3 == board sub 4 and board sub 4 == board sub 5 and board sub 3 not equals "_" {
+    if board sub 3 equals "X" {
+      return 10.
+    } else {
+      return -10.
+    }
+  } else if board sub 6 == board sub 7 and board sub 7 == board sub 8 and board sub 6 not equals "_" {
+    if board sub 6 equals "X" {
+      return 10.
+    } else {
+      return -10.
+    }
+  } else if board sub 0 == board sub 3 and board sub 3 == board sub 6 and board sub 0 not equals "_" {
+    if board sub 0 equals "X" {
+      return 10.
+    } else {
+      return -10.
+    }
+  } else if board sub 1 == board sub 4 and board sub 4 == board sub 7 and board sub 1 not equals "_" {
+    if board sub 1 equals "X" {
+      return 10.
+    } else {
+      return -10.
+    }
+  } else if board sub 2 == board sub 5 and board sub 5 == board sub 8 and board sub 2 not equals "_" {
+    if board sub 2 equals "X" {
+      return 10.
+    } else {
+      return -10.
+    }
+  } else if board sub 0 == board sub 4 and board sub 4 == board sub 8 and board sub 0 not equals "_" {
+    if board sub 0 equals "X" {
+      return 10.
+    } else {
+      return -10.
+    }
+  } else if board sub 2 == board sub 4 and board sub 4 == board sub 6 and board sub 2 not equals "_" {
+    if board sub 2 equals "X" {
+      return 10.
+    } else {
+      return -10.
+    }
+  }
+  return 0.
+}
 
-let String usersName equal input("What is your name?").
-add usersName to names.
-let int usersAge equal toInt(input("How old are you?")).
-add usersAge to ages.
+function printBoard(){
+  let String firstRow = board sub 0 plus " | " plus board sub 1 plus " | " plus board sub 2.
+  let String secondRow = board sub 3 plus " | " plus board sub 4 plus " | " plus board sub 5.
+  let String thirdRow = board sub 6 plus " | " plus board sub 7 plus " | " plus board sub 8.
+  print(firstRow).
+  print(secondRow).
+  print(thirdRow).
+  print("----------").
+  
+}
 
-printInfo(length of names, names, ages).
+let bool hasWon = false.
+let bool XTurn = true.
+
+while not hasWon {
+  printBoard().
+  if XTurn {
+    let int move = toInt(input("Where do you want to move as X?")).
+    while board sub move not equals toString(move) {
+      dialog("Invalid Move").
+      move = toInt(input("Where do you want to move as X?")).
+    }
+    set board sub move to "X".
+  } else {
+    let int move = toInt(input("Where do you want to move as O?")).
+    while board sub move not equals toString(move) {
+      dialog("Invalid Move").
+      move = toInt(input("Where do you want to move as O?")).
+    }
+    set board sub move to "O".
+  }
+  XTurn = not XTurn.
+  let int eval = evaluate().
+  if eval == 10 {
+    hasWon = true.
+    dialog("X WON!").
+    printBoard().
+  } else if eval == -10 {
+    hasWon = true.
+    dialog("O WON!").
+    printBoard().
+  }
+
+  
+}
+

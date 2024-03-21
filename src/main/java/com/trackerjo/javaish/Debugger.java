@@ -1482,7 +1482,7 @@ public class Debugger {
                     globalVariables.addVariable(incVarName, JavaishType.INT, new JavaishInt(0), lineNumber);
                 }
             } else {
-                if(!localVariables.isVariable(incVarName)){
+                if(!localVariables.isVariable(incVarName) && !globalVariables.isVariable(incVarName)){
                     localVariables.addVariable(incVarName, JavaishType.INT, new JavaishInt(0), lineNumber);
                 }
 
@@ -1492,7 +1492,12 @@ public class Debugger {
             if(isGlobal){
                 incVal = globalVariables.getVariableValue(incVarName);
             } else {
-                incVal = localVariables.getVariableValue(incVarName);
+                //Check if local or global
+                if(localVariables.isVariable(incVarName)){
+                    incVal = localVariables.getVariableValue(incVarName);
+                } else {
+                    incVal = globalVariables.getVariableValue(incVarName);
+                }
             }
 
             if(incVal == null){
@@ -1510,7 +1515,11 @@ public class Debugger {
             if(isGlobal){
                 globalVariables.setVariableValue(incVarName, incInt, lineNumber);
             } else {
-                localVariables.setVariableValue(incVarName, incInt, lineNumber);
+                if(localVariables.isVariable(incVarName)){
+                    localVariables.setVariableValue(incVarName, incInt, lineNumber);
+                } else {
+                    globalVariables.setVariableValue(incVarName, incInt, lineNumber);
+                }
             }
             result = evalExpression(condition, localVariables, isGlobal);
             if(result == null){

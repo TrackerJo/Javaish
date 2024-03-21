@@ -12,5 +12,6 @@
             "lib/turtle.jar",
             "/Users/nathanielkemmenash/Downloads/turtle.jar/"
         ]
-    }
+    },
+    "java.configuration.updateBuildConfiguration": "interactive"
 }

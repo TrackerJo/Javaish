@@ -330,6 +330,79 @@ public class Variables{
         }
    }
 
+   public void setListValue(String name, JavaishInt index, JavaishVal value, int lineNumber){
+        JavaishType t = allVariables.get(name);
+        switch (t.toString()) {
+             case "INTLIST":
+               for(IntList i : intLists){
+                    if(i.name.equals(name)){
+                         if(value.getType() == JavaishType.INT){
+                                List<JavaishInt> list = i.getValue().getList();
+                                list.set(index.getValue(), (JavaishInt)value);
+                                i.setValue(new JavaishIntList(list));
+                             }
+                             else{
+                                Error.TypeMismatch("Int", value.typeString(), lineNumber);
+                             
+                         }
+                    }
+               }
+               break;
+               case "FLOATLIST":
+                for(FloatList i : floatLists){
+                     if(i.name.equals(name)){
+                            if(value.getType() == JavaishType.FLOAT){
+                                    List<JavaishFloat> list = i.getValue().getList();
+                                    list.set(index.getValue(), (JavaishFloat)value);
+                                    i.setValue(new JavaishFloatList(list));
+                                 }
+                                 else{
+                                    if(value.getType() == JavaishType.INT){
+                                        List<JavaishFloat> list = i.getValue().getList();
+                                        list.set(index.getValue(), new JavaishFloat(((JavaishInt)value).getValue()));
+                                        i.setValue(new JavaishFloatList(list));
+                                    }
+                                    else {
+                                        Error.TypeMismatch("Float", value.typeString(), lineNumber);
+                                    }
+                                   
+                             }
+                     }
+                }
+                break;
+               case "BOOLEANLIST":
+                for(BoolList i : boolLists){
+                     if(i.name.equals(name)){
+                            if(value.getType() == JavaishType.BOOLEAN){
+                                    List<JavaishBoolean> list = i.getValue().getList();
+                                    list.set(index.getValue(), (JavaishBoolean)value);
+                                    i.setValue(new JavaishBooleanList(list));
+                                 }
+                                 else{
+                                    Error.TypeMismatch("Boolean", value.typeString(), lineNumber);
+                             }
+                     }
+                }
+                break;
+               case "STRINGLIST":
+                for(StringList i : stringLists){
+                     if(i.name.equals(name)){
+                            if(value.getType() == JavaishType.STRING){
+                                    List<JavaishString> list = i.getValue().getList();
+                                    list.set(index.getValue(), (JavaishString)value);
+                                    i.setValue(new JavaishStringList(list));
+                                 }
+                                 else{
+                                    Error.TypeMismatch("String", value.typeString(), lineNumber);
+                             }
+                     }
+                }
+                break;
+             default:
+               break;
+        }
+   }
+
    public JavaishVal getVariableValue(String name){
          //System.out .println(name);
          JavaishType t = allVariables.get(name);

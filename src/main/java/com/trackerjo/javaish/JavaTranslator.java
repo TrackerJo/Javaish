@@ -264,10 +264,27 @@ public class JavaTranslator {
                 RemoveAllFromStmt removeAllFromStmt = (RemoveAllFromStmt) stmt;
                 evalRemoveAllFrom(removeAllFromStmt, localVariables, isGlobal, javaPrinter);
                 break;
+            case SET:
+                SetStmt setStmt = (SetStmt) stmt;
+                evalSet(setStmt, localVariables, isGlobal, javaPrinter);
+                break;
 
             default:
                 break;
         }
+
+    }
+
+    private void evalSet(SetStmt setStmt, Variables localVariables, boolean isGlobal, List<String> javaPrinter){
+        String listName = setStmt.getName();
+        Expression index = setStmt.getListVal().getIndex();
+        Expression value = setStmt.getValue();
+        String indexString = translateExpression(index, localVariables, isGlobal, javaPrinter);
+        String valueString = translateExpression(value, localVariables, isGlobal, javaPrinter);
+        String line = addTabCount() + listName + ".set(" + indexString + ", " + valueString + ");";
+        javaPrinter.add(line);
+
+
 
     }
 
@@ -1077,6 +1094,7 @@ public class JavaTranslator {
                     break;
                 case EQUAL:
                     expr += " == ";
+                    
                     break;
                 case EXPRESSION:
                     ExpressionElmt expressionElmt = (ExpressionElmt) elmt;
@@ -1141,10 +1159,15 @@ public class JavaTranslator {
                     Expression[] params = function.getParams();
                     List<JavaishVal> paramVals = new ArrayList<JavaishVal>();
                     String funcExpr = function.getName() + "(";
+                    boolean hasParams = false;
                     for (Expression param : params) {
+
                        funcExpr += translateExpression(param, localVariables, isGlobal, javaPrinter) + ", ";
+                          hasParams = true;
                     }
-                    funcExpr = funcExpr.substring(0, funcExpr.length() - 2);
+                    if(hasParams){
+                        funcExpr = funcExpr.substring(0, funcExpr.length() - 2);
+                    }
                     funcExpr += ")";
                     expr += funcExpr;
                     break;
@@ -1409,7 +1432,12 @@ public class JavaTranslator {
                     localVariables.addList(declaration.getName(), type, listVal.getValue(), lineNumber);
                 
             } else {
-                localVariables.addVariable(declaration.getName(), type, value, lineNumber);
+                //Check if variable already exists
+                if(!localVariables.isVariable(declaration.getName())){
+                    
+                    localVariables.addVariable(declaration.getName(), type, value, lineNumber);
+                }
+                
              }
         }
         tabCount = prevTabCount;

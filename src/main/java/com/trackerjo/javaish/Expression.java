@@ -20,7 +20,6 @@ public class Expression {
         FLOATLIST,
         STRINGLIST,
         BOOLEANLIST,
-    
     }
     private int line;
     private boolean goal;
@@ -211,10 +210,11 @@ public class Expression {
                 }
                 else if(currentElement.equals("not") && nextWord(expression, i+1).equals("equals")){
                     elements.add(new NotEqualElmt());
-                    i+=5;
+                    i+=6;
                     currentElement = "";
                    
                 } else if (currentElement.equals("not")){
+                    System.out.println("READING NOT");
                     readingNot = true;
                     currentElement = "";
                 }
@@ -262,6 +262,7 @@ public class Expression {
                     Expression index = new Expression(parseExpression(currentElement, column + i), ExpressionReturnType.NUMBER, line);
                     elements.add(new ListValElmt(currentArrayName, index));
                     currentElement = "";
+                    readingArrayElmtArgs = false;
                 }
                 else{
                     if(currentElement.length()>0 && !currentElement.equals("not") && !readingFunction){
@@ -509,6 +510,8 @@ public class Expression {
         return null;
     }
  
+   
+
     public JavaishType typeExpression(Expression expression, int lineNumber, List<Variable> variables, List<Function> functions){
         JavaishType total = null;
         Operator operation = null;
@@ -518,9 +521,11 @@ public class Expression {
         
         
         for(Element elmt : expression.getElements()){
+            System.out.println("ELMT: " + elmt.getType());
             switch (elmt.getType()) {
+                
                 case AND:
-                    AndElmt and = (AndElmt) elmt;
+                    // AndElmt and = (AndElmt) elmt;
                     JavaishType result = performComparision(comparison, total, compVal, lineNumber);
                     if(result == null){
                         return null;
@@ -597,6 +602,7 @@ public class Expression {
                     EqualElmt equal = (EqualElmt) elmt;
                     comparison = Operator.EQUAL;
                     isComp = true;
+                    System.out.println("EQUAL");
                     break;
                 case EXPRESSION:
                     ExpressionElmt expressionElmt = (ExpressionElmt) elmt;
@@ -659,6 +665,7 @@ public class Expression {
                     NotEqualElmt notEqual = (NotEqualElmt) elmt;
                     comparison = Operator.NOT_EQUAL;
                     isComp = true;
+                    System.out.println("NOT EQUAL");
                     break;
                 case OR:
                     OrElmt or = (OrElmt) elmt;
@@ -711,6 +718,7 @@ public class Expression {
                             valFunc = func.getReturnType();
                         }
                     }
+                    System.out.println("FUNCTION VAL: " + valFunc + " IS COMP " + isComp);
                     if(isComp){
                         compVal = performOperation(operation, compVal, valFunc, lineNumber);
                     } else {
@@ -746,6 +754,7 @@ public class Expression {
                     } else if(listValVal == JavaishType.BOOLEANLIST){
                         listValVal = JavaishType.BOOLEAN;
                     }
+                    System.out.println("LIST VAL: " + listValVal + " IS COMP " + isComp);
                     if(isComp){
                         compVal = performOperation(operation, compVal, listValVal, lineNumber);
                     } else {
@@ -788,6 +797,7 @@ public class Expression {
             }
         }
         if(isComp){
+            System.out.println("COMPARISON: " + comparison);
             return performComparision(comparison, total, compVal, lineNumber);
         }
 
@@ -796,12 +806,13 @@ public class Expression {
 
     private JavaishType performOperation(Operator operation, JavaishType total, JavaishType val2, int lineNumber){
         JavaishType result = null;
-        if(val2 == JavaishType.BOOLEAN || total == JavaishType.BOOLEAN){
-            Error.TypeMismatch("Number", "Boolean", lineNumber);
-        }
+        
         if(operation == null){
             //System.out.println(val2.getValue() + " SINGLE VAL");
             return val2;
+        }
+        if(val2 == JavaishType.BOOLEAN || total == JavaishType.BOOLEAN){
+            Error.TypeMismatch("Number", "Boolean", lineNumber);
         }
         switch (operation) {
             case PLUS:
@@ -886,8 +897,10 @@ public class Expression {
                     result = JavaishType.BOOLEAN;
                 } else if(left == JavaishType.STRING || right == JavaishType.STRING){
                    if(left == JavaishType.BOOLEAN || right == JavaishType.BOOLEAN){
+                        System.out.println("TYPE MISMATCH: " + left + " " + right);
                         Error.TypeMismatch("String", "Bool", lineNumber);
                     } else {
+                        System.out.println("TYPE MISMATCH: " + left + " " + right);
                         Error.TypeMismatch("String", "Number", lineNumber);
                     }
                     return null;

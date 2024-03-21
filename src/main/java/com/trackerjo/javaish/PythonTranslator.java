@@ -279,8 +279,14 @@ public class PythonTranslator {
                 if(!usedRMove){
                     javaPrinter.add("motion = ALProxy(\"ALMotion\", \"" + robotIP + "\", 9559)");
                     javaPrinter.add("motion.setStiffnesses(\"Body\", 1.0)");
+                    
                     usedRMove = true;
                 }
+                if(!usedRPosture){
+                    javaPrinter.add("postureService = ALProxy(\"ALRobotPosture\", \"" + robotIP + "\", 9559)");
+                    usedRPosture = true;
+                }
+                javaPrinter.add("postureService.goToPosture(\"StandInit\", 0.5)");
                 javaPrinter.add("motion.moveInit()");
                 javaPrinter.add("motion.moveTo(" + valM + ",0,0)");
                 

@@ -161,10 +161,17 @@ public class Parser {
                 case "if":
                     String condition = parseLoop(line, "if");
                     int columnC = line.indexOf(condition);
+                    System.out.println("Condition: " + condition);
                     Expression boolExpression = new Expression(condition, ExpressionReturnType.BOOL, lineNumber, columnC);
+                    Element[] elements = boolExpression.getElements();
+                    for (Element element : elements) {
+                        System.out.println("Element: " + element.getType());
+                        
+                    }
                     JavaishType ifReturnType = boolExpression.typeExpression(boolExpression, lineNumber, variablesList, functions);
 
                     if(ifReturnType != JavaishType.BOOLEAN){
+                        System.out.println("IfReturnType: " + lineNumber);
                         Error.TypeMismatch("BOOLEAN", ifReturnType.toString(), lineNumber);
                     }
                     IfStmt ifStmt = new IfStmt(lineNumber, boolExpression);
@@ -214,6 +221,29 @@ public class Parser {
                         String[] forLoop = parseForEach(line);
                         String forVarName = forLoop[0];
                         String forListName = forLoop[1];
+                        //Get type of forListName
+                        JavaishType forListType = null;
+                        for (Variable variable : variablesList) {
+                            if(variable.getName().equals(forListName)){
+                                forListType = variable.getType();
+                            }
+                        }
+                        System.out.println("ForListType: " + forListType + " NAME: " + forListName) ;
+                        JavaishType forVarType = null;
+                        if (forListType == JavaishType.INTLIST) {
+                            forVarType = JavaishType.INT;
+                        } else if (forListType == JavaishType.FLOATLIST) {
+                            forVarType = JavaishType.FLOAT;
+                        } else if (forListType == JavaishType.STRINGLIST) {
+                            forVarType = JavaishType.STRING;
+                        } else if (forListType == JavaishType.BOOLEANLIST) {
+                            forVarType = JavaishType.BOOLEAN;
+                        } else {
+                            Error.InvalidForLoop(lineNumber);
+                        }
+                        //Add forVarName to variablesList
+                        variablesList.add(new Variable(forVarName, forVarType));
+                        
                         
                         
                         ForEachStmt forStmt = new ForEachStmt(lineNumber, forVarName, forListName);
@@ -253,7 +283,9 @@ public class Parser {
                         }
                     }
                     if(functionReturnType != JavaishType.VOID && hasReturn){
-                        Error.ReturnTypeMismatch(functionNameR, functionReturnType.toString(), returnType.toString(), lineNumber);
+                        if(functionReturnType != returnType){
+                            Error.ReturnTypeMismatch(functionNameR, functionReturnType.toString(), returnType.toString(), lineNumber);
+                        }
                     }
                     //Set function return type
                     for (Function function : functions) {
@@ -387,6 +419,7 @@ public class Parser {
                         String argName = arg[1];
                         JavaishType argType = getType(arg[0]);
                         arguments.add(new Argument(argType, argName));
+                        variablesList.add(new Variable(argName, argType));
                     }
 
                     Argument[] argumentsArr = arguments.toArray(new Argument[arguments.size()]);
@@ -494,7 +527,38 @@ public class Parser {
                     RobotStmt robotStmt2 = new RobotStmt(lineNumber, robotType, robotActionArgExpressions);
                     parents.get(parents.size() - 1).addStatement(robotStmt2);
                     break;
-                   
+                
+                case "set":
+                    String[] setStmt = parseSet(line);
+                    String setListName = setStmt[0];
+                    String setListLocation = setStmt[1];
+                    String setListValue = setStmt[2];
+                    int columnSL = line.indexOf(setListValue);
+                    Expression setListValueExpression = new Expression(setListValue, ExpressionReturnType.STRING, lineNumber, columnSL);
+                    JavaishType setListValueReturnType = setListValueExpression.typeExpression(setListValueExpression, lineNumber, variablesList, functions);
+                    
+                    JavaishType setListType = null;
+                    for (Variable variable : variablesList) {
+                        if(variable.getName().equals(setListName)){
+                            setListType = variable.getType();
+                        }
+                    }
+                    if(setListType == JavaishType.INTLIST && setListValueReturnType != JavaishType.INT){
+                        Error.TypeMismatch("INT", setListValueReturnType.toString(), lineNumber);
+                    } else if(setListType == JavaishType.FLOATLIST && setListValueReturnType != JavaishType.FLOAT){
+                        Error.TypeMismatch("FLOAT", setListValueReturnType.toString(), lineNumber);
+                    } else if(setListType == JavaishType.STRINGLIST && setListValueReturnType != JavaishType.STRING){
+                        Error.TypeMismatch("STRING", setListValueReturnType.toString(), lineNumber);
+                    } else if(setListType == JavaishType.BOOLEANLIST && setListValueReturnType != JavaishType.BOOLEAN){
+                        Error.TypeMismatch("BOOLEAN", setListValueReturnType.toString(), lineNumber);
+                    }
+                    ListValElmt setListLocStmt = new ListValElmt(setListName, new Expression(setListLocation, ExpressionReturnType.NUMBER, lineNumber, 0));
+                    SetStmt setStmt2 = new SetStmt(lineNumber, setListName, setListValueExpression, setListLocStmt);
+                    parents.get(parents.size() - 1).addStatement(setStmt2);
+                    break;
+
+                    
+                
                 default:
                     if((nextWord(line, words[0].length() + 1).equals("equals") || nextWord(line, words[0].length() + 1).equals("="))){
                         String assignment = parseAssignment(line, words[0]);
@@ -509,8 +573,10 @@ public class Parser {
                                 varTypeA = variable.getType();
                             }
                         }
+                        System.out.println("VarTypeA: " + exprReturnTypeA);
+                        System.out.println("ExprReturnTypeA: " + lineNumber);
                         if(exprReturnTypeA != varTypeA){
-                            Error.TypeMismatch(varTypeA.toString(), exprReturnTypeA.toString(), lineNumber);
+                             Error.TypeMismatch(varTypeA.toString(), exprReturnTypeA.toString(), lineNumber);
                         }
                         AssignmentStmt assignmentStmt = new AssignmentStmt(lineNumber, words[0], expressionA);
                         parents.get(parents.size() - 1).addStatement(assignmentStmt);
@@ -603,6 +669,73 @@ public class Parser {
         }
         return true;
     }
+
+    private String[] parseSet(String line){
+        int i = 0;
+        boolean readingId = true;
+        boolean readingLocation = false;
+        boolean readingVar = false;
+        boolean readingString = false;
+        boolean readPeriod = false;
+        boolean readingExpression = false;
+
+
+        String rString = "";
+        String varName = "";
+        String location = "";
+        String expression = "";
+        while(i < line.length()){
+            char c = line.charAt(i);
+            boolean hasNext = i < line.length() - 1;
+            char nextChar = ' ';
+            if(hasNext){
+                nextChar = line.charAt(i + 1);
+            } 
+            if(c =='"'){
+                readingString = !readingString;
+                rString += c;
+            } else if(c == ' ' && !readingString){
+                if(rString.equals("set") && readingId){
+                    readingId = false;
+                    readingVar = true;
+                    rString = "";
+                } else if(readingVar && nextWord(line, i+1).equals("sub")){
+                    readingVar = false;
+                    varName = rString;
+                    readingLocation = true;
+                    rString = "";
+                } else if(location.equals("") && readingLocation && rString.equals("sub")){
+                    rString = "";
+                } else if(readingLocation && nextWord(line, i+1).equals("to")){
+                    readingLocation = false;
+                    location = rString;
+                    readingExpression = true;
+                    rString = "";
+                } else if(expression.equals("") && readingExpression && rString.equals("to")){
+                    rString = "";
+                } else {
+                    rString += c;
+                }
+            } else if(c == '.' && readingExpression && !hasNext){
+                expression = rString;
+                rString = "";
+                readPeriod = true;
+            } else {
+                rString += c;
+            }
+            i++;
+        }
+
+         if(!readPeriod){
+            Error.MissingPeriod(lineNumber);
+        }
+
+        String[] returnArray = {varName, location, expression};
+        return returnArray;
+
+
+    }
+
     private FunctionCall parseRobot(String line){
         //Remove robot from line
         String robotLine = line.substring(6);

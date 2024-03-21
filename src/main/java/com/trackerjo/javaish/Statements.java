@@ -10,7 +10,7 @@ import com.trackerjo.javaish.JavaishVal.JavaishType;
 
 public class Statements {
     enum StmtType {
-        FUNCTION, IF, WHILE, FOREACH, RETURN, CALL, ASSIGNMENT, DECLARATION, VARIABLE, MUTATION, END, ELSE, CLASS, ELSEIF, FORWHEN, PRINT, SHOWMSGBOX, REMOVEAT, REMOVEFROM, REMOVEALLFROM, COMMENT, IMPORT, ROBOT
+        FUNCTION, IF, WHILE, FOREACH, RETURN, CALL, ASSIGNMENT, DECLARATION, VARIABLE, MUTATION, END, ELSE, CLASS, ELSEIF, FORWHEN, PRINT, SHOWMSGBOX, REMOVEAT, REMOVEFROM, REMOVEALLFROM, COMMENT, IMPORT, ROBOT, SET
     }
 
     enum MutationType {
@@ -516,6 +516,35 @@ class RobotStmt extends Statements {
 
     public Expression[] getValue() {
         return value;
+    }
+
+     public int getLine() {
+        return line;
+    }
+}
+
+class SetStmt extends Statements {
+    String listName;
+    ListValElmt list;
+    Expression value;
+    public SetStmt(int line,String name, Expression value, ListValElmt list) {
+        this.line = line;
+        this.listName = name;
+        this.value = value;
+        this.type = StmtType.SET;
+        this.list = list;
+    }
+
+    public String getName() {
+        return listName;
+    }
+
+    public Expression getValue() {
+        return value;
+    }
+
+    public ListValElmt getListVal() {
+        return list;
     }
 
      public int getLine() {

@@ -18,8 +18,6 @@ public interface JavaishVal {
         LIST,
         INPUT,
         VOID
- 
-
     }
    
 }

@@ -393,6 +393,10 @@ public class Runner {
                     RemoveAtStmt removeAtStmt = (RemoveAtStmt) statement;
                     System.out.println("RemoveAt: " + removeAtStmt.getLocation() + " From:" + removeAtStmt.getListName());
                     break;
+                case SET:
+                    SetStmt setStmt = (SetStmt) statement;
+                    System.out.println("Set: " + setStmt.getName() + " at " + setStmt.getListVal().getIndex() + " to " + setStmt.getValue());
+                    break;
                 default:
                     break;
             }
