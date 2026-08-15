@@ -14,7 +14,7 @@ public class Main {
         // State oldState = Runner.convertJSONToState(oldStateJSON);
         // System.out.println(oldState.isGlobal() + " - Is Global");
         // System.out.println(oldState.getCurrentLine());
-        Runner.convertFile("src/main/java/com/trackerjo/debug.javaish", "TicTacToe", "java");
+        Runner.convertFile("src/main/java/com/trackerjo/debug.javaish", "TicTacToe", "python");
         // State newState = Runner.debugFile("src/main/java/com/trackerjo/debug.javaish", oldState);
         // JSONObject newStateJSON = Runner.convertStateToJSON(newState, false);
         // System.out.println(newStateJSON.toString());
