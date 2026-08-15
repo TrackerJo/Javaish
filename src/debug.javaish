@@ -1,9 +1,10 @@
 print("ran line 1").
 print("ran line 2").
 print("ran line 3").
-function bill(){
+function bill(String test){
    print("ran line 5").
     print("ran line 6").
 }
 
 bill().
+let String test = "test" + " now".

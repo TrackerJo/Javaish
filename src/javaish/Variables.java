@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-class Variables{
+public class Variables{
     enum VarType {INT, FLOAT, BOOL, STRING, INTLIST,
         FLOATLIST,
         STRINGLIST,
@@ -56,6 +56,14 @@ class Variables{
                 System.exit(0);
                 return null;
         }
+    }
+
+    public Map<String, JavaishType> getAllVariables() {
+        return allVariables;
+    }
+
+    public Map<String, FunctionVar> getFunctions() {
+        return functions;
     }
 
     public void addVariable(String name, JavaishType type, JavaishVal value, int lineNumber){
@@ -389,6 +397,7 @@ class IntVar {
     public JavaishInt getValue() {
         return value;
     }
+    
 }
 
 class FloatVar {

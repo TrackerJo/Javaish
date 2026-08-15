@@ -1162,7 +1162,7 @@ public class Debugger {
         Result pastResult = new Result(false);  
         int funcLineNumber = globalVariables.getFunctionLineNumber(name);
         Return returnVal = new Return(false, null);
-        State funcState = new State(body, localVariables, localVariables, pastResult, returnVal, 0, false);
+        State funcState = new State(body, localVariables, localVariables, pastResult, returnVal, 0, false, false);
         currentState.addState(funcState);
         System.out.println("CALLING FUNCTION: " + name);
         currentState.printState();
@@ -1768,46 +1768,4 @@ public class Debugger {
 
 
 
-}
-
-class Result {
-    boolean pastResult;
-
-    public Result(boolean pastResult) {
-        this.pastResult = pastResult;
-    }
-    
-    public boolean getResult(){
-        return pastResult;
-    }
-
-    public void setResult(boolean pastResult){
-        this.pastResult = pastResult;
-    }
-}
-
-class Return {
-    boolean hasReturn;
-    JavaishVal value;
-
-    public Return(boolean hasReturn, JavaishVal value) {
-        this.hasReturn = hasReturn;
-        this.value = value;
-    }
-
-    public boolean hasReturn(){
-        return hasReturn;
-    }
-
-    public JavaishVal getValue(){
-        return value;
-    }
-
-    public void setHasReturn(boolean hasReturn){
-        this.hasReturn = hasReturn;
-    }
-
-    public void setValue(JavaishVal value){
-        this.value = value;
-    }
 }

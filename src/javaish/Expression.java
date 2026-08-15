@@ -25,6 +25,7 @@ public class Expression {
     private ExpressionReturnType returnType;
     private Element[] elements;
     private int startColumn;
+    private int column;
     public Expression(Element[] elements, ExpressionReturnType returnType, int line) {
         this.elements = elements;
         this.returnType = returnType;
@@ -34,9 +35,14 @@ public class Expression {
     public Expression(String expression,ExpressionReturnType returnType, int line, int column) {
         this.returnType = returnType;
         this.line = line;
+        this.column = column;
         //Parse Expression
         
         this.elements = parseExpression(expression, column);
+    }
+
+    public int getColumn() {
+        return column;
     }
 
     public int getLine() {

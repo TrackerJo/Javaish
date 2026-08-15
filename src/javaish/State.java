@@ -16,7 +16,7 @@ public class State {
     boolean isComplete;
     List<State> states = new ArrayList<>();
 
-    public State(List<Statements> statements, Variables globalVariables, Variables localVariables, Result pastResult, Return returnVal, int currentLine, boolean isGlobal) {
+    public State(List<Statements> statements, Variables globalVariables, Variables localVariables, Result pastResult, Return returnVal, int currentLine, boolean isGlobal, boolean isComplete) {
         this.statements = statements;
         this.globalVariables = globalVariables;
         this.localVariables = localVariables;
@@ -24,6 +24,19 @@ public class State {
         this.returnVal = returnVal;
         this.currentLine = currentLine;
         this.isGlobal = isGlobal;
+        this.isComplete = isComplete;
+    }
+
+    public State(List<Statements> statements, Variables globalVariables, Variables localVariables, Result pastResult, Return returnVal, int currentLine, boolean isGlobal, boolean isComplete, List<State> states) {
+        this.statements = statements;
+        this.globalVariables = globalVariables;
+        this.localVariables = localVariables;
+        this.pastResult = pastResult;
+        this.returnVal = returnVal;
+        this.currentLine = currentLine;
+        this.isGlobal = isGlobal;
+        this.isComplete = isComplete;
+        this.states = states;
     }
 
     public List<Statements> getStatements() {
